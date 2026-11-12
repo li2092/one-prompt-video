@@ -1,5 +1,5 @@
 ---
-name: one-sentence-video
+name: one-prompt-video
 description: 把一句话需求做成带配乐和字幕的 MP4 短视频：讲解、科普、产品介绍、数据播报、知识卡片，20 到 90 秒，横屏或竖屏。只需要填一份 video.json，一条命令出片；不用视频生成模型，Windows、macOS、Linux 通用。Use this whenever the user wants a video made from a sentence, topic, text or data — "做个视频"、"生成一个短视频"、"讲解视频"、"宣传片"、"动画视频"、"make a video / explainer / short clip" — even if they give only a topic. Not for editing existing footage, and not for AI-generated footage.
 license: MIT
 metadata:
@@ -12,7 +12,7 @@ compatibility: Requires Node.js 18+ and ffmpeg (scripts/setup.mjs checks and hel
 
 用户给一句话，你写一份 `video.json`（每个画面选一种现成版式、填上文字和数字），脚本负责排时间、画画面、配乐、编码、自检。你不用写画图代码，也不用算时间。
 
-下文命令里的 `SKILL` 要换成本文件所在目录的绝对路径（例如 `/home/me/skills/one-sentence-video`）。所有命令在用户的当前工作目录里跑，文件路径都相对它。
+下文命令里的 `SKILL` 要换成本文件所在目录的绝对路径（例如 `/home/me/skills/one-prompt-video`）。所有命令在用户的当前工作目录里跑，文件路径都相对它。
 
 ## 五步
 
