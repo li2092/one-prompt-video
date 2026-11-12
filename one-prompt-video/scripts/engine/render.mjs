@@ -1,5 +1,5 @@
 // 出帧：drawFrame(ctx, T) 把全片第 T 秒的画面画到 ctx 上。同一个 T 永远画出同一张图。
-import { clamp, lerp, ease, fitText } from './core.mjs'
+import { clamp, lerp, ease, fitText, invLerp, k, inOut, rng, hash, noise1, rgba, mix, hexToRgb, wrapText, spacedText, roundRect, typeOn } from './core.mjs'
 import { LAYOUTS, drawCaption } from './layouts.mjs'
 
 export function makeRenderer({ v, theme, TL, fonts, W, H, createCanvas, custom = {} }) {
@@ -12,11 +12,19 @@ export function makeRenderer({ v, theme, TL, fonts, W, H, createCanvas, custom =
   const warnings = new Set()
   const fitCache = new Map()
   const layer = createCanvas(W, H), lctx = layer.getContext('2d')
+  const store = new Map()
+  // 给风格包用的版式信息：safe 是四周留的边，box 是中间能放内容的区域（已经让开了字幕）
+  const L = { W, H, u, cx: W / 2, cy: H / 2, portrait, safe: { top: safe.t, bottom: safe.b, left: safe.l, right: safe.r }, box: { x: safe.l, y: safe.t, w: W - safe.l - safe.r, h: H - safe.t - safe.b } }
   const enterDur = { pop: 0.36, slam: 0.3, fade: 0.6, rise: 0.5, draw: 0.6 }[theme.motion] || 0.5
 
   function makeE(T, sceneIndex) {
     const E = {
-      W, H, u, portrait, safe, captionH, theme, T, total: TL.total, sceneIndex,
+      W, H, u, portrait, safe, captionH, theme, T, total: TL.total, sceneIndex, sceneCount: TL.scenes.length, L, fonts,
+      clamp, lerp, invLerp, ease, k, inOut, rng, hash, noise1, rgba, mix, mixColor: mix, hexToRgb, wrapText, spacedText, roundRect, typeOn,
+      createCanvas: (w, h) => createCanvas(Math.max(1, Math.round(w)), Math.max(1, Math.round(h))),
+      pick: (land, port) => (portrait ? port : land),
+      // 只算一次的东西（纹理、贴图）：第一次调用时算，以后直接取
+      once(name, make) { if (!store.has(name)) store.set(name, make()); return store.get(name) },
       font: (role, weight, size) => `${weight} ${size.toFixed(1)}px ${roleStack[role] || roleStack.body}`,
       fit(text, o) {
         const key = [text, o.role, o.weight, o.size, o.maxW, o.maxLines, o.maxH, o.lineGap, o.oneLine].join('|')
@@ -62,8 +70,8 @@ export function makeRenderer({ v, theme, TL, fonts, W, H, createCanvas, custom =
     lctx.setTransform(1, 0, 0, 1, 0, 0); lctx.globalAlpha = 1; lctx.globalCompositeOperation = 'source-over'; lctx.shadowBlur = 0; lctx.shadowColor = 'transparent'
     lctx.clearRect(0, 0, W, H)
     lctx.save()
-    const draw = S.layout === 'custom' ? custom[S.i] : LAYOUTS[S.layout]
-    draw(lctx, s, E)
+    const draw = S.layout === 'custom' ? custom[S.i] : (theme.layouts && theme.layouts[S.layout]) || LAYOUTS[S.layout]
+    draw.call(theme, lctx, s, E)
     lctx.restore()
     const last = S.i === TL.scenes.length - 1
     const tin = theme.transition === 'cut' ? 1 : clamp(t / 0.3), tout = theme.transition === 'cut' || last ? 1 : clamp((S.dur - t) / 0.2)
@@ -72,7 +80,9 @@ export function makeRenderer({ v, theme, TL, fonts, W, H, createCanvas, custom =
     const dx = theme.transition === 'slide' ? ((1 - ease.out(tin)) * 70 - (1 - tout) * 50) * u : 0
     ctx.drawImage(layer, dx, 0)
     ctx.restore()
-    ctx.save(); drawCaption(ctx, s, E); ctx.restore()
+    ctx.save(); if (theme.caption) theme.caption(ctx, s, E); else drawCaption(ctx, s, E); ctx.restore()
+    // 风格包的最上层：扫描线、角标、外框这一类
+    if (theme.overlay) { ctx.save(); theme.overlay(ctx, E, s); ctx.restore() }
     // 开头从黑场淡入，片尾淡到黑
     const dark = Math.max(1 - clamp(T / 0.35), clamp((T - (TL.total - 0.8)) / 0.7))
     if (dark > 0) { ctx.fillStyle = `rgba(0,0,0,${dark})`; ctx.fillRect(0, 0, W, H) }

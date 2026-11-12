@@ -10,7 +10,7 @@ import path from 'node:path'
 import { createRequire } from 'node:module'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { resolveFonts, hasCJK } from './engine/core.mjs'
-import { getTheme, THEMES, THEME_IDS } from './engine/themes.mjs'
+import { loadTheme, THEMES, THEME_IDS, STYLE_IDS } from './engine/themes.mjs'
 import { validate, buildTimeline, sizeOf } from './engine/timeline.mjs'
 import { makeRenderer } from './engine/render.mjs'
 import { renderMusic, wavBuffer } from './engine/music.mjs'
@@ -59,8 +59,11 @@ if (errors.length) {
   console.error(`\n[出错] video.json 有 ${errors.length} 处要改：\n` + errors.map((e, i) => `  ${i + 1}. ${e}`).join('\n') + '\n\n改完重跑同一条命令。字段说明见技能目录的 references/video-json.md。\n')
   process.exit(1)
 }
-const theme = getTheme(v.theme || 'grid', v.colors)
-const dir = path.dirname(jsonPath), outDir = path.resolve(opt('--out', path.join(dir, 'out'))), tmp = path.join(outDir, 'tmp')
+const dir = path.dirname(jsonPath)
+let theme
+try { theme = await loadTheme(v.theme || 'grid', v.colors, dir) } catch (e) { die(`主题 "${v.theme}" 加载失败：${e.message}`) }
+if (!theme) die(`没有这个主题：${v.theme}`)
+const outDir = path.resolve(opt('--out', path.join(dir, 'out'))), tmp = path.join(outDir, 'tmp')
 const fps = v.fps === 24 || v.fps === 25 || v.fps === 60 ? v.fps : 30
 const [W, H] = sizeOf(v.aspect)
 

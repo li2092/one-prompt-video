@@ -1,7 +1,7 @@
 // 校验 video.json，并把它排成时间线：每场多长、每个元素什么时候入场。
 // 校验一次报出全部问题，每条都写明第几场、哪个字段、该怎么写。
 import { readSeconds, textUnits } from './core.mjs'
-import { THEME_IDS } from './themes.mjs'
+import { ALL_IDS as THEME_IDS } from './themes.mjs'
 import { COUNT, visibleText } from './layouts.mjs'
 
 const ASPECTS = { '16:9': [1920, 1080], '9:16': [1080, 1920], '1:1': [1080, 1080] }
@@ -42,7 +42,7 @@ export function validate(v) {
   const err = (m) => errors.push(m), warn = (m) => warnings.push(m)
   if (!v || typeof v !== 'object' || Array.isArray(v)) return { errors: ['video.json 的最外层要是一个对象：{ "title": …, "theme": …, "scenes": […] }'], warnings }
   if (!isStr(v.title)) err('缺 "title"：全片的标题，也用作输出文件名。例：  "title": "光合作用"')
-  if (v.theme != null && !THEME_IDS.includes(v.theme)) err(`"theme" 写成了 "${v.theme}"，只能是这几个之一：${THEME_IDS.join('、')}`)
+  if (v.theme != null && !THEME_IDS.includes(v.theme) && !String(v.theme).endsWith('.mjs')) err(`"theme" 写成了 "${v.theme}"，只能是这几个之一：${THEME_IDS.join('、')}`)
   if (v.aspect != null && !ASPECTS[v.aspect]) err(`"aspect" 写成了 "${v.aspect}"，只能是 "16:9"（横屏）、"9:16"（竖屏）或 "1:1"（方形）`)
   if (v.colors != null && (typeof v.colors !== 'object' || Object.values(v.colors).some(c => !/^#[0-9a-fA-F]{6}$/.test(c)))) err('"colors" 里的颜色要写成 "#rrggbb" 六位十六进制，例：  "colors": { "accent": "#e2577a" }')
   if (v.seconds != null && !(typeof v.seconds === 'number' && v.seconds >= 8 && v.seconds <= 180)) err('最外层的 "seconds" 是全片的目标时长，要是 8 到 180 之间的数字（不带引号）。')
