@@ -2,7 +2,7 @@
 //   s = { scene, t 本场已过的秒数, dur 本场时长, p(i) 第 i 个元素的入场进度 0..1 }
 //   E = { W, H, u 缩放单位, portrait, safe 安全边距, theme, font(), fit(), enter(), T 全片时刻 }
 // 版式只摆位置，颜色、线条、卡片、入场方式都问主题要。
-import { clamp, ease, rgba, drawLines, formatNumber, decimalsOf, roundRect } from './core.mjs'
+import { clamp, ease, rgba, drawLines, formatNumber, decimalsOf, roundRect, textUnits } from './core.mjs'
 
 // 每种版式有几个要依次入场的元素（时间线据此排入场时刻和音效）
 export const COUNT = {
@@ -278,13 +278,23 @@ export const LAYOUT_IDS = Object.keys(LAYOUTS)
 
 // 底部字幕：一场的 say 按标点切成几段，按字数分配时间，一次显示一段
 export function captionChunks(text, maxChars) {
-  const parts = String(text).split(/(?<=[。！？!?；;])|(?<=[，,、：:])(?=.{6,})/u).map(x => x.trim()).filter(Boolean)
-  const out = []
-  let cur = ''
-  for (const part of parts) {
-    if (cur && [...(cur + part)].length > maxChars) { out.push(cur); cur = part } else cur += part
+  const parts = String(text).split(/(?<=[。！？!?；;])|(?<=\.)(?=\s)|(?<=[，,、：:])(?=.{6,})/u).map(x => x.trim()).filter(Boolean)
+  const pack = (limit) => {
+    const out = []
+    let cur = ''
+    for (const part of parts) {
+      const glue = cur && /[A-Za-z0-9.,!?;:]$/.test(cur) && /^[A-Za-z0-9]/.test(part) ? ' ' : ''
+      if (cur && textUnits(cur + glue + part) > limit) { out.push(cur); cur = part } else cur += glue + part
+    }
+    if (cur) out.push(cur)
+    return out
   }
-  if (cur) out.push(cur)
+  let out = pack(maxChars)
+  // 最后一段只剩几个字时，把上限收紧重排一次，各段长短就匀了
+  if (out.length > 1 && textUnits(out[out.length - 1]) < maxChars * 0.4) {
+    const even = pack(Math.max(maxChars * 0.5, textUnits(text) / out.length * 1.25))
+    if (even.length === out.length) out = even
+  }
   return out
 }
 
@@ -292,7 +302,7 @@ export function drawCaption(ctx, s, E) {
   const say = s.scene.say
   if (!say) return
   const { W, H, u, theme } = E
-  const chunks = captionChunks(say, E.portrait ? 16 : 28), lens = chunks.map(c => [...c].length), total = lens.reduce((x, y) => x + y, 0)
+  const chunks = captionChunks(say, E.portrait ? 16 : 28), lens = chunks.map(c => textUnits(c)), total = lens.reduce((x, y) => x + y, 0)
   const span = Math.max(0.5, s.dur - 0.3)
   let acc = 0, idx = chunks.length - 1, t0 = 0, t1 = span
   for (let i = 0; i < chunks.length; i++) { const d = span * lens[i] / total; if (s.t < acc + d) { idx = i; t0 = acc; t1 = acc + d; break } acc += d }

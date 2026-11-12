@@ -1,6 +1,6 @@
 // 校验 video.json，并把它排成时间线：每场多长、每个元素什么时候入场。
 // 校验一次报出全部问题，每条都写明第几场、哪个字段、该怎么写。
-import { readSeconds } from './core.mjs'
+import { readSeconds, textUnits } from './core.mjs'
 import { THEME_IDS } from './themes.mjs'
 import { COUNT, visibleText } from './layouts.mjs'
 
@@ -63,7 +63,7 @@ export function validate(v) {
       if (s[k] != null && k !== 'highlight' && typeof s[k] !== 'string') err(`${A}的 "${k}" 要是一段文字（带引号的字符串）。`)
     }
     if (s.seconds != null && !(typeof s.seconds === 'number' && s.seconds >= 2 && s.seconds <= 30)) err(`${A}的 "seconds" 要是 2 到 30 之间的数字（不带引号）。`)
-    if (typeof s.say === 'string' && [...s.say].length > 36) warn(`${A}的 "say" 有 ${[...s.say].length} 个字，偏长；一场一句，30 个字以内。`)
+    if (typeof s.say === 'string' && textUnits(s.say) > 36) warn(`${A}的 "say" 偏长（相当于 ${Math.round(textUnits(s.say))} 个汉字）；一场一句，30 个汉字或 12 个英文词以内。`)
     if (s.layout === 'bars' && isStr(s.unit) && isStr(s.title) && s.title.includes(s.unit) && /[（(]/.test(s.title)) warn(`${A}的标题里已经写了单位「${s.unit}」，"unit" 还会接在每个数后面，两处留一处就够。`)
     if ((s.layout === 'bullets' || s.layout === 'steps') && s.items != null) {
       const [mn, mx] = s.layout === 'bullets' ? [2, 5] : [2, 5]
