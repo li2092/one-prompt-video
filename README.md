@@ -17,9 +17,9 @@
 
 </div>
 
-带声音的完整版，43 秒，点开播放：
+带声音的完整版，42 秒，点开播放：
 
-https://github.com/user-attachments/assets/060c046b-e0f1-4596-abe5-ac39dde2c76c
+https://github.com/user-attachments/assets/bbe739b1-32a2-4042-b0e6-c4116cb0daa9
 
 <sub>画面由本技能的引擎逐帧渲染：自己写的三场画面加现成版式，源文件在 <a href="docs/demos/trailer">docs/demos/trailer</a>。配乐用库乐队（GarageBand）的乐器采样制作，旁白是豆包语音合成的 AI 配音，做法在技能的 <a href="one-prompt-video/references/external-tools.md">external-tools.md</a> 里。下面几支片子用的是技能自带的、程序合成的配乐。</sub>
 
@@ -35,27 +35,27 @@ https://github.com/user-attachments/assets/060c046b-e0f1-4596-abe5-ac39dde2c76c
 
 ## 看效果
 
-下面的片子都带声音，配乐和音效是技能自己合成的。
+下面的片子都带声音，配乐和音效是技能自己合成的。为了让播放器的封面有画面，每支切掉了开头一两秒的淡入。
 
 ### 只填表出的片
 
 「一句话，出一支片」：七场全是现成版式，grid 主题。本页后面的示例 `video.json`、主题预览和总览图用的都是它。
 
-https://github.com/user-attachments/assets/0d4edfbe-d055-461e-a002-a9f1d7764109
+https://github.com/user-attachments/assets/80fd4bbb-2e34-457d-8688-b6d547401871
 
 「从一句话到 MP4」：八场全是现成版式，blueprint 主题。
 
-https://github.com/user-attachments/assets/719468d2-724e-4e50-8aae-8173fbd4984f
+https://github.com/user-attachments/assets/ff0d3ac2-ccd1-4046-93a6-fabe674b399e
 
 「小模型也能出片」：竖屏，pop 主题，内容是本仓库的实测数据。
 
-https://github.com/user-attachments/assets/efa0b62b-1af7-46d3-a628-f0b9c1c17cfe
+https://github.com/user-attachments/assets/f6e06329-f875-4261-bf37-1bfba71bade7
 
 ### 加一场自己写的画面
 
 「one-prompt-video 是什么」：七场里有一场是自己写的画面代码（一句话变成 `video.json` 再变成 MP4 的那一场），其余是现成版式。
 
-https://github.com/user-attachments/assets/606b438c-bbeb-47c3-80a2-c8c6352725d7
+https://github.com/user-attachments/assets/946ce180-f7af-44bf-94a0-eb96f282fc96
 
 ### 风格不设上限
 
