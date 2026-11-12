@@ -173,6 +173,9 @@ export function readSeconds(text) {
   return cjk / 5 + words / 3
 }
 
+// 一段字占多宽：汉字算 1，英文字母、数字、空格算半个。用来限制字幕的长度，中英文都适用
+export function textUnits(text) { let n = 0; for (const ch of String(text || '')) n += isCJK(ch) ? 1 : 0.5; return n }
+
 // 把数字写成带千分位的字符串；保留原文里的小数位数
 export function formatNumber(v, decimals = 0) {
   const n = Number(v)
