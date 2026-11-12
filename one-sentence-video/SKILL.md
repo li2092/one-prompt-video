@@ -2,6 +2,9 @@
 name: one-sentence-video
 description: 把一句话需求做成带配乐和字幕的 MP4 短视频：讲解、科普、产品介绍、数据播报、知识卡片，20 到 90 秒，横屏或竖屏。只需要填一份 video.json，一条命令出片；不用视频生成模型，Windows、macOS、Linux 通用。Use this whenever the user wants a video made from a sentence, topic, text or data — "做个视频"、"生成一个短视频"、"讲解视频"、"宣传片"、"动画视频"、"make a video / explainer / short clip" — even if they give only a topic. Not for editing existing footage, and not for AI-generated footage.
 license: MIT
+metadata:
+  author: JiMiL, vivhuang
+  version: "0.1.0"
 compatibility: Requires Node.js 18+ and ffmpeg (scripts/setup.mjs checks and helps install). No GPU, no browser.
 ---
 

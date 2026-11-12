@@ -57,6 +57,6 @@ evals/                     测试题
 - 成片的声音（配乐、音效、人声和配乐的比例）只量过响度和峰值，好不好听要人听。
 - 默认没有人声。要人声由用户提供录音或自己的配音命令，见 `one-sentence-video/references/voice.md`。
 
-## 许可
+## 作者和许可
 
-MIT。依赖和出处见 `one-sentence-video/references/sources.md`。
+作者：JiMiL、vivhuang。MIT 许可。依赖和出处见 `one-sentence-video/references/sources.md`。
