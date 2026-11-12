@@ -41,7 +41,7 @@ export function validate(v) {
   const errors = [], warnings = []
   const err = (m) => errors.push(m), warn = (m) => warnings.push(m)
   if (!v || typeof v !== 'object' || Array.isArray(v)) return { errors: ['video.json 的最外层要是一个对象：{ "title": …, "theme": …, "scenes": […] }'], warnings }
-  if (!isStr(v.title)) err('缺 "title"：全片的标题，也用作输出文件名。例：  "title": "番茄工作法"')
+  if (!isStr(v.title)) err('缺 "title"：全片的标题，也用作输出文件名。例：  "title": "光合作用"')
   if (v.theme != null && !THEME_IDS.includes(v.theme)) err(`"theme" 写成了 "${v.theme}"，只能是这几个之一：${THEME_IDS.join('、')}`)
   if (v.aspect != null && !ASPECTS[v.aspect]) err(`"aspect" 写成了 "${v.aspect}"，只能是 "16:9"（横屏）、"9:16"（竖屏）或 "1:1"（方形）`)
   if (v.colors != null && (typeof v.colors !== 'object' || Object.values(v.colors).some(c => !/^#[0-9a-fA-F]{6}$/.test(c)))) err('"colors" 里的颜色要写成 "#rrggbb" 六位十六进制，例：  "colors": { "accent": "#e2577a" }')

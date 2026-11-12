@@ -59,17 +59,15 @@ https://github.com/user-attachments/assets/0aa34997-b250-4b0a-ace8-a029054c62f0
 
 ### No ceiling on style
 
-One scene, twelve looks. The first six are the built-in themes, a one-word change. The other six are built-in themes with a few colors replaced through `colors`; you can make as many as you like.
+One scene cycling through eighteen looks. The first twelve are the built-in themes, a one-word change. The other six are built-in themes with a few colors replaced through `colors`; you can make as many of those as you like.
 
-<img src="docs/styles.gif" width="640" alt="The same scene in twelve looks">
-
-<img src="docs/styles.jpg" width="100%" alt="Preview of twelve looks">
+<img src="docs/styles.gif" width="640" alt="The same scene in eighteen looks">
 
 When that is not enough, write the drawing code for a scene, use one of the three reference pipelines, or bring in external tools. See "Going further" below.
 
-The six built-in themes, four scenes each (in Chinese):
+The built-in themes, three scenes each (in Chinese):
 
-<img src="docs/themes.jpg" width="100%" alt="Preview of the six built-in themes">
+<img src="one-prompt-video/assets/themes.jpg" width="100%" alt="Preview of the built-in themes">
 
 ## How it works
 
@@ -226,10 +224,9 @@ It makes layout-based videos that explain one thing clearly. Live-action footage
 
 ## Status
 
-- Version 0.3.0. Tested on macOS (Apple Silicon) only. The Windows and Linux code paths are written but have not been run yet; reports are welcome.
+- Version 0.4.0. Tested on macOS (Apple Silicon) only. The Windows and Linux code paths are written but have not been run yet; reports are welcome.
 - Without external tools, the default output has code-synthesized music and no voice-over, which is plainer than the demos above. Compare with [the default output of the same "One prompt in, one video out"](https://github.com/user-attachments/assets/382dc542-a11a-47e3-85dd-1de3ded48b5d).
 - Music, both built-in and sample-based, has only been measured for loudness and peaks; whether it sounds good is for you to judge.
-- Overriding the background color through `colors` has no effect on the `blueprint` theme, and on `pop` it changes only one of the four alternating backgrounds.
 - The skill instructions (`SKILL.md`, `references/`) and the script messages are in Chinese for now. Video content can be in any language, and English typesetting is supported.
 
 ## Repository layout
