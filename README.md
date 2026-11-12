@@ -34,16 +34,16 @@
 <tr>
 <td width="62%" valign="top">
 
-**换主题只改一个词**
+换主题只改一个词
 
 <img src="docs/themes.gif" width="100%" alt="同一场内容换六种主题">
 
-同一份内容，`"theme"` 换一个词就是另一种样子。
+同一场内容，`"theme"` 依次换成六个值。
 
 </td>
 <td width="38%" valign="top">
 
-**竖屏**
+竖屏
 
 <img src="docs/demo-portrait.gif" width="100%" alt="竖屏短视频">
 
@@ -61,16 +61,14 @@
 
 ```mermaid
 flowchart LR
-    A["你说一句话"] --> B["大模型写 video.json<br/>每场选一种版式、填文字和数字"]
-    B --> C{"make.mjs --check<br/>校验"}
-    C -- "有错：第几场、哪个字段、怎么改" --> B
-    C -- 通过 --> D["排时间线<br/>切点落在拍子上"]
-    D --> E["逐帧画画面"]
-    D --> F["合成配乐和音效"]
-    E --> G["编码 MP4"]
-    F --> G
-    G --> H["自检报告 + 总览图"]
+    A["你说一句话"] --> B["大模型写<br/>video.json"]
+    B --> C{"校验"}
+    C -- "有错：哪一场<br/>哪个字段、怎么改" --> B
+    C -- 通过 --> D["排时间线<br/>画画面、合成配乐"]
+    D --> E["MP4<br/>自检报告、总览图"]
 ```
+
+时间线按主题的拍子排：每一场的长度是整数拍，换场和音效都落在拍点上，画面和配乐因此对得上。
 
 模型写的只有这样一份文件：
 
@@ -103,7 +101,7 @@ flowchart LR
 
 ## 快速开始
 
-**1. 装技能**
+### 1. 装技能
 
 ```bash
 git clone https://github.com/li2092/one-prompt-video.git
@@ -124,7 +122,7 @@ Copy-Item -Recurse one-prompt-video\one-prompt-video "$HOME\.claude\skills\one-p
 
 别的 agent 按它自己的文档放技能目录。不支持技能的模型，把 `one-prompt-video/SKILL.md` 的内容贴进对话，把里面的 `SKILL` 换成这个目录的绝对路径。
 
-**2. 说一句话**
+### 2. 说一句话
 
 ```text
 做一个 30 秒的视频，讲清楚什么是复利
@@ -134,7 +132,7 @@ Copy-Item -Recurse one-prompt-video\one-prompt-video "$HOME\.claude\skills\one-p
 
 第一次用时，agent 会跑一遍环境检查，缺画图库或 ffmpeg 会自动装或告诉你怎么装。
 
-**不经过 agent，直接用脚本**
+### 不经过 agent，直接用脚本
 
 ```bash
 mkdir my-videos && cd my-videos
