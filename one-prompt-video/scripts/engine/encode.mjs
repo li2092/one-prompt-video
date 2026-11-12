@@ -79,6 +79,15 @@ export function mixAudio(ff, { music, voices = [], out, tmp, target = -14, tpMax
   return loudness(ff, out)
 }
 
+// 用户自己的配乐文件：裁到全片长、片尾淡出、响度拉到和自带配乐差不多（-19 LUFS），再叠上音效
+export function prepMusic(ff, { file, sfx, out, total, target = -19 }) {
+  const m = loudness(ff, file)
+  if (!m || !isFinite(m.I)) throw new Error(`配乐文件读不了或者没有声音：${file}`)
+  const gain = (target - m.I).toFixed(2), T = total.toFixed(3), st = Math.max(0, total - 1.1).toFixed(3)
+  const graph = `[0:a]aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo,volume=${gain}dB,apad=whole_dur=${T},atrim=0:${T},afade=t=out:st=${st}:d=1.1[m];[1:a]aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo[s];[m][s]amix=inputs=2:normalize=0[o]`
+  must(ff, ['-y', '-i', file, '-i', sfx, '-filter_complex', graph, '-map', '[o]', '-ar', '48000', '-ac', '2', '-c:a', 'pcm_f32le', out], '处理配乐文件')
+}
+
 // 选一个这份 ffmpeg 里有的 H.264 编码器
 export function pickEncoder(ff) {
   const list = run(ff, ['-encoders']).err + spawnSync(ff, ['-hide_banner', '-encoders'], opts).stdout

@@ -2,13 +2,14 @@
   "title": "Small models can make videos too",
   "theme": "pop",
   "aspect": "9:16",
-  "seconds": 28,
+  "music": "music.wav",
+  "tts": {"command": ["python3", "SKILL/assets/external/voice/doubao_tts.py", "--text", "{text}", "--out", "{out}", "--voice", "zh_female_xiaohe_uranus_bigtts", "--tone", "Lively and a little excited, fairly fast", "--rate", "8", "--lang", "en"], "ext": "mp3"},
   "scenes": [
-    { "layout": "title", "kicker": "one-prompt-video, tested", "title": "Small models can do it", "subtitle": "Six runs with Claude Haiku", "say": "Can a small model make a video from one sentence?" },
-    { "layout": "bullets", "title": "Three prompts, two rounds", "items": ["Explain a concept", "A portrait product video", "Turn data into a video"], "say": "Three prompts, two rounds each." },
-    { "layout": "number", "value": "6", "unit": "runs", "label": "All passed on the first try", "note": "Not a single failed command", "say": "All six passed on the first try." },
-    { "layout": "bars", "title": "Time per run", "unit": "s", "items": [{ "label": "A1", "value": 68 }, { "label": "B1", "value": 78 }, { "label": "C1", "value": 61 }, { "label": "A2", "value": 51 }, { "label": "B2", "value": 57 }, { "label": "C2", "value": 65 }], "say": "From reading the instructions to a finished video: about a minute." },
-    { "layout": "bullets", "title": "Why it works", "items": ["No drawing code to write", "No timings to compute", "Every error says how to fix it"], "say": "The model only fills in a form, and errors say how to fix them." },
-    { "layout": "end", "title": "Small model, one sentence, one video", "subtitle": "Test prompts are in the evals folder", "cta": "See the tests", "say": "The prompts and the grading script are in the repository." }
+    {"layout": "title", "kicker": "one-prompt-video, tested", "title": "Small models can do it", "subtitle": "Six runs with Claude Haiku", "say": "Can a small model make a video from one sentence?"},
+    {"layout": "bullets", "title": "Three prompts, two rounds", "items": ["Explain a concept", "A portrait product video", "Turn data into a video"], "say": "Three prompts, two rounds each."},
+    {"layout": "number", "value": "6", "unit": "runs", "label": "All passed on the first try", "note": "Not a single failed command", "say": "All six passed on the first try."},
+    {"layout": "bars", "title": "Time per run", "unit": "s", "items": [{"label": "A1", "value": 68}, {"label": "B1", "value": 78}, {"label": "C1", "value": 61}, {"label": "A2", "value": 51}, {"label": "B2", "value": 57}, {"label": "C2", "value": 65}], "say": "From reading the instructions to a finished video: about a minute."},
+    {"layout": "bullets", "title": "Why it works", "items": ["No drawing code to write", "No timings to compute", "Every error says how to fix it"], "say": "The model only fills in a form, and errors say how to fix them."},
+    {"layout": "end", "title": "Small model, one sentence, one video", "subtitle": "Test prompts are in the evals folder", "cta": "See the tests", "say": "The prompts and the grading script are in the repository."}
   ]
 }

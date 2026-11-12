@@ -35,27 +35,27 @@ An [Agent Skill](https://agentskills.io). Install it into Claude Code, Codex, or
 
 ## Gallery
 
-The videos below have sound. Music and sound effects are synthesized by the skill. The first second or two of fade-in has been trimmed from each so that the player shows a meaningful cover frame.
+Each of the four videos below is rendered from a single `video.json`. Narration is Doubao TTS, with a different voice, tone and pace for each video. The scores are GarageBand instrument samples, with a different arrangement for each. Both come from the skill's external-tools methods: narration needs your own API key, and sample-based scores can only be made on macOS. A single cover frame has been added at the start of each so that the player shows a meaningful cover.
 
 ### One hand-written scene plus layouts
 
-"What is one-prompt-video": one of the seven scenes is custom drawing code (the one where a sentence becomes `video.json` and then an MP4). The rest are built-in layouts.
+"What is one-prompt-video": one of the seven scenes is custom drawing code (the one where a sentence becomes `video.json` and then an MP4). The rest are built-in layouts. A calm male voice; piano, horns, choir and harp.
 
-https://github.com/user-attachments/assets/5c2a59f2-fc30-4131-8ad0-5f0703192980
+https://github.com/user-attachments/assets/56d3aaf9-4331-4453-a1c6-8be83d848a17
 
 ### Form only
 
-"One prompt in, one video out": seven scenes, all built-in layouts, grid theme. The theme preview and the contact sheet further down come from it.
+"One prompt in, one video out": seven scenes, all built-in layouts, grid theme. A bright female voice; acoustic guitar, piano and upright bass. The theme preview and the contact sheet further down come from its Chinese version.
 
-https://github.com/user-attachments/assets/382dc542-a11a-47e3-85dd-1de3ded48b5d
+https://github.com/user-attachments/assets/a6af9fa9-fe9d-4097-92a6-03cbd148a407
 
-"From one sentence to MP4": eight scenes, all built-in layouts, blueprint theme.
+"From one sentence to MP4": eight scenes, all built-in layouts, blueprint theme. A steady male voice; synth pad, plucks and electronic drums.
 
-https://github.com/user-attachments/assets/355e6fbd-de2d-4643-b70c-407456080292
+https://github.com/user-attachments/assets/5c3f65bf-3ed3-4f40-bf06-600a764e2309
 
-"Small models can make videos too": portrait, pop theme, using this repository's own test numbers.
+"Small models can make videos too": portrait, pop theme, using this repository's own test numbers. A fast, lively female voice; marimba, electric bass and vibraphone.
 
-https://github.com/user-attachments/assets/e6fcdb52-0e49-40bb-aafb-1fb708b34ff0
+https://github.com/user-attachments/assets/0aa34997-b250-4b0a-ace8-a029054c62f0
 
 ### No ceiling on style
 
@@ -189,7 +189,7 @@ From the nearest step to the furthest:
 | You want | How |
 |---|---|
 | Custom colors, fonts, or a fixed length for one scene | [`references/video-json.md`](one-prompt-video/references/video-json.md) |
-| Voice-over | Drop in your own recordings, or plug in your own TTS command: [`references/voice.md`](one-prompt-video/references/voice.md) |
+| Voice-over | The skill ships no voice service; bring your own. Drop in recordings or plug in your own TTS: [`references/voice.md`](one-prompt-video/references/voice.md) |
 | One scene with special visuals | Write the drawing code for that scene; the rest stay as layouts: [`references/custom-scenes.md`](one-prompt-video/references/custom-scenes.md) |
 | Cartoon shorts, 3D scenes, landscapes | Three reference pipelines: [`references/pipelines.md`](one-prompt-video/references/pipelines.md) |
 | Photoreal rendering, real instruments, AI narration | External tools: [`references/external-tools.md`](one-prompt-video/references/external-tools.md) |
@@ -226,9 +226,9 @@ It makes layout-based videos that explain one thing clearly. Live-action footage
 
 ## Status
 
-- Version 0.2.0. Tested on macOS (Apple Silicon) only. The Windows and Linux code paths are written but have not been run yet; reports are welcome.
-- The built-in music and sound effects are synthesized by code. Loudness and peaks are measured; whether it sounds good is for you to judge.
-- No voice-over by default.
+- Version 0.3.0. Tested on macOS (Apple Silicon) only. The Windows and Linux code paths are written but have not been run yet; reports are welcome.
+- Without external tools, the default output has code-synthesized music and no voice-over, which is plainer than the demos above. Compare with [the default output of the same "One prompt in, one video out"](https://github.com/user-attachments/assets/382dc542-a11a-47e3-85dd-1de3ded48b5d).
+- Music, both built-in and sample-based, has only been measured for loudness and peaks; whether it sounds good is for you to judge.
 - Overriding the background color through `colors` has no effect on the `blueprint` theme, and on `pop` it changes only one of the four alternating backgrounds.
 - The skill instructions (`SKILL.md`, `references/`) and the script messages are in Chinese for now. Video content can be in any language, and English typesetting is supported.
 

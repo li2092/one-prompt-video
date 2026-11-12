@@ -14,11 +14,12 @@ function level(P) {
   return 0.5
 }
 
-export function renderMusic(TL, theme, { sfx = true } = {}) {
+// bed=false 时只出音效，不出配乐（用户用自己的配乐文件时）
+export function renderMusic(TL, theme, { sfx = true, bed = true } = {}) {
   const M = new Music(TL.total, { bpm: TL.bpm }), B = TL.beat, BAR = 4 * B
   const mu = theme.music, prog = mu.prog, endT = TL.scenes[TL.scenes.length - 1].t0
   const bars = Math.ceil(TL.body / BAR)
-  for (let b = 0; b < bars; b++) {
+  for (let b = 0; bed && b < bars; b++) {
     const t = b * BAR, name = t >= endT ? prog[0] : prog[b % prog.length], lv = t >= endT ? 0.35 : level(t / TL.body)
     const low = chord(name, 2), mid = chord(name, 3), hi = chord(name, 4).map(n => n + 12)
     const len = Math.min(BAR, TL.body - t)
@@ -50,7 +51,7 @@ export function renderMusic(TL, theme, { sfx = true } = {}) {
     }
   }
   // 最后一场：落在主和弦上，留一个长音
-  M.piano(endT, chord(prog[0], 4)[0] + 12, 3, 0.6); M.bell(endT, chord(prog[0], 5)[0], 0.3)
+  if (bed) { M.piano(endT, chord(prog[0], 4)[0] + 12, 3, 0.6); M.bell(endT, chord(prog[0], 5)[0], 0.3) }
   // 场和场之间、元素入场的音效
   if (sfx) {
     const lead = { whoosh: 0.3, swell: 1.3 }
@@ -67,7 +68,7 @@ export function renderMusic(TL, theme, { sfx = true } = {}) {
   const f0 = Math.round((TL.total - 1.1) * SR)
   let peak = 1e-9
   for (let i = 0; i < n; i++) { if (i > f0) { const g = Math.max(0, 1 - (i - f0) / (n - f0)); L[i] *= g * g; R[i] *= g * g } peak = Math.max(peak, Math.abs(L[i]), Math.abs(R[i])) }
-  const g = 0.7 / peak
+  const g = bed ? 0.7 / peak : Math.min(1, 0.7 / peak)
   for (let i = 0; i < n; i++) { L[i] *= g; R[i] *= g }
   return [L, R]
 }

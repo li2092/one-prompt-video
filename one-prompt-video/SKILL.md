@@ -4,7 +4,7 @@ description: 把一句话需求做成带配乐和字幕的 MP4 短视频：讲�
 license: MIT
 metadata:
   author: JiMiL, vivhuang
-  version: "0.2.0"
+  version: "0.3.0"
 compatibility: Requires Node.js 18+ and ffmpeg (scripts/setup.mjs checks and helps install). No GPU, no browser.
 ---
 
@@ -32,7 +32,7 @@ node "SKILL/scripts/setup.mjs"
 | 横屏竖屏 | 横屏 `16:9`；提到手机、竖屏、抖音、小红书、视频号用 `9:16` |
 | 风格 | 按下面的主题表挑一个最贴内容的 |
 | 语言 | 和用户说话的语言一致 |
-| 人声 | 不要。默认是字幕加配乐（要人声见 `references/voice.md`） |
+| 人声 | 不要。默认是字幕加配乐。本技能不带配音服务：用户要人声时，先告诉他配音要自己准备（一个能从命令行出声的 TTS，或自己的录音），再照 `references/voice.md` 接 |
 
 ### 3. 写 video.json
 
@@ -69,7 +69,7 @@ node "SKILL/scripts/make.mjs" 片名/video.json            # 出片
 
 ### 5. 告诉用户
 
-说清四件事：成片在哪（报告里「成片：」那一行的路径，文件名是 `title` 加 `.mp4`）；你替用户定了什么（时长、画幅、主题）；片子里哪些内容是你补的；画面好不好看、配乐好不好听你没法判断，请用户看一遍。
+说清四件事：成片在哪（报告里「成片：」那一行的路径，文件名是 `title` 加 `.mp4`）；你替用户定了什么（时长、画幅、主题）；片子里哪些内容是你补的；画面好不好看、配乐好不好听你没法判断，请用户看一遍。成片没有人声时顺带提一句：想加配音，要他自己找一个 TTS 接进来。
 
 ## 九种版式
 
@@ -115,7 +115,7 @@ node "SKILL/scripts/make.mjs" 片名/video.json            # 出片
 | 需要 | 读 |
 |---|---|
 | 全部字段、换颜色、换字体、固定某一场的秒数 | `references/video-json.md` |
-| 加人声（用户自己的录音或自己的配音命令） | `references/voice.md` |
+| 加人声（配音要用户自己找 TTS 或自己录），换成自己的配乐文件 | `references/voice.md`、`references/video-json.md` |
 | 现成版式不够，想自己写某一场的画面代码 | `references/custom-scenes.md` |
 | 安装失败、字体方框、ffmpeg 报错 | `references/troubleshooting.md` |
 | 用户明确要叙事短片、3D 写实场景、自然风景这类这条生产线做不了的片子 | `references/pipelines.md`（三条参考生产线，要自己写代码，先确认自己做得了） |

@@ -2,15 +2,16 @@
   "title": "从一句话到 MP4",
   "theme": "blueprint",
   "aspect": "16:9",
-  "seconds": 32,
+  "music": "music.wav",
+  "tts": {"command": ["python3", "SKILL/assets/external/voice/doubao_tts.py", "--text", "{text}", "--out", "{out}", "--voice", "zh_male_liufei_uranus_bigtts", "--tone", "沉稳、清楚，像工程师在讲原理", "--rate", "0"], "ext": "mp3"},
   "scenes": [
-    { "layout": "title", "kicker": "one-prompt-video 的内部", "title": "从一句话到 MP4", "subtitle": "脚本在背后做了什么", "say": "一份表格，是怎么变成一支片子的？" },
-    { "layout": "steps", "title": "五道工序", "items": ["校验", "排时间线", "画画面", "合成配乐", "编码和自检"], "say": "校验、排时间线、画画面、合成配乐，最后编码和自检。" },
-    { "layout": "statement", "text": "表填错了，脚本说清第几场、哪个字段、怎么改", "highlight": "怎么改", "say": "表填错了，脚本会说清楚第几场、哪个字段、怎么改。" },
-    { "layout": "bullets", "title": "时间线跟着拍子走", "items": ["每一场的长度是整数拍", "换场落在拍点上", "每个元素入场配一个音效"], "say": "每一场都是整数拍，换场和音效落在拍点上。" },
-    { "layout": "number", "value": "13", "unit": "秒", "label": "出一支 35 秒的 1080p 片子", "note": "Apple Silicon 笔记本实测", "say": "一支三十五秒的片子，十三秒出完。" },
-    { "layout": "bullets", "title": "出片后自己查一遍", "items": ["分辨率和时长", "响度和真峰值", "有没有字放不下"], "say": "出片以后，脚本自己再查一遍。" },
-    { "layout": "statement", "text": "同一份输入，永远出同一支片", "highlight": "同一支片", "say": "同一份输入，永远出同一支片。" },
-    { "layout": "end", "title": "不用显卡，不用浏览器", "subtitle": "只要 Node.js 和 ffmpeg", "say": "不用显卡，不用浏览器。" }
+    {"layout": "title", "kicker": "one-prompt-video 的内部", "title": "从一句话到 MP4", "subtitle": "脚本在背后做了什么", "say": "一份表格，是怎么变成一支片子的？"},
+    {"layout": "steps", "title": "五道工序", "items": ["校验", "排时间线", "画画面", "合成配乐", "编码和自检"], "say": "校验、排时间线、画画面、合成配乐，最后编码和自检。"},
+    {"layout": "statement", "text": "表填错了，脚本说清第几场、哪个字段、怎么改", "highlight": "怎么改", "say": "表填错了，脚本会说清楚第几场、哪个字段、怎么改。"},
+    {"layout": "bullets", "title": "时间线跟着拍子走", "items": ["每一场的长度是整数拍", "换场落在拍点上", "每个元素入场配一个音效"], "say": "每一场都是整数拍，换场和音效落在拍点上。"},
+    {"layout": "number", "value": "13", "unit": "秒", "label": "出一支 35 秒的 1080p 片子", "note": "Apple Silicon 笔记本实测", "say": "一支三十五秒的片子，十三秒出完。"},
+    {"layout": "bullets", "title": "出片后自己查一遍", "items": ["分辨率和时长", "响度和真峰值", "有没有字放不下"], "say": "出片以后，脚本自己再查一遍。"},
+    {"layout": "statement", "text": "同一份输入，永远出同一支片", "highlight": "同一支片", "say": "同一份输入，永远出同一支片。"},
+    {"layout": "end", "title": "不用显卡，不用浏览器", "subtitle": "只要 Node.js 和 ffmpeg", "say": "不用显卡，不用浏览器。"}
   ]
 }

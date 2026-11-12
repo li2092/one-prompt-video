@@ -2,14 +2,15 @@
   "title": "One prompt in, one video out",
   "theme": "grid",
   "aspect": "16:9",
-  "seconds": 32,
+  "music": "music.wav",
+  "tts": {"command": ["python3", "SKILL/assets/external/voice/doubao_tts.py", "--text", "{text}", "--out", "{out}", "--voice", "zh_female_vv_uranus_bigtts", "--tone", "Bright and friendly, like recommending a handy tool to a friend", "--rate", "10", "--lang", "en"], "ext": "mp3"},
   "scenes": [
-    { "layout": "title", "kicker": "one-prompt-video", "title": "One prompt in, one video out", "subtitle": "The model fills in a form. Scripts render it.", "say": "Say one sentence. Get a finished video." },
-    { "layout": "steps", "title": "How it works", "items": ["Say one sentence", "The model fills in a form", "Scripts render it", "You get an MP4"], "say": "You say one sentence, the model fills in a form, scripts render it." },
-    { "layout": "bars", "title": "Six small-model test runs", "unit": "s", "items": [{ "label": "Run 1", "value": 68 }, { "label": "Run 2", "value": 78 }, { "label": "Run 3", "value": 61 }, { "label": "Run 4", "value": 51 }, { "label": "Run 5", "value": 57 }, { "label": "Run 6", "value": 65 }], "say": "Six runs with a small model, about a minute each. All passed first try." },
-    { "layout": "compare", "title": "Compared with video generation models", "left": { "title": "Video generation", "items": ["Text may be garbled", "One fix means a redo", "Needs a GPU or a cloud service"] }, "right": { "title": "one-prompt-video", "items": ["Exact text and numbers", "Edit one word, re-render", "Runs on a laptop"] }, "say": "Every frame is drawn by code, so text is exact." },
-    { "layout": "number", "value": "13", "unit": "s", "label": "to render a 35-second 1080p video", "note": "Measured on an Apple Silicon laptop", "say": "A 35-second video renders in 13 seconds." },
-    { "layout": "statement", "text": "The model fills in one form. Scripts do the rest.", "highlight": "one form", "say": "The model fills in one form. Scripts do the rest." },
-    { "layout": "end", "title": "One prompt in, one video out", "subtitle": "github.com/li2092/one-prompt-video", "cta": "Try it", "say": "Try it." }
+    {"layout": "title", "kicker": "one-prompt-video", "title": "One prompt in, one video out", "subtitle": "The model fills in a form. Scripts render it.", "say": "Say one sentence. Get a finished video."},
+    {"layout": "steps", "title": "How it works", "items": ["Say one sentence", "The model fills in a form", "Scripts render it", "You get an MP4"], "say": "You say one sentence, the model fills in a form, scripts render it."},
+    {"layout": "bars", "title": "Six small-model test runs", "unit": "s", "items": [{"label": "Run 1", "value": 68}, {"label": "Run 2", "value": 78}, {"label": "Run 3", "value": 61}, {"label": "Run 4", "value": 51}, {"label": "Run 5", "value": 57}, {"label": "Run 6", "value": 65}], "say": "Six runs with a small model, about a minute each. All passed first try."},
+    {"layout": "compare", "title": "Compared with video generation models", "left": {"title": "Video generation", "items": ["Text may be garbled", "One fix means a redo", "Needs a GPU or a cloud service"]}, "right": {"title": "one-prompt-video", "items": ["Exact text and numbers", "Edit one word, re-render", "Runs on a laptop"]}, "say": "Every frame is drawn by code, so text is exact."},
+    {"layout": "number", "value": "13", "unit": "s", "label": "to render a 35-second 1080p video", "note": "Measured on an Apple Silicon laptop", "say": "A 35-second video renders in 13 seconds."},
+    {"layout": "statement", "text": "The model fills in one form. Scripts do the rest.", "highlight": "one form", "say": "The model fills in one form. Scripts do the rest."},
+    {"layout": "end", "title": "One prompt in, one video out", "subtitle": "github.com/li2092/one-prompt-video", "cta": "Try it", "say": "Try it."}
   ]
 }

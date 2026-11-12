@@ -2,7 +2,8 @@
   "title": "What is one-prompt-video",
   "theme": "keynote",
   "aspect": "16:9",
-  "seconds": 34,
+  "music": "music.wav",
+  "tts": {"command": ["python3", "SKILL/assets/external/voice/doubao_tts.py", "--text", "{text}", "--out", "{out}", "--voice", "zh_male_dayi_uranus_bigtts", "--tone", "Unhurried and warm, like telling a story", "--rate", "-5", "--lang", "en"], "ext": "mp3"},
   "scenes": [
     {"layout": "title", "kicker": "Agent Skill", "title": "one-prompt-video", "subtitle": "One prompt in, one video out", "say": "Say one sentence. Get a finished video."},
     {"layout": "custom", "module": "../scenes/prompt.mjs", "seconds": 7, "cues": 3, "say": "You say one sentence. The model fills in a form. Scripts turn it into a video.", "data": {"who": "You:", "prompt": "Make a 30-second video about one-prompt-video", "file": "video.json", "out": "one-prompt-video.mp4", "specs": "1080p · music · captions", "lines": ["{ \"title\": \"One prompt in, one video out\",", "  \"scenes\": [", "    { \"layout\": \"title\", \"title\": \"One prompt in\" },", "    { \"layout\": \"steps\", \"items\": [ … ] },", "    { \"layout\": \"number\", \"value\": \"13\" },", "    { \"layout\": \"end\", \"title\": \"Try it\" }", "  ] }"]}},
@@ -10,6 +11,6 @@
     {"layout": "bullets", "title": "Scripts do the rest", "items": ["Build a timeline on the beat", "Draw every frame", "Synthesize music and sound effects", "Check the result"], "say": "Timing, drawing, music and checks are all done by scripts."},
     {"layout": "compare", "title": "Compared with video generation models", "left": {"title": "Video generation", "items": ["Text may be garbled", "One fix means a redo", "Needs a GPU or a cloud service"]}, "right": {"title": "one-prompt-video", "items": ["Exact text and numbers", "Edit one word, re-render", "Runs on a laptop"]}, "say": "Every frame is drawn by code, so text is exact and a fix is a one-word edit."},
     {"layout": "statement", "text": "The video you are watching was made with it", "highlight": "made with it", "say": "The video you are watching was made with it."},
-    {"layout": "end", "title": "One prompt in, one video out", "subtitle": "github.com/li2092/one-prompt-video", "cta": "Try it", "say": "Try it."}
+    {"layout": "end", "title": "One prompt in, one video out", "subtitle": "github.com/li2092/one-prompt-video", "cta": "Try it", "say": "Give it a try today."}
   ]
 }

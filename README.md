@@ -35,27 +35,27 @@ https://github.com/user-attachments/assets/bbe739b1-32a2-4042-b0e6-c4116cb0daa9
 
 ## 看效果
 
-下面的片子都带声音，配乐和音效是技能自己合成的。为了让播放器的封面有画面，每支切掉了开头一两秒的淡入。
+下面四支片子的画面各由一份 `video.json` 出。配音是豆包语音，每支换一个音色、语气和语速；配乐是库乐队的乐器采样，每支一种编曲。这两样用的是技能里「借助外部工具」的做法：配音要自己的密钥，采样配乐只能在 macOS 上做。为了让播放器的封面有画面，每支开头加了一帧封面。
 
 ### 只填表出的片
 
-「一句话，出一支片」：七场全是现成版式，grid 主题。本页后面的示例 `video.json`、主题预览和总览图用的都是它。
+「一句话，出一支片」：七场全是现成版式，grid 主题。女声，轻快；木吉他、钢琴、原声贝斯。本页后面的示例 `video.json`、主题预览和总览图用的都是它。
 
-https://github.com/user-attachments/assets/80fd4bbb-2e34-457d-8688-b6d547401871
+https://github.com/user-attachments/assets/b36dd503-4017-4324-a4ee-bb70dc505c53
 
-「从一句话到 MP4」：八场全是现成版式，blueprint 主题。
+「从一句话到 MP4」：八场全是现成版式，blueprint 主题。男声，沉稳；合成器铺底、拨弦音色、电子鼓。
 
-https://github.com/user-attachments/assets/ff0d3ac2-ccd1-4046-93a6-fabe674b399e
+https://github.com/user-attachments/assets/5a296a94-050b-4096-bbd9-c021417efa9e
 
-「小模型也能出片」：竖屏，pop 主题，内容是本仓库的实测数据。
+「小模型也能出片」：竖屏，pop 主题，内容是本仓库的实测数据。女声，语速快；马林巴、电贝斯、颤音琴。
 
-https://github.com/user-attachments/assets/f6e06329-f875-4261-bf37-1bfba71bade7
+https://github.com/user-attachments/assets/1bec9149-21b1-4973-81be-457f3c279f72
 
 ### 加一场自己写的画面
 
-「one-prompt-video 是什么」：七场里有一场是自己写的画面代码（一句话变成 `video.json` 再变成 MP4 的那一场），其余是现成版式。
+「one-prompt-video 是什么」：七场里有一场是自己写的画面代码（一句话变成 `video.json` 再变成 MP4 的那一场），其余是现成版式。男声，从容；钢琴、圆号、合唱、竖琴。
 
-https://github.com/user-attachments/assets/946ce180-f7af-44bf-94a0-eb96f282fc96
+https://github.com/user-attachments/assets/d89fea91-f7cd-4c06-b54d-4c51cbde7e3f
 
 ### 风格不设上限
 
@@ -189,7 +189,7 @@ node /path/to/one-prompt-video/scripts/make.mjs demo/video.json     # 成片在 
 | 想要 | 怎么做 |
 |---|---|
 | 换颜色、换字体、固定某一场的秒数 | [`references/video-json.md`](one-prompt-video/references/video-json.md) |
-| 加人声 | 放自己的录音，或配一条自己的配音命令：[`references/voice.md`](one-prompt-video/references/voice.md) |
+| 加人声 | 技能不带配音服务，配音要自己找：放自己的录音，或接一个自己的 TTS：[`references/voice.md`](one-prompt-video/references/voice.md) |
 | 某一场要特别的画面 | 这一场自己写画面代码，其余照常用版式：[`references/custom-scenes.md`](one-prompt-video/references/custom-scenes.md) |
 | 卡通短片、3D 场景、自然风景 | 三条参考生产线：[`references/pipelines.md`](one-prompt-video/references/pipelines.md) |
 | 写实渲染、真实乐器的配乐、AI 旁白 | 借助外部工具：[`references/external-tools.md`](one-prompt-video/references/external-tools.md) |
@@ -226,9 +226,9 @@ https://github.com/user-attachments/assets/225be1e4-821d-4b5b-9432-e9ffde8ccc12
 
 ## 现状
 
-- 版本 0.2.0。只在 macOS（Apple Silicon）上实测过；Windows 和 Linux 的代码路径按文档写了，还没有实测，欢迎反馈。
-- 自带的配乐和音效是程序合成的，只量过响度和峰值，好不好听要你自己听。
-- 默认没有人声。
+- 版本 0.3.0。只在 macOS（Apple Silicon）上实测过；Windows 和 Linux 的代码路径按文档写了，还没有实测，欢迎反馈。
+- 不接外部工具时的默认输出是程序合成的配乐、没有人声，比上面的演示片简单。[同一支「一句话，出一支片」的默认输出](https://github.com/user-attachments/assets/80fd4bbb-2e34-457d-8688-b6d547401871)可以对比着看。
+- 配乐（自带的和采样的）只量过响度和峰值，好不好听要你自己听。
 - 用 `colors` 换背景色对 `blueprint` 主题不起作用，`pop` 主题的背景是四种颜色轮换，只有第一种跟着换。
 - 技能的说明文件和脚本的提示信息目前是中文；片子的内容可以是任何语言，英文排版已支持。
 
