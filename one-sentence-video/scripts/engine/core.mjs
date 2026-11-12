@@ -75,6 +75,7 @@ export function resolveFonts(GlobalFonts, userDir, prefer) {
 const CJK = /[⺀-鿿豈-﫿＀-￯　-〿]/
 const NO_LINE_START = /[，。、；：？！）》」』”’,.;:?!)\]%…]/
 const NO_LINE_END = /[（《「『“‘(\[]/
+const BREAK_AFTER = /[，。、；：？！,;:?!]/
 export const isCJK = ch => CJK.test(ch)
 export const hasCJK = s => CJK.test(String(s))
 
@@ -103,7 +104,12 @@ export function wrapText(ctx, text, maxW) {
     const next = line + tk
     if (ctx.measureText(next).width <= maxW || line === '') { line = next; continue }
     if (NO_LINE_START.test(tk[0])) { line = next; continue }
-    const last = [...line].pop()
+    // 这一行靠后的位置有逗号、顿号这类标点的，就在标点后面断开，不把一个词切成两半
+    const chars = [...line]
+    let cut = -1
+    for (let k = chars.length - 2; k >= Math.floor(chars.length * 0.5); k--) if (BREAK_AFTER.test(chars[k])) { cut = k; break }
+    if (cut > 0) { lines.push(chars.slice(0, cut + 1).join('').trimEnd()); line = (chars.slice(cut + 1).join('') + tk).trimStart(); continue }
+    const last = chars[chars.length - 1]
     if (last && NO_LINE_END.test(last)) { const head = [...line].slice(0, -1).join(''); lines.push(head.trimEnd()); line = last + tk; continue }
     push(); line = tk === ' ' ? '' : tk
   }
@@ -113,13 +119,18 @@ export function wrapText(ctx, text, maxW) {
 
 // 在给定的宽和行数里放下一段字：放不下就缩小字号，缩到下限还放不下就报告溢出。
 // font(size) 返回 ctx.font 字符串。返回 { size, lines, lineH, overflow }
-export function fitText(ctx, text, { font, maxW, maxLines = 2, size, minSize = size * 0.55, lineGap = 1.28, maxH = Infinity }) {
+export function fitText(ctx, text, { font, maxW, maxLines = 2, size, minSize = size * 0.55, lineGap = 1.28, maxH = Infinity, oneLine = false }) {
   let s = size
+  // 短标题：宁可缩小一点放进一行，也不折成两行（折行容易把一个词切开）
+  if (oneLine && !String(text).includes('\n')) {
+    for (let q = size; q >= size * 0.68; q *= 0.95) { ctx.font = font(q); const w = ctx.measureText(text).width; if (w <= maxW) return { size: q, lines: [String(text)], lineH: q * lineGap, width: w, overflow: false } }
+  }
   for (;;) {
     ctx.font = font(s)
     let lines = wrapText(ctx, text, maxW)
-    if (lines.length > 1) {
-      // 行数不变的前提下把行宽收窄，各行就匀了，最后一行不会只剩一两个字
+    const widths = lines.map(l => ctx.measureText(l).width)
+    if (lines.length > 1 && widths[widths.length - 1] < Math.max(...widths) * 0.34) {
+      // 最后一行只剩一两个字：行数不变的前提下把行宽收窄，各行就匀了
       let lo = maxW * 0.45, hi = maxW
       for (let k = 0; k < 7; k++) { const mid = (lo + hi) / 2; if (wrapText(ctx, text, mid).length <= lines.length) hi = mid; else lo = mid }
       lines = wrapText(ctx, text, hi)

@@ -63,6 +63,8 @@ export function validate(v) {
       if (s[k] != null && k !== 'highlight' && typeof s[k] !== 'string') err(`${A}的 "${k}" 要是一段文字（带引号的字符串）。`)
     }
     if (s.seconds != null && !(typeof s.seconds === 'number' && s.seconds >= 2 && s.seconds <= 30)) err(`${A}的 "seconds" 要是 2 到 30 之间的数字（不带引号）。`)
+    if (typeof s.say === 'string' && [...s.say].length > 36) warn(`${A}的 "say" 有 ${[...s.say].length} 个字，偏长；一场一句，30 个字以内。`)
+    if (s.layout === 'bars' && isStr(s.unit) && isStr(s.title) && s.title.includes(s.unit) && /[（(]/.test(s.title)) warn(`${A}的标题里已经写了单位「${s.unit}」，"unit" 还会接在每个数后面，两处留一处就够。`)
     if ((s.layout === 'bullets' || s.layout === 'steps') && s.items != null) {
       const [mn, mx] = s.layout === 'bullets' ? [2, 5] : [2, 5]
       if (!strList(s.items, mn, mx)) err(`${A}的 "items" 要是 ${mn} 到 ${mx} 条文字组成的数组。${ex}`)

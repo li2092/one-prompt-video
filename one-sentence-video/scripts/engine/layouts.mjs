@@ -33,7 +33,7 @@ function heading(ctx, s, E, text) {
   const { u, theme } = E, a = content(E)
   if (!text) return a.y
   const size = (E.portrait ? 72 : 68) * u
-  const f = E.fit(text, { role: 'title', weight: theme.wTitle, size, maxW: a.w, maxLines: 2 })
+  const f = E.fit(text, { role: 'title', weight: theme.wTitle, size, maxW: a.w, maxLines: 2, oneLine: true })
   const p = s.p(0)
   E.enter(ctx, p, a.x, a.y, () => { ctx.fillStyle = theme.c.fg; ctx.font = E.font('title', theme.wTitle, f.size); drawLines(ctx, f.lines, a.x, a.y, f.lineH, 'left') })
   const yb = a.y + f.lines.length * f.lineH + 14 * u
@@ -59,7 +59,7 @@ export const LAYOUTS = {
   // 片头：大标题居中
   title(ctx, s, E) {
     const { W, u, theme } = E, a = content(E), sc = s.scene
-    const big = E.fit(sc.title, { role: 'title', weight: theme.wTitle, size: (E.portrait ? 132 : 156) * u, maxW: a.w * 0.92, maxLines: 3, lineGap: 1.18 })
+    const big = E.fit(sc.title, { role: 'title', weight: theme.wTitle, size: (E.portrait ? 132 : 156) * u, maxW: a.w * 0.92, maxLines: 3, lineGap: 1.18, oneLine: [...sc.title].length <= 9 })
     const sub = sc.subtitle ? E.fit(sc.subtitle, { role: 'body', weight: theme.wBody, size: 54 * u, maxW: a.w * 0.8, maxLines: 2 }) : null
     const kick = sc.kicker ? E.fit(sc.kicker, { role: 'body', weight: 600, size: 42 * u, maxW: a.w * 0.8, maxLines: 1 }) : null
     const hBig = big.lines.length * big.lineH, hSub = sub ? sub.lines.length * sub.lineH + 34 * u : 0, hKick = kick ? kick.lineH + 26 * u : 0
@@ -253,7 +253,7 @@ export const LAYOUTS = {
   // 片尾：一句收束的话，可以带一行行动号召
   end(ctx, s, E) {
     const { W, u, theme } = E, a = content(E), sc = s.scene
-    const big = E.fit(sc.title, { role: 'title', weight: theme.wTitle, size: (E.portrait ? 112 : 128) * u, maxW: a.w * 0.9, maxLines: 3, lineGap: 1.22 })
+    const big = E.fit(sc.title, { role: 'title', weight: theme.wTitle, size: (E.portrait ? 112 : 128) * u, maxW: a.w * 0.9, maxLines: 3, lineGap: 1.22, oneLine: [...sc.title].length <= 9 })
     const sub = sc.subtitle ? E.fit(sc.subtitle, { role: 'body', weight: theme.wBody, size: 52 * u, maxW: a.w * 0.8, maxLines: 2 }) : null
     const cta = sc.cta ? E.fit(sc.cta, { role: 'body', weight: 700, size: 46 * u, maxW: a.w * 0.7, maxLines: 1 }) : null
     const hBig = big.lines.length * big.lineH, hSub = sub ? sub.lines.length * sub.lineH + 30 * u : 0, hCta = cta ? 110 * u + 50 * u : 0
@@ -298,7 +298,7 @@ export function drawCaption(ctx, s, E) {
   for (let i = 0; i < chunks.length; i++) { const d = span * lens[i] / total; if (s.t < acc + d) { idx = i; t0 = acc; t1 = acc + d; break } acc += d }
   const a = Math.min(clamp((s.t - t0) / 0.18), idx === chunks.length - 1 ? 1 : clamp((t1 - s.t) / 0.12))
   const size = (E.portrait ? 46 : 44) * u, maxW = W - E.safe.l * 2
-  const f = E.fit(chunks[idx], { role: 'body', weight: 500, size, maxW, maxLines: 2, quiet: true })
+  const f = E.fit(chunks[idx].replace(/[，、：:,]$/u, ''), { role: 'body', weight: 500, size, maxW, maxLines: 2, quiet: true })
   const h = f.lines.length * f.lineH, cy = H - E.captionH / 2 - (E.portrait ? 30 * u : 0), y = cy - h / 2
   ctx.save(); ctx.globalAlpha = a
   const padX = 34 * u, padY = 14 * u, w = f.width + padX * 2

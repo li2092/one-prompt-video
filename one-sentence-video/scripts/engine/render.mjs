@@ -19,10 +19,10 @@ export function makeRenderer({ v, theme, TL, fonts, W, H, createCanvas, custom =
       W, H, u, portrait, safe, captionH, theme, T, total: TL.total, sceneIndex,
       font: (role, weight, size) => `${weight} ${size.toFixed(1)}px ${roleStack[role] || roleStack.body}`,
       fit(text, o) {
-        const key = [text, o.role, o.weight, o.size, o.maxW, o.maxLines, o.maxH, o.lineGap].join('|')
+        const key = [text, o.role, o.weight, o.size, o.maxW, o.maxLines, o.maxH, o.lineGap, o.oneLine].join('|')
         let f = fitCache.get(key)
         if (!f) {
-          f = fitText(lctx, String(text), { font: sz => E.font(o.role, o.weight, sz), maxW: o.maxW, maxLines: o.maxLines, size: o.size, minSize: o.minSize, lineGap: o.lineGap, maxH: o.maxH })
+          f = fitText(lctx, String(text), { font: sz => E.font(o.role, o.weight, sz), maxW: o.maxW, maxLines: o.maxLines, size: o.size, minSize: o.minSize, lineGap: o.lineGap, maxH: o.maxH, oneLine: o.oneLine })
           fitCache.set(key, f)
           const short = [...String(text)].slice(0, 14).join('') + ([...String(text)].length > 14 ? '…' : '')
           if (f.overflow) warnings.add(`第 ${sceneIndex + 1} 场：「${short}」字太多，放不下，已被截在框外。把这段字缩短。`)
