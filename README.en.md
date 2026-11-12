@@ -17,11 +17,11 @@ Say one sentence → the LLM fills in a form → one command renders an MP4 with
 
 </div>
 
-Full version with sound, 42 seconds:
+Full version with narration and score, 42 seconds. **GitHub's player starts muted: press play, then click the speaker icon at the bottom right.** The same goes for every video on this page:
 
 https://github.com/user-attachments/assets/7da9e384-5efd-4d13-9077-716861572c67
 
-<sub>Every frame is rendered by this skill's engine: three hand-written scenes plus built-in layouts, with sources in <a href="docs/demos/trailer-en">docs/demos/trailer-en</a>. The score uses GarageBand instrument samples and the narration is an AI voice from Doubao TTS; both methods are described in the skill's <a href="one-prompt-video/references/external-tools.md">external-tools.md</a>. The videos below use the skill's own music, which is synthesized by code.</sub>
+<sub>Every frame is rendered by this skill's engine: three hand-written scenes plus built-in layouts, with sources in <a href="docs/demos/trailer-en">docs/demos/trailer-en</a>. The score uses GarageBand instrument samples and the narration is an AI voice from Doubao TTS; both methods are described in the skill's <a href="one-prompt-video/references/external-tools.md">external-tools.md</a>.</sub>
 
 ## What it is
 
@@ -35,7 +35,7 @@ An [Agent Skill](https://agentskills.io). Install it into Claude Code, Codex, or
 
 ## Gallery
 
-Each of the four videos below is rendered from a single `video.json`. Narration is Doubao TTS, with a different voice, tone and pace for each video. The scores are GarageBand instrument samples, with a different arrangement for each. Both come from the skill's external-tools methods: narration needs your own API key, and sample-based scores can only be made on macOS. A single cover frame has been added at the start of each so that the player shows a meaningful cover.
+Each of the four videos below is rendered from a single `video.json`. Narration is Doubao TTS, with a different voice, tone and pace for each video. The scores are GarageBand instrument samples, with a different arrangement for each. Both come from the skill's external-tools methods: narration needs your own API key, and sample-based scores can only be made on macOS. A single cover frame has been added at the start of each so that the player shows a meaningful cover. The player starts muted, so click the speaker icon.
 
 ### One hand-written scene plus layouts
 
