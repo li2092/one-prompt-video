@@ -79,17 +79,22 @@ const BREAK_AFTER = /[，。、；：？！,;:?!]/
 export const isCJK = ch => CJK.test(ch)
 export const hasCJK = s => CJK.test(String(s))
 
-// 把一段话拆成不可再拆的小块：一个汉字一块，一个英文词或一串数字一块
+// 把一段话拆成不可再拆的小块：一个中文词一块（「满意」「模式」不会被折成两行），一个英文词或一串数字一块。
+// 中文分词用 Node 自带的 Intl.Segmenter；没有它的环境退回一个汉字一块。
+const SEG = typeof Intl !== 'undefined' && Intl.Segmenter ? new Intl.Segmenter('zh', { granularity: 'word' }) : null
 function tokens(text) {
   const out = []
-  let buf = ''
+  let buf = '', han = ''
+  const flushHan = () => { if (!han) return; if (SEG) for (const s of SEG.segment(han)) out.push(s.segment); else out.push(...han); han = '' }
+  const flush = () => { if (buf) out.push(buf); buf = '' }
   for (const ch of String(text)) {
-    if (ch === '\n') { if (buf) out.push(buf); buf = ''; out.push('\n') }
-    else if (isCJK(ch)) { if (buf) out.push(buf); buf = ''; out.push(ch) }
-    else if (ch === ' ') { if (buf) out.push(buf); buf = ''; out.push(' ') }
+    if (isCJK(ch)) { flush(); han += ch; continue }
+    flushHan()
+    if (ch === '\n') { flush(); out.push('\n') }
+    else if (ch === ' ') { flush(); out.push(' ') }
     else buf += ch
   }
-  if (buf) out.push(buf)
+  flush(); flushHan()
   return out
 }
 

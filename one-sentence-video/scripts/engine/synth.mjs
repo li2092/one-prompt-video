@@ -1,5 +1,5 @@
 // 程序合成配乐：纯 JS，离线渲染到 Float32 立体声缓冲。
-// 用法见 audio.mjs：风格目录的 music.mjs 导出 score(M, TL)，在 M 上排音符，M.render() 出缓冲。
+// 用法见同目录的 music.mjs：new Music(秒数, { bpm })，在上面排音符（piano、pluck、pad、bass、kick……），render() 出左右两个声道的缓冲。
 export const SR = 48000
 
 const NOTE = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }

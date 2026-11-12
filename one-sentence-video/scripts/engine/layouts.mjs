@@ -59,7 +59,7 @@ export const LAYOUTS = {
   // 片头：大标题居中
   title(ctx, s, E) {
     const { W, u, theme } = E, a = content(E), sc = s.scene
-    const big = E.fit(sc.title, { role: 'title', weight: theme.wTitle, size: (E.portrait ? 132 : 156) * u, maxW: a.w * 0.92, maxLines: 3, lineGap: 1.18, oneLine: [...sc.title].length <= 9 })
+    const big = E.fit(sc.title, { role: 'title', weight: theme.wTitle, size: (E.portrait ? 132 : 156) * u, maxW: a.w * 0.92, maxLines: 3, lineGap: 1.18, oneLine: true })
     const sub = sc.subtitle ? E.fit(sc.subtitle, { role: 'body', weight: theme.wBody, size: 54 * u, maxW: a.w * 0.8, maxLines: 2 }) : null
     const kick = sc.kicker ? E.fit(sc.kicker, { role: 'body', weight: 600, size: 42 * u, maxW: a.w * 0.8, maxLines: 1 }) : null
     const hBig = big.lines.length * big.lineH, hSub = sub ? sub.lines.length * sub.lineH + 34 * u : 0, hKick = kick ? kick.lineH + 26 * u : 0
@@ -253,7 +253,7 @@ export const LAYOUTS = {
   // 片尾：一句收束的话，可以带一行行动号召
   end(ctx, s, E) {
     const { W, u, theme } = E, a = content(E), sc = s.scene
-    const big = E.fit(sc.title, { role: 'title', weight: theme.wTitle, size: (E.portrait ? 112 : 128) * u, maxW: a.w * 0.9, maxLines: 3, lineGap: 1.22, oneLine: [...sc.title].length <= 9 })
+    const big = E.fit(sc.title, { role: 'title', weight: theme.wTitle, size: (E.portrait ? 112 : 128) * u, maxW: a.w * 0.9, maxLines: 3, lineGap: 1.22, oneLine: true })
     const sub = sc.subtitle ? E.fit(sc.subtitle, { role: 'body', weight: theme.wBody, size: 52 * u, maxW: a.w * 0.8, maxLines: 2 }) : null
     const cta = sc.cta ? E.fit(sc.cta, { role: 'body', weight: 700, size: 46 * u, maxW: a.w * 0.7, maxLines: 1 }) : null
     const hBig = big.lines.length * big.lineH, hSub = sub ? sub.lines.length * sub.lineH + 30 * u : 0, hCta = cta ? 110 * u + 50 * u : 0
