@@ -1,8 +1,10 @@
-// 六种风格主题。主题只管「长什么样、怎么动、配什么乐」，不管内容；同一份 video.json 换主题不用改别的。
+// 内置的风格主题。主题只管「长什么样、怎么动、配什么乐」，不管内容；同一份 video.json 换主题不用改别的。
 // 新主题：复制一个对象，改颜色、字体、bg、card 就能用；在 video.json 里也可以用 "colors" 覆盖颜色。
 import { rgba, mix, rng, hash, roundRect, lerp, clamp } from './core.mjs'
 
 const TAU = Math.PI * 2
+// 按比例调亮或调暗一个颜色（k 大于 1 调亮），色相不变。背景的渐变、底纹都从主题的 bg 色算出来，"colors" 换了 bg 它们跟着变
+const scale = (hex, k) => '#' + [1, 3, 5].map(i => Math.min(255, Math.round(parseInt(hex.slice(i, i + 2), 16) * k)).toString(16).padStart(2, '0')).join('')
 
 // ---------- 所有主题共用的默认画法 ----------
 const base = {
@@ -48,7 +50,7 @@ function segPoints(x1, y1, x2, y2, p = 1, step = 60) {
 }
 const tick8 = E => Math.floor(E.T * 8)
 
-// ---------- 六种主题 ----------
+// ---------- 主题 ----------
 export const THEMES = {
   grid: {
     ...base, id: 'grid', solidAccent: true, name: '网格图解', mood: '讲概念、讲原理，像书里的配图', bpm: 90,
@@ -102,7 +104,8 @@ export const THEMES = {
     wTitle: 900, wBody: 700, radius: 22, motion: 'pop', transition: 'cut',
     bg(ctx, E) {
       const { W, H, u } = E, c = this.c
-      const tones = [c.bg, '#7cf0c8', '#ffb3d1', '#9ecbff']
+      // 每场换一种底色。"colors" 换了 bg 时，另外三种从新的 bg 和两个强调色配出来
+      const tones = c.bg === THEMES.pop.c.bg ? [c.bg, '#7cf0c8', '#ffb3d1', '#9ecbff'] : [c.bg, mix(c.bg, c.accent2, 0.3), mix(c.bg, c.accent, 0.3), mix(c.bg, '#ffffff', 0.45)]
       const base0 = tones[E.sceneIndex % tones.length]
       ctx.fillStyle = base0; ctx.fillRect(0, 0, W, H)
       // 放射线，慢慢转
@@ -148,7 +151,8 @@ export const THEMES = {
     wTitle: 700, radius: 26, motion: 'rise', transition: 'fade',
     bg(ctx, E) {
       const { W, H } = E, c = this.c
-      const g = ctx.createLinearGradient(0, 0, W, H); g.addColorStop(0, '#070916'); g.addColorStop(0.55, c.bg); g.addColorStop(1, '#1b1240')
+      const own = c.bg !== THEMES.keynote.c.bg
+      const g = ctx.createLinearGradient(0, 0, W, H); g.addColorStop(0, own ? scale(c.bg, 0.7) : '#070916'); g.addColorStop(0.55, c.bg); g.addColorStop(1, own ? mix(c.bg, c.accent, 0.18) : '#1b1240')
       ctx.fillStyle = g; ctx.fillRect(0, 0, W, H)
       const blobs = [[0.22, 0.3, c.accent, 0.20], [0.8, 0.72, c.accent2, 0.16], [0.6, 0.15, '#3fd0ff', 0.10]]
       blobs.forEach(([bx, by, col, a], i) => {
@@ -187,7 +191,7 @@ export const THEMES = {
     fontTitle: 'sans', fontBody: 'mono', fontNum: 'mono', wTitle: 700, wBody: 400, radius: 0, motion: 'draw', transition: 'fade',
     bg(ctx, E) {
       const { W, H, u } = E
-      const g = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, Math.hypot(W, H) / 2); g.addColorStop(0, '#16509f'); g.addColorStop(1, '#0b2f69')
+      const g = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, Math.hypot(W, H) / 2); g.addColorStop(0, scale(this.c.bg, 1.25)); g.addColorStop(1, scale(this.c.bg, 0.75))
       ctx.fillStyle = g; ctx.fillRect(0, 0, W, H)
       const s = 40 * u
       for (let x = 0, k = 0; x <= W; x += s, k++) { ctx.strokeStyle = rgba('#ffffff', k % 5 === 0 ? 0.20 : 0.07); ctx.lineWidth = (k % 5 === 0 ? 1.5 : 1) * u; ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke() }
@@ -199,7 +203,7 @@ export const THEMES = {
     },
     card(ctx, E, x, y, w, h, o = {}) {
       const u = E.u, p = o.p ?? 1, col = o.tone === 'accent' ? this.c.accent : this.c.line
-      ctx.save(); ctx.fillStyle = rgba('#0b2f69', 0.55); ctx.fillRect(x, y, w, h)
+      ctx.save(); ctx.fillStyle = rgba(scale(this.c.bg, 0.75), 0.55); ctx.fillRect(x, y, w, h)
       ctx.strokeStyle = col; ctx.lineWidth = 2 * u; ctx.setLineDash([2 * (w + h)]); ctx.lineDashOffset = 2 * (w + h) * (1 - p); ctx.strokeRect(x, y, w, h); ctx.setLineDash([])
       const k = 16 * u; ctx.lineWidth = 4 * u; ctx.globalAlpha = p
       for (const [cx, cy, sx, sy] of [[x, y, 1, 1], [x + w, y, -1, 1], [x, y + h, 1, -1], [x + w, y + h, -1, -1]]) { ctx.beginPath(); ctx.moveTo(cx + sx * k, cy); ctx.lineTo(cx, cy); ctx.lineTo(cx, cy + sy * k); ctx.stroke() }
@@ -215,7 +219,7 @@ export const THEMES = {
       ctx.restore(); ctx.save(); ctx.strokeStyle = col; ctx.lineWidth = 3 * u; ctx.strokeRect(x, y, w, h); ctx.restore()
     },
     markHollow: true,
-    mark(ctx, E, x, y, r, i, o = {}) { ctx.save(); ctx.strokeStyle = o.color ?? this.c.accent; ctx.lineWidth = 3 * E.u; ctx.fillStyle = '#0b2f69'; ctx.beginPath(); ctx.rect(x - r, y - r, 2 * r, 2 * r); ctx.fill(); ctx.stroke(); ctx.restore() },
+    mark(ctx, E, x, y, r, i, o = {}) { ctx.save(); ctx.strokeStyle = o.color ?? this.c.accent; ctx.lineWidth = 3 * E.u; ctx.fillStyle = scale(this.c.bg, 0.75); ctx.beginPath(); ctx.rect(x - r, y - r, 2 * r, 2 * r); ctx.fill(); ctx.stroke(); ctx.restore() },
     line(ctx, E, x1, y1, x2, y2, o = {}) {
       base.line.call(this, ctx, E, x1, y1, x2, y2, { width: 2.5, ...o })
       if ((o.p ?? 1) >= 1 && o.ticks !== false) { const u = E.u, a = Math.atan2(y2 - y1, x2 - x1) + Math.PI / 2, k = 9 * u; ctx.save(); ctx.strokeStyle = o.color ?? this.c.accent; ctx.lineWidth = 2.5 * u; for (const [px, py] of [[x1, y1], [x2, y2]]) { ctx.beginPath(); ctx.moveTo(px - Math.cos(a) * k, py - Math.sin(a) * k); ctx.lineTo(px + Math.cos(a) * k, py + Math.sin(a) * k); ctx.stroke() } ctx.restore() }
@@ -265,6 +269,182 @@ export const THEMES = {
     music: { style: 'bright', prog: ['C', 'Am', 'F', 'G'], lead: 'marimba', drums: false },
     sfx: { enter: 'type', cut: 'whoosh', accent: 'pop' },
   },
+
+  neon: {
+    ...base, id: 'neon', name: '霓虹夜色', mood: '发光的线条和透视网格，科技、游戏、电子音乐', bpm: 110,
+    c: { bg: '#0b0714', fg: '#f5f0ff', muted: '#a79bc9', accent: '#00e5ff', accent2: '#ff2bd6', card: '#150d26', line: '#4a3a86', onAccent: '#0b0714' },
+    wTitle: 800, radius: 10, motion: 'pop', transition: 'cut',
+    bg(ctx, E) {
+      const { W, H, u } = E, c = this.c
+      ctx.fillStyle = c.bg; ctx.fillRect(0, 0, W, H)
+      // 地平线上一团光，下面是朝镜头滚过来的透视网格
+      const hy = H * 0.66
+      const glow = ctx.createRadialGradient(W / 2, hy, 0, W / 2, hy, Math.max(W, H) * 0.55); glow.addColorStop(0, rgba(c.accent2, 0.24)); glow.addColorStop(1, rgba(c.accent2, 0))
+      ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H)
+      ctx.strokeStyle = rgba(c.accent, 0.16); ctx.lineWidth = 1.5 * u
+      for (let i = -30; i <= 30; i++) { ctx.beginPath(); ctx.moveTo(W / 2, hy); ctx.lineTo(W / 2 + i * 160 * u, H); ctx.stroke() }
+      for (let k = 0; k < 12; k++) { const q = ((k + (E.T * 0.35) % 1) / 12) ** 2.2, y = hy + (H - hy) * q; ctx.globalAlpha = 0.25 + 0.75 * q; ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke() }
+      ctx.globalAlpha = 1
+      ctx.strokeStyle = rgba(c.accent2, 0.5); ctx.lineWidth = 2 * u; ctx.beginPath(); ctx.moveTo(0, hy); ctx.lineTo(W, hy); ctx.stroke()
+    },
+    card(ctx, E, x, y, w, h, o = {}) {
+      const u = E.u, col = o.tone === 'accent' ? this.c.accent : this.c.accent2
+      ctx.save(); roundRect(ctx, x, y, w, h, this.radius * u)
+      ctx.fillStyle = rgba(this.c.card, 0.85); ctx.fill()
+      if (o.tone === 'accent') { ctx.fillStyle = rgba(col, 0.12); ctx.fill() }
+      ctx.shadowColor = col; ctx.shadowBlur = 22 * u; ctx.lineWidth = 2.5 * u; ctx.strokeStyle = col; ctx.stroke(); ctx.restore()
+    },
+    bar(ctx, E, x, y, w, h, o = {}) {
+      const col = o.color ?? this.c.accent
+      ctx.save(); roundRect(ctx, x, y, w, h, Math.min(6 * E.u, Math.abs(w) / 2, Math.abs(h) / 2)); ctx.shadowColor = col; ctx.shadowBlur = 26 * E.u; ctx.fillStyle = col; ctx.fill(); ctx.restore()
+    },
+    markHollow: true,
+    mark(ctx, E, x, y, r, i, o = {}) {
+      const col = o.color ?? [this.c.accent, this.c.accent2][i % 2]
+      ctx.save(); ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fillStyle = this.c.bg; ctx.fill(); ctx.shadowColor = col; ctx.shadowBlur = 18 * E.u; ctx.lineWidth = 3 * E.u; ctx.strokeStyle = col; ctx.stroke(); ctx.restore()
+    },
+    underline(ctx, E, x, y, w, p) { ctx.save(); ctx.shadowColor = this.c.accent2; ctx.shadowBlur = 20 * E.u; ctx.fillStyle = this.c.accent2; ctx.fillRect(x, y, w * p, 5 * E.u); ctx.restore() },
+    music: { style: 'drive', prog: ['Am', 'F', 'C', 'G'], lead: 'pluck', drums: true },
+    sfx: { enter: 'tick', cut: 'glitch', accent: 'chime' },
+  },
+
+  paper: {
+    ...base, id: 'paper', solidAccent: true, name: '报刊杂志', mood: '衬线大标题和细线，评论、读书、人文话题', bpm: 80,
+    c: { bg: '#f3ecdd', fg: '#1c1a17', muted: '#7a7266', accent: '#b3261e', accent2: '#1d4e6f', card: '#f9f4e9', line: '#1c1a17', onAccent: '#fbf6ec' },
+    fontTitle: 'serif', fontBody: 'serif', fontNum: 'serif', wTitle: 900, wBody: 500, radius: 0, motion: 'fade', transition: 'fade',
+    bg(ctx, E) {
+      const { W, H, u } = E, c = this.c
+      ctx.fillStyle = c.bg; ctx.fillRect(0, 0, W, H)
+      // 纸面的细颗粒，位置固定
+      for (let i = 0; i < 900; i++) { ctx.fillStyle = rgba(c.fg, 0.03 + hash(i, 23) * 0.05); ctx.fillRect(hash(i, 21) * W, hash(i, 22) * H, 2 * u, 2 * u) }
+      // 报头的粗细双线，页脚一条细线
+      const m = E.safe.l * 0.5
+      ctx.fillStyle = c.fg; ctx.fillRect(m, 40 * u, W - 2 * m, 6 * u); ctx.fillRect(m, 52 * u, W - 2 * m, 1.5 * u); ctx.fillRect(m, H - 42 * u, W - 2 * m, 1.5 * u)
+    },
+    card(ctx, E, x, y, w, h, o = {}) {
+      const u = E.u, c = this.c
+      ctx.save()
+      if (o.tone === 'accent') { ctx.fillStyle = c.accent; ctx.fillRect(x, y, w, h) }
+      else { ctx.fillStyle = c.card; ctx.fillRect(x, y, w, h); ctx.strokeStyle = rgba(c.line, 0.35); ctx.lineWidth = 1.5 * u; ctx.strokeRect(x, y, w, h); ctx.fillStyle = c.line; ctx.fillRect(x, y, w, 5 * u) }
+      ctx.restore()
+    },
+    bar(ctx, E, x, y, w, h, o = {}) { ctx.save(); ctx.fillStyle = o.color ?? this.c.accent; ctx.fillRect(x, y, w, h); ctx.restore() },
+    mark(ctx, E, x, y, r, i, o = {}) { ctx.save(); ctx.fillStyle = o.color ?? this.c.accent; ctx.fillRect(x - r, y - r, 2 * r, 2 * r); ctx.restore() },
+    underline(ctx, E, x, y, w, p) { ctx.save(); ctx.fillStyle = this.c.accent; ctx.fillRect(x, y, w * p, 6 * E.u); ctx.fillRect(x, y + 10 * E.u, w * p, 1.5 * E.u); ctx.restore() },
+    music: { style: 'calm', prog: ['Fmaj7', 'Dm7', 'Bbmaj7', 'C'], lead: 'piano', drums: false },
+    sfx: { enter: 'click', cut: 'whoosh', accent: 'chime' },
+  },
+
+  terminal: {
+    ...base, id: 'terminal', solidAccent: true, name: '终端', mood: '等宽字和绿色光标，代码、命令行、开发工具', bpm: 96,
+    c: { bg: '#0b1410', fg: '#d9ffe6', muted: '#74b08a', accent: '#39ff88', accent2: '#ffcc4d', card: '#0f1d17', line: '#2f6a4a', onAccent: '#06130b' },
+    fontTitle: 'mono', fontBody: 'mono', fontNum: 'mono', wTitle: 700, wBody: 400, radius: 6, motion: 'draw', transition: 'cut',
+    bg(ctx, E) {
+      const { W, H, u } = E, c = this.c
+      ctx.fillStyle = c.bg; ctx.fillRect(0, 0, W, H)
+      const v = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, Math.hypot(W, H) / 2); v.addColorStop(0, rgba(c.accent, 0.07)); v.addColorStop(1, rgba(c.accent, 0))
+      ctx.fillStyle = v; ctx.fillRect(0, 0, W, H)
+      // 扫描线
+      ctx.fillStyle = rgba('#000000', 0.16); for (let y = 0; y < H; y += 6 * u) ctx.fillRect(0, y, W, 2 * u)
+      // 窗口的标题栏和三个圆点
+      ctx.fillStyle = rgba(c.fg, 0.07); ctx.fillRect(0, 0, W, 46 * u)
+      ;['#ff5f57', '#febc2e', '#28c840'].forEach((col, i) => { ctx.fillStyle = col; ctx.beginPath(); ctx.arc((34 + i * 30) * u, 23 * u, 8 * u, 0, TAU); ctx.fill() })
+    },
+    card(ctx, E, x, y, w, h, o = {}) {
+      const u = E.u, acc = o.tone === 'accent'
+      ctx.save(); roundRect(ctx, x, y, w, h, this.radius * u); ctx.fillStyle = acc ? this.c.accent : this.c.card; ctx.fill()
+      if (!acc) { ctx.setLineDash([10 * u, 8 * u]); ctx.lineWidth = 2 * u; ctx.strokeStyle = this.c.line; ctx.stroke() }
+      ctx.restore()
+    },
+    // 条形画成一格一格的方块，从左下角排起
+    bar(ctx, E, x, y, w, h, o = {}) {
+      const u = E.u, x0 = Math.min(x, x + w), y0 = Math.min(y, y + h), bw = Math.abs(w), bh = Math.abs(h), cell = 20 * u, gap = 4 * u
+      ctx.save(); ctx.fillStyle = o.color ?? this.c.accent
+      for (let dy = 0; dy < bh; dy += cell) for (let dx = 0; dx < bw; dx += cell) { const sw = Math.min(cell - gap, bw - dx), sh = Math.min(cell - gap, bh - dy); if (sw > 0 && sh > 0) ctx.fillRect(x0 + dx, y0 + bh - dy - sh, sw, sh) }
+      ctx.restore()
+    },
+    mark(ctx, E, x, y, r, i, o = {}) { ctx.save(); ctx.fillStyle = o.color ?? this.c.accent; ctx.fillRect(x - r, y - r, 2 * r, 2 * r); ctx.restore() },
+    // 标题下面一条线，画完以后线尾有一个闪烁的光标
+    underline(ctx, E, x, y, w, p) { const u = E.u; ctx.save(); ctx.fillStyle = this.c.accent; ctx.fillRect(x, y, w * p, 4 * u); if (p >= 1 && Math.floor(E.T * 2) % 2 === 0) ctx.fillRect(x + w + 10 * u, y - 22 * u, 14 * u, 26 * u); ctx.restore() },
+    music: { style: 'bright', prog: ['Am7', 'Fmaj7', 'C', 'G'], lead: 'pluck', drums: true },
+    sfx: { enter: 'type', cut: 'glitch', accent: 'pop' },
+  },
+
+  ink: {
+    ...base, id: 'ink', solidAccent: true, name: '水墨', mood: '宣纸、远山和朱红印章，传统文化、诗词、历史', bpm: 66,
+    c: { bg: '#f4efe4', fg: '#1b1b1b', muted: '#6b655a', accent: '#b8322a', accent2: '#2f5d50', card: '#f4efe4', line: '#1b1b1b', onAccent: '#fff8ee' },
+    fontTitle: 'serif', fontBody: 'serif', fontNum: 'serif', wTitle: 700, wBody: 500, radius: 6, motion: 'fade', transition: 'fade',
+    bg(ctx, E) {
+      const { W, H, u } = E, c = this.c
+      ctx.fillStyle = c.bg; ctx.fillRect(0, 0, W, H)
+      // 右上角一轮淡日
+      ctx.fillStyle = rgba(c.accent, 0.16); ctx.beginPath(); ctx.arc(W - 96 * u, 110 * u, 62 * u, 0, TAU); ctx.fill()
+      // 三层远山，越近越深，各自慢慢横移，山脚化进纸里
+      for (let k = 0; k < 3; k++) {
+        const y0 = H * (0.80 + k * 0.06), amp = (70 - k * 14) * u, sh = E.T * (4 + k * 5) * u
+        ctx.beginPath(); ctx.moveTo(0, H)
+        for (let x = 0; x <= W + 12 * u; x += 12 * u) { const q = (x + sh) / u; ctx.lineTo(x, y0 - amp * (0.55 * Math.sin(q * 0.0041 + k * 1.7) + 0.3 * Math.sin(q * 0.0097 + k * 4.1) + 0.15 * Math.sin(q * 0.023 + k))) }
+        ctx.lineTo(W + 12 * u, H); ctx.closePath()
+        const g = ctx.createLinearGradient(0, y0 - amp, 0, H); g.addColorStop(0, rgba(c.fg, 0.10 + k * 0.05)); g.addColorStop(1, rgba(c.fg, 0))
+        ctx.fillStyle = g; ctx.fill()
+      }
+    },
+    card(ctx, E, x, y, w, h, o = {}) {
+      const u = E.u, c = this.c
+      ctx.save(); roundRect(ctx, x, y, w, h, this.radius * u)
+      if (o.tone === 'accent') { ctx.fillStyle = c.accent; ctx.fill() } else { ctx.fillStyle = rgba(c.card, 0.7); ctx.fill(); ctx.lineWidth = 2 * u; ctx.strokeStyle = rgba(c.line, 0.6); ctx.stroke() }
+      ctx.restore()
+    },
+    // 标记画成一方印章
+    mark(ctx, E, x, y, r, i, o = {}) { ctx.save(); roundRect(ctx, x - r, y - r, 2 * r, 2 * r, r * 0.28); ctx.fillStyle = o.color ?? this.c.accent; ctx.fill(); ctx.restore() },
+    // 标题下面一笔：起笔粗，收笔尖
+    underline(ctx, E, x, y, w, p) {
+      const u = E.u, L = w * p; if (L <= 0) return
+      ctx.save(); ctx.fillStyle = this.c.fg; ctx.beginPath(); ctx.moveTo(x, y - 1 * u); ctx.quadraticCurveTo(x + L * 0.3, y - 3 * u, x + L, y + 3 * u); ctx.quadraticCurveTo(x + L * 0.3, y + 11 * u, x, y + 9 * u); ctx.closePath(); ctx.fill(); ctx.restore()
+    },
+    music: { style: 'ambient', prog: ['Am9', 'Fmaj7', 'Cmaj7', 'Em7'], lead: 'pluck', drums: false },
+    sfx: { enter: 'click', cut: 'swell', accent: 'chime' },
+  },
+
+  bold: {
+    ...base, id: 'bold', solidAccent: true, name: '黑白大字', mood: '粗黑体、硬切、只用一种强调色，观点、口号、榜单', bpm: 126,
+    c: { bg: '#f2f1ed', fg: '#0d0d0d', muted: '#55534e', accent: '#ff3b1f', accent2: '#0d0d0d', card: '#ffffff', line: '#0d0d0d', onAccent: '#ffffff' },
+    wTitle: 900, wBody: 600, radius: 0, motion: 'slam', transition: 'cut',
+    bg(ctx, E) {
+      const { W, H, u } = E, c = this.c
+      ctx.fillStyle = c.bg; ctx.fillRect(0, 0, W, H)
+      // 右下角一个很大的场次数字；顶上一条粗带，随全片进度填上强调色
+      ctx.font = E.font('num', 900, 620 * u); ctx.textAlign = 'right'; ctx.textBaseline = 'alphabetic'; ctx.fillStyle = rgba(c.fg, 0.06)
+      ctx.fillText(String(E.sceneIndex + 1).padStart(2, '0'), W - 30 * u, H + 60 * u)
+      ctx.fillStyle = c.fg; ctx.fillRect(0, 0, W, 22 * u)
+      ctx.fillStyle = c.accent; ctx.fillRect(0, 0, W * clamp(E.T / E.total), 22 * u)
+    },
+    card(ctx, E, x, y, w, h, o = {}) {
+      ctx.save(); ctx.fillStyle = o.tone === 'accent' ? this.c.accent : this.c.card; ctx.fillRect(x, y, w, h); ctx.lineWidth = 6 * E.u; ctx.strokeStyle = this.c.line; ctx.strokeRect(x, y, w, h); ctx.restore()
+    },
+    bar(ctx, E, x, y, w, h, o = {}) { ctx.save(); ctx.fillStyle = o.color ?? this.c.accent; ctx.fillRect(x, y, w, h); ctx.restore() },
+    mark(ctx, E, x, y, r, i, o = {}) { ctx.save(); ctx.fillStyle = o.color ?? this.c.fg; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill(); ctx.restore() },
+    underline(ctx, E, x, y, w, p) { ctx.save(); ctx.fillStyle = this.c.accent; ctx.fillRect(x, y, w * p, 18 * E.u); ctx.restore() },
+    music: { style: 'drive', prog: ['Em', 'C', 'G', 'D'], lead: 'pluck', drums: true },
+    sfx: { enter: 'click', cut: 'thud', accent: 'pop' },
+  },
+}
+
+// 黑板粉笔：线条的画法和手绘白板相同，换成深色的板面和粉笔的颜色
+THEMES.chalk = {
+  ...THEMES.whiteboard, id: 'chalk', name: '黑板粉笔', mood: '课堂板书，讲题、讲公式、讲步骤', bpm: 92,
+  c: { bg: '#21443a', fg: '#f4f1e6', muted: '#b7c9be', accent: '#ffd866', accent2: '#ff9f8f', card: '#21443a', line: '#f4f1e6', onAccent: '#21443a' },
+  transition: 'fade',
+  bg(ctx, E) {
+    const { W, H, u } = E, c = this.c
+    const g = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, Math.hypot(W, H) / 2); g.addColorStop(0, scale(c.bg, 1.12)); g.addColorStop(1, scale(c.bg, 0.8))
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H)
+    // 没擦干净的粉笔灰
+    for (let i = 0; i < 9; i++) { const x = hash(i, 31) * W, y = hash(i, 32) * H, R = (180 + hash(i, 33) * 300) * u, d = ctx.createRadialGradient(x, y, 0, x, y, R); d.addColorStop(0, rgba('#ffffff', 0.05)); d.addColorStop(1, rgba('#ffffff', 0)); ctx.fillStyle = d; ctx.fillRect(x - R, y - R, 2 * R, 2 * R) }
+    // 木头边框
+    ctx.strokeStyle = '#8a5a36'; ctx.lineWidth = 18 * u; ctx.strokeRect(9 * u, 9 * u, W - 18 * u, H - 18 * u)
+  },
+  music: { style: 'calm', prog: ['C', 'Am', 'F', 'G'], lead: 'epiano', drums: false },
 }
 
 export const THEME_IDS = Object.keys(THEMES)

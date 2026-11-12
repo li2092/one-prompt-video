@@ -6,7 +6,7 @@
 |---|---|---|
 | `title` | 是 | 片名，也是输出文件名 |
 | `scenes` | 是 | 数组，1 到 20 场，一般 5 到 9 场 |
-| `theme` | 否 | `grid`（默认）、`minimal`、`pop`、`keynote`、`blueprint`、`whiteboard` |
+| `theme` | 否 | `grid`（默认）、`minimal`、`pop`、`keynote`、`blueprint`、`whiteboard`、`chalk`、`neon`、`terminal`、`paper`、`ink`、`bold` |
 | `aspect` | 否 | `"16:9"`（默认，1920×1080）、`"9:16"`（1080×1920）、`"1:1"`（1080×1080） |
 | `seconds` | 否 | 全片目标时长（8 到 180）。脚本把没写死时长的场按比例拉长或压短去凑；每场的长度会凑成整数拍，所以成片和目标差一两秒是正常的 |
 | `colors` | 否 | 覆盖主题色，见下 |

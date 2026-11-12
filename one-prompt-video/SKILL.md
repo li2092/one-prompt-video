@@ -4,7 +4,7 @@ description: 把一句话需求做成带配乐和字幕的 MP4 短视频：讲�
 license: MIT
 metadata:
   author: JiMiL, vivhuang
-  version: "0.3.0"
+  version: "0.4.0"
 compatibility: Requires Node.js 18+ and ffmpeg (scripts/setup.mjs checks and helps install). No GPU, no browser.
 ---
 
@@ -40,15 +40,15 @@ node "SKILL/scripts/setup.mjs"
 
 ```json
 {
-  "title": "番茄工作法",
+  "title": "一句话，出一支片",
   "theme": "grid",
   "aspect": "16:9",
   "seconds": 30,
   "scenes": [
-    { "layout": "title", "title": "番茄工作法", "subtitle": "一次只做一件事", "say": "总是分心？试试番茄工作法。" },
-    { "layout": "number", "value": "25", "unit": "分钟", "label": "一个番茄钟的长度", "say": "把时间切成二十五分钟一段。" },
-    { "layout": "steps", "title": "怎么做", "items": ["选一件事", "定时 25 分钟", "专心做到铃响", "休息 5 分钟"], "say": "选一件事，定时，做到铃响，然后休息。" },
-    { "layout": "end", "title": "现在就定一个 25 分钟", "say": "现在就试一次吧。" }
+    { "layout": "title", "title": "一句话，出一支片", "subtitle": "模型填一张表，脚本出片", "say": "说一句话，就能拿到一支短视频。" },
+    { "layout": "number", "value": "13", "unit": "秒", "label": "出一支 35 秒的片子", "say": "一支三十五秒的片子，十三秒出完。" },
+    { "layout": "steps", "title": "怎么用", "items": ["说一句话", "模型填一张表", "脚本出片", "拿到 MP4"], "say": "你说一句话，模型填一张表，脚本出片。" },
+    { "layout": "end", "title": "现在试试", "say": "现在就试一次吧。" }
   ]
 }
 ```
@@ -89,7 +89,7 @@ node "SKILL/scripts/make.mjs" 片名/video.json            # 出片
 
 每种版式都可以加 `say`（字幕）和 `seconds`（这一场固定多少秒）。
 
-## 六种主题
+## 十二种内置主题
 
 | theme | 样子 | 适合 |
 |---|---|---|
@@ -99,8 +99,14 @@ node "SKILL/scripts/make.mjs" 片名/video.json            # 出片
 | `keynote` | 深色渐变、玻璃卡片、发光 | 新品、重大结论、科技话题 |
 | `blueprint` | 蓝图纸、白线、黄色标注 | 讲结构、架构、怎么组装 |
 | `whiteboard` | 白板、马克笔、手画的框 | 老师边画边讲，讲流程和因果 |
+| `chalk` | 墨绿黑板、粉笔线、木边框 | 课堂板书，讲题、讲公式、讲步骤 |
+| `neon` | 深紫夜色、发光线条、透视网格 | 科技、游戏、电子音乐 |
+| `terminal` | 黑底绿字、等宽字、闪烁的光标 | 代码、命令行、开发工具 |
+| `paper` | 米色纸面、衬线大标题、红色 | 评论、读书、人文话题 |
+| `ink` | 宣纸、远山、朱红印章 | 传统文化、诗词、历史 |
+| `bold` | 黑白粗体、硬切、一种红色 | 观点、口号、榜单 |
 
-主题的预览图在 `SKILL/assets/themes.jpg`。同一份 `video.json` 换主题只改 `theme` 一个词。
+主题的预览图在 `SKILL/assets/themes.jpg`。同一份 `video.json` 换主题只改 `theme` 一个词。这十二种只是现成的起点：用户要别的颜色用 `colors` 换，要别的样子照 `references/custom-scenes.md` 自己画。
 
 ## 写内容的规矩
 

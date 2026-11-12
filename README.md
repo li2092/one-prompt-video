@@ -59,17 +59,15 @@ https://github.com/user-attachments/assets/d89fea91-f7cd-4c06-b54d-4c51cbde7e3f
 
 ### 风格不设上限
 
-同一场内容，十二套风格。前六套是内置主题，换一个词就行；后六套是在内置主题上用 `colors` 换了几个颜色配出来的，想配多少套都可以。
+同一场内容轮换十八套风格。前十二套是内置主题，换一个词就行；后六套是在内置主题上用 `colors` 换了几个颜色配出来的，这样的想配多少套都可以。
 
-<img src="docs/styles.gif" width="640" alt="同一场内容换十二套风格">
-
-<img src="docs/styles.jpg" width="100%" alt="十二套风格的预览">
+<img src="docs/styles.gif" width="640" alt="同一场内容轮换十八套风格">
 
 还不够的话，可以自己写某一场的画面，走三条参考生产线，或者借助外部工具，见后面的「进阶」。
 
-六种内置主题各取四场：
+内置主题各取三场：
 
-<img src="docs/themes.jpg" width="100%" alt="六种内置主题的预览">
+<img src="one-prompt-video/assets/themes.jpg" width="100%" alt="内置主题的预览">
 
 ## 它怎么做到的
 
@@ -226,10 +224,9 @@ https://github.com/user-attachments/assets/225be1e4-821d-4b5b-9432-e9ffde8ccc12
 
 ## 现状
 
-- 版本 0.3.0。只在 macOS（Apple Silicon）上实测过；Windows 和 Linux 的代码路径按文档写了，还没有实测，欢迎反馈。
+- 版本 0.4.0。只在 macOS（Apple Silicon）上实测过；Windows 和 Linux 的代码路径按文档写了，还没有实测，欢迎反馈。
 - 不接外部工具时的默认输出是程序合成的配乐、没有人声，比上面的演示片简单。[同一支「一句话，出一支片」的默认输出](https://github.com/user-attachments/assets/80fd4bbb-2e34-457d-8688-b6d547401871)可以对比着看。
 - 配乐（自带的和采样的）只量过响度和峰值，好不好听要你自己听。
-- 用 `colors` 换背景色对 `blueprint` 主题不起作用，`pop` 主题的背景是四种颜色轮换，只有第一种跟着换。
 - 技能的说明文件和脚本的提示信息目前是中文；片子的内容可以是任何语言，英文排版已支持。
 
 ## 目录
