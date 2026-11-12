@@ -1,0 +1,15 @@
+{
+  "title": "缩略图用的九种版式",
+  "theme": "keynote",
+  "scenes": [
+    { "layout": "title", "kicker": "三十秒看懂", "title": "什么是复利", "subtitle": "收益也会产生收益" },
+    { "layout": "statement", "text": "时间，是复利里最重要的变量", "highlight": "时间" },
+    { "layout": "bullets", "title": "复利的三个要素", "items": ["本金", "收益率", "时间"] },
+    { "layout": "number", "value": "7.6", "unit": "倍", "label": "年化 7%，三十年后的本金倍数" },
+    { "layout": "bars", "title": "1 万元按年化 7% 计算（万元）", "items": [{ "label": "10 年后", "value": 2.0 }, { "label": "20 年后", "value": 3.9 }, { "label": "30 年后", "value": 7.6 }] },
+    { "layout": "steps", "title": "怎么算", "items": ["本金", "乘以（1 + 收益率）", "每年重复一次", "得到终值"] },
+    { "layout": "compare", "title": "单利和复利", "left": { "title": "单利", "items": ["只有本金生息", "每年收益一样多"] }, "right": { "title": "复利", "items": ["收益也生息", "一年比一年多"] } },
+    { "layout": "quote", "text": "收益也会产生收益", "by": "复利的定义" },
+    { "layout": "end", "title": "复利，就是收益也生收益", "subtitle": "换一个收益率，自己算一遍", "cta": "算一算" }
+  ]
+}

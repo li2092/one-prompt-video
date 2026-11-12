@@ -13,53 +13,58 @@ Say one sentence → the LLM fills in a form → one command renders an MP4 with
 ![agent skills](https://img.shields.io/badge/Agent%20Skills-SKILL.md-8a5cf6)
 ![no GPU](https://img.shields.io/badge/GPU-not%20needed-lightgrey)
 
-<img src="docs/demo-en.gif" width="720" alt="An explainer video made from one sentence">
-
-<sub>"The Pomodoro Technique", rendered from a single seven-scene `video.json`. The GIF is silent; the real output has music and sound effects.</sub>
+<img src="{{hero-en}}" width="760" alt="A clip from the one-prompt-video trailer">
 
 </div>
+
+Full version with sound, 43 seconds:
+
+{{trailer-en}}
+
+<sub>Every frame is rendered by this skill's engine: three hand-written scenes plus built-in layouts, with sources in <a href="docs/demos/trailer-en">docs/demos/trailer-en</a>. The score was made separately with GarageBand instrument samples. The skill's own music is synthesized by code; the videos below use it.</sub>
 
 ## What it is
 
 An [Agent Skill](https://agentskills.io). Install it into Claude Code, Codex, or any agent that supports skills, say one sentence, and get back a 20 to 90 second video: explainers, product intros, data stories, knowledge cards, in landscape or portrait.
 
 - **No video generation model.** Every frame is drawn by code. Text is never garbled, numbers are exact, the same input always gives the same video, and a fix is a one-word edit followed by a re-render.
-- **The model only fills in a form.** Nine layouts and six themes to pick from. Timing, drawing, music, encoding and self-checks are done by scripts.
+- **The model only fills in a form.** Nine layouts and six built-in themes to pick from. Timing, drawing, music, encoding and self-checks are done by scripts.
 - **Small models can run it.** When the form is wrong, the script says which scene, which field, and what the correct form looks like.
 - **Lightweight.** Node.js and ffmpeg. No GPU, no browser. A 30-second 1080p video renders in about 13 seconds on an Apple Silicon laptop.
 
 ## Gallery
 
-<table>
-<tr>
-<td width="62%" valign="top">
+The videos below have sound. Music and sound effects are synthesized by the skill.
 
-Switch themes by changing one word
+### One hand-written scene plus layouts
 
-<img src="docs/themes.gif" width="100%" alt="The same scene in six themes">
+"What is one-prompt-video": one of the seven scenes is custom drawing code (the one where a sentence becomes `video.json` and then an MP4). The rest are built-in layouts.
 
-The same scene with `"theme"` set to each of the six values.
+{{intro-en}}
 
-</td>
-<td width="38%" valign="top">
+### Form only
 
-Portrait
+"From one sentence to MP4" (in Chinese): eight scenes, all built-in layouts, blueprint theme.
 
-<img src="docs/demo-portrait.gif" width="100%" alt="A portrait short video">
+{{how-it-works}}
 
-Written by Claude Haiku from one sentence (in Chinese): a portrait short video for new noise-cancelling headphones, 40-hour battery, transparency mode, priced at 199 yuan.
+"Small models can make videos too" (in Chinese): portrait, pop theme, using this repository's own test numbers.
 
-</td>
-</tr>
-</table>
+{{small-model}}
 
-Six themes, four scenes each:
+Made by Claude Haiku, a small model that read only the skill instructions, from one Chinese sentence asking for a portrait video about noise-cancelling headphones with a 40-hour battery, transparency mode and a price of 199 yuan.
 
-<img src="one-prompt-video/assets/themes.jpg" width="100%" alt="Preview of the six themes">
+{{haiku-earbuds}}
 
-Chinese works the same way:
+### Themes
 
-<img src="docs/demo-zh.gif" width="720" alt="The same video in Chinese">
+Six built-in themes. Switching is a one-word change.
+
+<img src="{{themes-gif}}" width="640" alt="The same scene in six themes">
+
+<img src="docs/themes.jpg" width="100%" alt="Preview of the six built-in themes">
+
+If the built-in ones are not enough, override any color with `colors` or the typeface with `font` in `video.json`. Beyond that, write the drawing code for a scene yourself, or use one of the three reference pipelines below. There is no fixed number of themes.
 
 ## How it works
 
@@ -78,15 +83,15 @@ This file is all the model writes:
 
 ```json
 {
-  "title": "The Pomodoro Technique",
-  "theme": "keynote",
+  "title": "Compound interest",
+  "theme": "grid",
   "aspect": "16:9",
-  "seconds": 30,
+  "seconds": 32,
   "scenes": [
-    { "layout": "title", "title": "The Pomodoro Technique", "subtitle": "One task at a time, then take a break", "say": "Always distracted? Try the Pomodoro Technique." },
-    { "layout": "number", "value": "25", "unit": "min", "label": "The length of one pomodoro", "say": "Split your time into 25-minute blocks." },
-    { "layout": "steps", "title": "How it works", "items": ["Pick one task", "Set a 25-minute timer", "Focus until it rings", "Rest for 5 minutes"] },
-    { "layout": "end", "title": "Set a 25-minute timer now" }
+    { "layout": "title", "title": "Compound interest", "subtitle": "Returns that earn returns", "say": "Compound interest means your returns earn returns too." },
+    { "layout": "bars", "title": "$10,000 at 7% a year ($ thousand)", "items": [{ "label": "10 years", "value": 20 }, { "label": "20 years", "value": 39 }, { "label": "30 years", "value": 76 }] },
+    { "layout": "number", "value": "7.6", "unit": "x", "label": "Growth at 7% a year over 30 years" },
+    { "layout": "end", "title": "Returns that earn returns", "cta": "Do the math" }
   ]
 }
 ```
@@ -108,7 +113,7 @@ After rendering, the script checks resolution, duration, loudness, true peak and
 ### 1. Install the skill
 
 ```bash
-git clone https://github.com/li2092/one-prompt-video.git
+git clone --depth 1 https://github.com/li2092/one-prompt-video.git
 
 # Claude Code
 mkdir -p ~/.claude/skills && cp -r one-prompt-video/one-prompt-video ~/.claude/skills/
@@ -120,9 +125,11 @@ mkdir -p ~/.codex/skills && cp -r one-prompt-video/one-prompt-video ~/.codex/ski
 Windows (PowerShell):
 
 ```powershell
-git clone https://github.com/li2092/one-prompt-video.git
+git clone --depth 1 https://github.com/li2092/one-prompt-video.git
 Copy-Item -Recurse one-prompt-video\one-prompt-video "$HOME\.claude\skills\one-prompt-video"
 ```
+
+The videos and GIFs on this page are stored on GitHub's attachment service, not in the repository, so the download is only a megabyte or two.
 
 For other agents, put the folder wherever that agent loads skills from. For a model without skill support, paste the content of `one-prompt-video/SKILL.md` into the conversation and replace `SKILL` with the absolute path of the folder.
 
@@ -183,6 +190,8 @@ Each reference pipeline ships with a minimal runnable project, intended for stro
 
 <img src="docs/pipelines.jpg" width="100%" alt="Three reference pipelines: Canvas 2D, three.js, full-screen shader">
 
+The sources of the demo videos on this page are in [`docs/demos/`](docs/demos), so they can be re-rendered.
+
 ## What it is not
 
 | | This skill | Video generation models |
@@ -194,6 +203,8 @@ Each reference pipeline ships with a minimal runnable project, intended for stro
 | Hardware | Any ordinary computer | A GPU or a cloud service |
 
 It makes layout-based videos that explain one thing clearly. Live-action footage, real people on camera and character-driven stories are out of scope, and so is editing existing footage.
+
+{{tiangong-section}}
 
 ## Status
 
@@ -211,7 +222,7 @@ one-prompt-video/            the skill itself; this is the folder you install
   references/                documents read on demand
   assets/                    example video.json, theme preview, minimal projects for the reference pipelines
 evals/                       test prompts and grading script
-docs/                        images used on this page
+docs/                        images for this page; demo sources are in docs/demos/
 ```
 
 ## Authors and license
