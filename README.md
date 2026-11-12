@@ -17,11 +17,11 @@
 
 </div>
 
-带声音的完整版，42 秒，点开播放：
+带旁白和配乐的完整版，42 秒。**GitHub 的播放器默认静音，播放后点右下角的喇叭图标打开声音**，本页所有视频都一样：
 
 https://github.com/user-attachments/assets/bbe739b1-32a2-4042-b0e6-c4116cb0daa9
 
-<sub>画面由本技能的引擎逐帧渲染：自己写的三场画面加现成版式，源文件在 <a href="docs/demos/trailer">docs/demos/trailer</a>。配乐用库乐队（GarageBand）的乐器采样制作，旁白是豆包语音合成的 AI 配音，做法在技能的 <a href="one-prompt-video/references/external-tools.md">external-tools.md</a> 里。下面几支片子用的是技能自带的、程序合成的配乐。</sub>
+<sub>画面由本技能的引擎逐帧渲染：自己写的三场画面加现成版式，源文件在 <a href="docs/demos/trailer">docs/demos/trailer</a>。配乐用库乐队（GarageBand）的乐器采样制作，旁白是豆包语音合成的 AI 配音，做法在技能的 <a href="one-prompt-video/references/external-tools.md">external-tools.md</a> 里。</sub>
 
 ## 这是什么
 
@@ -35,7 +35,7 @@ https://github.com/user-attachments/assets/bbe739b1-32a2-4042-b0e6-c4116cb0daa9
 
 ## 看效果
 
-下面四支片子的画面各由一份 `video.json` 出。配音是豆包语音，每支换一个音色、语气和语速；配乐是库乐队的乐器采样，每支一种编曲。这两样用的是技能里「借助外部工具」的做法：配音要自己的密钥，采样配乐只能在 macOS 上做。为了让播放器的封面有画面，每支开头加了一帧封面。
+下面四支片子的画面各由一份 `video.json` 出。配音是豆包语音，每支换一个音色、语气和语速；配乐是库乐队的乐器采样，每支一种编曲。这两样用的是技能里「借助外部工具」的做法：配音要自己的密钥，采样配乐只能在 macOS 上做。为了让播放器的封面有画面，每支开头加了一帧封面。播放器默认静音，记得点喇叭图标。
 
 ### 只填表出的片
 
