@@ -1,0 +1,8 @@
+node_modules/
+dev/
+*-workspace/
+out/
+.osv/
+*.mp4
+*.wav
+.DS_Store
