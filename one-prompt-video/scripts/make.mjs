@@ -14,7 +14,7 @@ import { getTheme, THEMES, THEME_IDS } from './engine/themes.mjs'
 import { validate, buildTimeline, sizeOf } from './engine/timeline.mjs'
 import { makeRenderer } from './engine/render.mjs'
 import { renderMusic, wavBuffer } from './engine/music.mjs'
-import { findFfmpeg, FFMPEG_HELP, mixAudio, openEncoder, probe, loudness, durationOf, run } from './engine/encode.mjs'
+import { findFfmpeg, FFMPEG_HELP, mixAudio, prepMusic, openEncoder, probe, loudness, durationOf, run } from './engine/encode.mjs'
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const argv = process.argv.slice(2)
@@ -127,6 +127,8 @@ const printNotes = () => { if (notes.length) console.log('\n[注意]\n' + notes.
 
 if (flag('--check')) { printNotes(); console.log(`\n校验通过${notes.length ? `，有 ${notes.length} 条注意` : ''}。出片：去掉 --check 重跑。\n`); process.exit(0) }
 fs.writeFileSync(sheetPath, await sheet.encode('jpeg', 88))
+// 时间线另存一份，给自己写配乐的人用：每一场从第几秒开始、多长，一拍多少秒
+fs.writeFileSync(path.join(outDir, 'timeline.json'), JSON.stringify({ bpm: TL.bpm, beat: TL.beat, total: TL.total, scenes: TL.scenes.map(S => ({ i: S.i + 1, layout: S.layout, start: +S.t0.toFixed(3), seconds: +S.dur.toFixed(3), cues: S.cues })) }, null, 1))
 if (opt('--still') != null) {
   const T = Math.min(Math.max(0, Number(opt('--still')) || 0), TL.total - 1e-3), c = createCanvas(W, H)
   R.drawFrame(c.getContext('2d'), T)
@@ -139,8 +141,11 @@ needFf()
 let audio = null, loud = null
 if (!flag('--no-audio') && v.music !== false) {
   const t0 = Date.now()
-  const [L, Rr] = renderMusic(TL, theme)
-  const musicPath = path.join(tmp, 'music.wav'); fs.writeFileSync(musicPath, wavBuffer(L, Rr))
+  const own = typeof v.music === 'string' ? path.resolve(dir, v.music) : null
+  if (own && !fs.existsSync(own)) die(`"music" 写的配乐文件找不到：${own}\n把文件放到 video.json 旁边，或者删掉 "music" 用自带的配乐。`)
+  const [L, Rr] = renderMusic(TL, theme, { bed: !own })
+  const musicPath = path.join(tmp, 'music.wav'); fs.writeFileSync(own ? path.join(tmp, 'sfx.wav') : musicPath, wavBuffer(L, Rr))
+  if (own) { try { prepMusic(ff, { file: own, sfx: path.join(tmp, 'sfx.wav'), out: musicPath, total: TL.total }) } catch (e) { die(e.message) } }
   audio = path.join(tmp, 'master.wav')
   loud = mixAudio(ff, { music: musicPath, voices: voices.map((f, i) => f && { file: f, at: TL.scenes[i].t0 + 0.3 }).filter(Boolean), out: audio, tmp })
   console.log(`\n配乐和混音完成（${((Date.now() - t0) / 1000).toFixed(1)} 秒）`)
@@ -178,7 +183,7 @@ const report = [
   `总览图：${sheetPath}`,
   `规格：${W}×${H}，${fps} 帧/秒，${TL.total.toFixed(1)} 秒，${pr.video?.codec || '?'}${audio ? ' + AAC 双声道' : '，无声'}`,
   `主题：${theme.id}（${theme.name}）；字体：${Object.entries(fonts.found).filter(([, n]) => n).map(([k, n]) => `${k}=${n}`).join('，')}`,
-  `声音：${audio ? '程序合成的配乐和音效' + (voices.some(Boolean) ? `，加 ${voices.filter(Boolean).length} 段人声` : '，没有人声') : '无'}`,
+  `声音：${audio ? (typeof v.music === 'string' ? '自己的配乐文件（' + path.basename(v.music) + '）加程序合成的音效' : '程序合成的配乐和音效') + (voices.some(Boolean) ? `，加 ${voices.filter(Boolean).length} 段人声` : '，没有人声') : '无'}`,
   '', '时间线：', ...TL.scenes.map(S => `  ${pad2(S.i + 1)} ${S.layout.padEnd(10)} ${S.t0.toFixed(2)}s 起，${S.dur.toFixed(2)}s`),
   '', '自检：', ...checks.map(c => '  ' + c),
   ...(notes.length ? ['', '注意：', ...notes.map(n => '  · ' + n)] : []),

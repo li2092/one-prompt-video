@@ -2,7 +2,8 @@
   "title": "one-prompt-video 是什么",
   "theme": "keynote",
   "aspect": "16:9",
-  "seconds": 34,
+  "music": "music.wav",
+  "tts": {"command": ["python3", "SKILL/assets/external/voice/doubao_tts.py", "--text", "{text}", "--out", "{out}", "--voice", "zh_male_dayi_uranus_bigtts", "--tone", "从容、温和，娓娓道来", "--rate", "-8"], "ext": "mp3"},
   "scenes": [
     {"layout": "title", "kicker": "Agent Skill", "title": "one-prompt-video", "subtitle": "一句话，出一支片", "say": "说一句话，拿到一支短视频。"},
     {"layout": "custom", "module": "../scenes/prompt.mjs", "seconds": 7, "cues": 3, "say": "你说一句话，模型填一张表，脚本把它变成片子。", "data": {"who": "你：", "prompt": "做一个 30 秒的视频，介绍 one-prompt-video", "file": "video.json", "out": "one-prompt-video.mp4", "specs": "1080p · 配乐 · 字幕", "lines": ["{ \"title\": \"一句话，出一支片\",", "  \"scenes\": [", "    { \"layout\": \"title\", \"title\": \"一句话，出一支片\" },", "    { \"layout\": \"steps\", \"items\": [ … ] },", "    { \"layout\": \"number\", \"value\": \"13\" },", "    { \"layout\": \"end\", \"title\": \"装上试试\" }", "  ] }"]}},
@@ -10,6 +11,6 @@
     {"layout": "bullets", "title": "剩下的事脚本做", "items": ["排时间线，切点落在拍子上", "逐帧画画面", "合成配乐和音效", "出片后自检"], "say": "排时间、画画面、配乐、自检，都由脚本完成。"},
     {"layout": "compare", "title": "和视频生成模型比", "left": {"title": "视频生成模型", "items": ["字可能出错", "改一处要重新生成", "要显卡或云服务"]}, "right": {"title": "one-prompt-video", "items": ["字和数字准确", "改一个词重出", "普通电脑就行"]}, "say": "每一帧都是代码画的，字不会错，改一个词就能重出。"},
     {"layout": "statement", "text": "你正在看的这支片子，也是它做的", "highlight": "也是它做的", "say": "你正在看的这支片子，也是它做的。"},
-    {"layout": "end", "title": "一句话，出一支片", "subtitle": "github.com/li2092/one-prompt-video", "cta": "装上试试", "say": "装上试试。"}
+    {"layout": "end", "title": "一句话，出一支片", "subtitle": "github.com/li2092/one-prompt-video", "cta": "装上试试", "say": "现在就装上试试吧。"}
   ]
 }
