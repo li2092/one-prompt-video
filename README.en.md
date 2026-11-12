@@ -13,22 +13,23 @@ Say one sentence → the LLM fills in a form → one command renders an MP4 with
 ![agent skills](https://img.shields.io/badge/Agent%20Skills-SKILL.md-8a5cf6)
 ![no GPU](https://img.shields.io/badge/GPU-not%20needed-lightgrey)
 
-<img src="{{hero-en}}" width="760" alt="A clip from the one-prompt-video trailer">
+<img src="https://github.com/user-attachments/assets/aa4fee16-3d77-4bf4-a7b6-e1cefc0bdfab" width="760" alt="A clip from the one-prompt-video trailer">
 
 </div>
 
 Full version with sound, 43 seconds:
 
-{{trailer-en}}
+https://github.com/user-attachments/assets/56bd83db-cc7f-410d-b8aa-52ab861dd864
 
-<sub>Every frame is rendered by this skill's engine: three hand-written scenes plus built-in layouts, with sources in <a href="docs/demos/trailer-en">docs/demos/trailer-en</a>. The score was made separately with GarageBand instrument samples. The skill's own music is synthesized by code; the videos below use it.</sub>
+<sub>Every frame is rendered by this skill's engine: three hand-written scenes plus built-in layouts, with sources in <a href="docs/demos/trailer-en">docs/demos/trailer-en</a>. The score uses GarageBand instrument samples and the narration is an AI voice from Doubao TTS; both methods are described in the skill's <a href="one-prompt-video/references/external-tools.md">external-tools.md</a>. The videos below use the skill's own music, which is synthesized by code.</sub>
 
 ## What it is
 
 An [Agent Skill](https://agentskills.io). Install it into Claude Code, Codex, or any agent that supports skills, say one sentence, and get back a 20 to 90 second video: explainers, product intros, data stories, knowledge cards, in landscape or portrait.
 
 - **No video generation model.** Every frame is drawn by code. Text is never garbled, numbers are exact, the same input always gives the same video, and a fix is a one-word edit followed by a re-render.
-- **The model only fills in a form.** Nine layouts and six built-in themes to pick from. Timing, drawing, music, encoding and self-checks are done by scripts.
+- **The model only fills in a form.** It picks from nine layouts and fills in text and numbers. Timing, drawing, music, encoding and self-checks are done by scripts.
+- **No ceiling on style.** The built-in themes are a starting point: swap colors and fonts, or write the drawing code for any scene. Stronger models can also bring in Blender, real-instrument scores and AI narration.
 - **Small models can run it.** When the form is wrong, the script says which scene, which field, and what the correct form looks like.
 - **Lightweight.** Node.js and ffmpeg. No GPU, no browser. A 30-second 1080p video renders in about 13 seconds on an Apple Silicon laptop.
 
@@ -40,31 +41,35 @@ The videos below have sound. Music and sound effects are synthesized by the skil
 
 "What is one-prompt-video": one of the seven scenes is custom drawing code (the one where a sentence becomes `video.json` and then an MP4). The rest are built-in layouts.
 
-{{intro-en}}
+https://github.com/user-attachments/assets/7854e420-31a5-4e4f-8a39-ec7ead67464f
 
 ### Form only
 
-"From one sentence to MP4" (in Chinese): eight scenes, all built-in layouts, blueprint theme.
+"One prompt in, one video out": seven scenes, all built-in layouts, grid theme. The theme preview and the contact sheet further down come from it.
 
-{{how-it-works}}
+https://github.com/user-attachments/assets/0ddcdd04-0003-4e9c-867f-f9b516a330bb
 
-"Small models can make videos too" (in Chinese): portrait, pop theme, using this repository's own test numbers.
+"From one sentence to MP4": eight scenes, all built-in layouts, blueprint theme.
 
-{{small-model}}
+https://github.com/user-attachments/assets/7fb1c289-26fc-44da-b194-833d110d2775
 
-Made by Claude Haiku, a small model that read only the skill instructions, from one Chinese sentence asking for a portrait video about noise-cancelling headphones with a 40-hour battery, transparency mode and a price of 199 yuan.
+"Small models can make videos too": portrait, pop theme, using this repository's own test numbers.
 
-{{haiku-earbuds}}
+https://github.com/user-attachments/assets/2bc2475a-660c-4460-a138-6f62c07aafce
 
-### Themes
+### No ceiling on style
 
-Six built-in themes. Switching is a one-word change.
+One scene, twelve looks. The first six are the built-in themes, a one-word change. The other six are built-in themes with a few colors replaced through `colors`; you can make as many as you like.
 
-<img src="{{themes-gif}}" width="640" alt="The same scene in six themes">
+<img src="docs/styles.gif" width="640" alt="The same scene in twelve looks">
+
+<img src="docs/styles.jpg" width="100%" alt="Preview of twelve looks">
+
+When that is not enough, write the drawing code for a scene, use one of the three reference pipelines, or bring in external tools. See "Going further" below.
+
+The six built-in themes, four scenes each (in Chinese):
 
 <img src="docs/themes.jpg" width="100%" alt="Preview of the six built-in themes">
-
-If the built-in ones are not enough, override any color with `colors` or the typeface with `font` in `video.json`. Beyond that, write the drawing code for a scene yourself, or use one of the three reference pipelines below. There is no fixed number of themes.
 
 ## How it works
 
@@ -83,15 +88,15 @@ This file is all the model writes:
 
 ```json
 {
-  "title": "Compound interest",
+  "title": "One prompt in, one video out",
   "theme": "grid",
   "aspect": "16:9",
   "seconds": 32,
   "scenes": [
-    { "layout": "title", "title": "Compound interest", "subtitle": "Returns that earn returns", "say": "Compound interest means your returns earn returns too." },
-    { "layout": "bars", "title": "$10,000 at 7% a year ($ thousand)", "items": [{ "label": "10 years", "value": 20 }, { "label": "20 years", "value": 39 }, { "label": "30 years", "value": 76 }] },
-    { "layout": "number", "value": "7.6", "unit": "x", "label": "Growth at 7% a year over 30 years" },
-    { "layout": "end", "title": "Returns that earn returns", "cta": "Do the math" }
+    { "layout": "title", "title": "One prompt in, one video out", "subtitle": "The model fills in a form. Scripts render it.", "say": "Say one sentence. Get a finished video." },
+    { "layout": "steps", "title": "How it works", "items": ["Say one sentence", "The model fills in a form", "Scripts render it", "You get an MP4"] },
+    { "layout": "number", "value": "13", "unit": "s", "label": "to render a 35-second 1080p video", "note": "Measured on an Apple Silicon laptop" },
+    { "layout": "end", "title": "One prompt in, one video out", "cta": "Try it" }
   ]
 }
 ```
@@ -136,9 +141,9 @@ For other agents, put the folder wherever that agent loads skills from. For a mo
 ### 2. Say one sentence
 
 ```text
-Make a 30-second video that explains compound interest
-Turn this into a short video: customer satisfaction over four quarters was 72, 78, 85, 91. Highlight the 19-point rise.
-Make a portrait video for our new noise-cancelling headphones: 40-hour battery, priced at $29
+Make a 30-second video that introduces the one-prompt-video skill
+Turn this into a short video: six small-model test runs took 68, 78, 61, 51, 57 and 65 seconds, and all of them passed on the first try
+Make a portrait video: one sentence in, one video out, no GPU, no video generation model
 ```
 
 On first use the agent runs an environment check. If the drawing library or ffmpeg is missing, it installs them or tells you how.
@@ -166,7 +171,7 @@ Any scene can carry a `say` line, shown as a caption. All fields are documented 
 
 ## Built for small models
 
-Tested with Claude Haiku, a small model, on three prompts (compound interest, a portrait product video, a satisfaction data story), two rounds each. The model read only `SKILL.md`. All six runs succeeded on the first attempt with no failed command, at about one minute per run. The prompts and the grading script are in [`evals/`](evals).
+Tested with Claude Haiku, a small model, on three prompts (explaining a concept, a portrait product video, a data story), two rounds each. The model read only `SKILL.md`. All six runs succeeded on the first attempt with no failed command, at about one minute per run. The prompts and the grading script are in [`evals/`](evals).
 
 Design choices that make this work:
 
@@ -179,16 +184,31 @@ Design choices that make this work:
 
 ## Going further
 
+From the nearest step to the furthest:
+
 | You want | How |
 |---|---|
 | Custom colors, fonts, or a fixed length for one scene | [`references/video-json.md`](one-prompt-video/references/video-json.md) |
 | Voice-over | Drop in your own recordings, or plug in your own TTS command: [`references/voice.md`](one-prompt-video/references/voice.md) |
-| Something the layouts cannot do | Write the drawing code for that scene: [`references/custom-scenes.md`](one-prompt-video/references/custom-scenes.md) |
-| Videos beyond layout-based explainers | Three reference pipelines: [`references/pipelines.md`](one-prompt-video/references/pipelines.md) |
+| One scene with special visuals | Write the drawing code for that scene; the rest stay as layouts: [`references/custom-scenes.md`](one-prompt-video/references/custom-scenes.md) |
+| Cartoon shorts, 3D scenes, landscapes | Three reference pipelines: [`references/pipelines.md`](one-prompt-video/references/pipelines.md) |
+| Photoreal rendering, real instruments, AI narration | External tools: [`references/external-tools.md`](one-prompt-video/references/external-tools.md) |
 
 Each reference pipeline ships with a minimal runnable project, intended for stronger models:
 
 <img src="docs/pipelines.jpg" width="100%" alt="Three reference pipelines: Canvas 2D, three.js, full-screen shader">
+
+### With external tools
+
+When the user's machine has the software or the account, a stronger model can use these three methods. Instructions and minimal projects are in [`references/external-tools.md`](one-prompt-video/references/external-tools.md) (Chinese):
+
+- Blender rendering: global illumination, real materials, reflections, depth of field. Needs an installed Blender.
+- Instrument-sample scores: real brass, choir, harp and timpani. Needs GarageBand or Logic on macOS.
+- Doubao TTS narration: natural Chinese speech, plus English and Japanese. Needs your own Volcano Engine API key.
+
+The trailer at the top of this page uses the last two. The 8-second clip below was made by the author with the Blender route. Its project is far more elaborate than the minimal one shipped with the skill (hand-built architecture and terrain plus CC0 trees and rocks), and it took 5 hours 37 minutes to render at 1080p. It is here to show the ceiling of that route. Installing the skill does not mean one sentence will produce a clip like this.
+
+https://github.com/user-attachments/assets/225be1e4-821d-4b5b-9432-e9ffde8ccc12
 
 The sources of the demo videos on this page are in [`docs/demos/`](docs/demos), so they can be re-rendered.
 
@@ -204,13 +224,12 @@ The sources of the demo videos on this page are in [`docs/demos/`](docs/demos), 
 
 It makes layout-based videos that explain one thing clearly. Live-action footage, real people on camera and character-driven stories are out of scope, and so is editing existing footage.
 
-{{tiangong-section}}
-
 ## Status
 
-- Version 0.1.0. Tested on macOS (Apple Silicon) only. The Windows and Linux code paths are written but have not been run yet; reports are welcome.
-- Music and sound effects are synthesized by code. Loudness and peaks are measured; whether it sounds good is for you to judge.
+- Version 0.2.0. Tested on macOS (Apple Silicon) only. The Windows and Linux code paths are written but have not been run yet; reports are welcome.
+- The built-in music and sound effects are synthesized by code. Loudness and peaks are measured; whether it sounds good is for you to judge.
 - No voice-over by default.
+- Overriding the background color through `colors` has no effect on the `blueprint` theme, and on `pop` it changes only one of the four alternating backgrounds.
 - The skill instructions (`SKILL.md`, `references/`) and the script messages are in Chinese for now. Video content can be in any language, and English typesetting is supported.
 
 ## Repository layout

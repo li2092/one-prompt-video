@@ -5,9 +5,9 @@
   "seconds": 28,
   "scenes": [
     { "layout": "title", "kicker": "one-prompt-video 实测", "title": "小模型也能出片", "subtitle": "用 Claude Haiku 测了六次", "say": "小模型能不能一句话出片？测了六次。" },
-    { "layout": "bullets", "title": "三道题，各跑两轮", "items": ["讲清楚什么是复利", "给降噪耳机做竖屏短视频", "把四个季度的满意度做成片"], "say": "三道题，每道跑两轮。" },
+    { "layout": "bullets", "title": "三道题，各跑两轮", "items": ["讲清楚一个概念", "给新品做竖屏短视频", "把一组数据做成片"], "say": "三道题，每道跑两轮。" },
     { "layout": "number", "value": "6", "unit": "次", "label": "全部一次跑通", "note": "没有一条命令报错", "say": "六次全部一次跑通。" },
-    { "layout": "bars", "title": "每次用时（秒）", "unit": "秒", "items": [{ "label": "复利 1", "value": 68 }, { "label": "耳机 1", "value": 78 }, { "label": "满意度 1", "value": 61 }, { "label": "复利 2", "value": 51 }, { "label": "耳机 2", "value": 57 }, { "label": "满意度 2", "value": 65 }], "say": "从读说明到出片，每次一分钟左右。" },
+    { "layout": "bars", "title": "每次用时", "unit": "秒", "items": [{ "label": "概念 1", "value": 68 }, { "label": "带货 1", "value": 78 }, { "label": "数据 1", "value": 61 }, { "label": "概念 2", "value": 51 }, { "label": "带货 2", "value": 57 }, { "label": "数据 2", "value": 65 }], "say": "从读说明到出片，每次一分钟左右。" },
     { "layout": "bullets", "title": "为什么跑得通", "items": ["模型不写画图代码", "不用算时间", "填错了逐条告诉它怎么改"], "say": "模型只填表，填错了有逐条提示。" },
     { "layout": "end", "title": "小模型，也能一句话出片", "subtitle": "测试题在 evals 目录", "cta": "看测试题", "say": "测试题和打分脚本都在仓库里。" }
   ]

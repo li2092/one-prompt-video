@@ -4,7 +4,7 @@ description: 把一句话需求做成带配乐和字幕的 MP4 短视频：讲�
 license: MIT
 metadata:
   author: JiMiL, vivhuang
-  version: "0.1.0"
+  version: "0.2.0"
 compatibility: Requires Node.js 18+ and ffmpeg (scripts/setup.mjs checks and helps install). No GPU, no browser.
 ---
 
@@ -119,5 +119,6 @@ node "SKILL/scripts/make.mjs" 片名/video.json            # 出片
 | 现成版式不够，想自己写某一场的画面代码 | `references/custom-scenes.md` |
 | 安装失败、字体方框、ffmpeg 报错 | `references/troubleshooting.md` |
 | 用户明确要叙事短片、3D 写实场景、自然风景这类这条生产线做不了的片子 | `references/pipelines.md`（三条参考生产线，要自己写代码，先确认自己做得了） |
+| 用户机器上有 Blender、库乐队，或有豆包语音的密钥，想要写实渲染、真实乐器的配乐、自然的人声 | `references/external-tools.md`（借助外部工具，给能力强的模型，先确认自己做得了） |
 
 这条生产线做不了的：剪辑已有的视频、真人或实拍画面、角色表演的故事片。遇到这类需求如实告诉用户。

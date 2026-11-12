@@ -1,6 +1,6 @@
-// 九种版式的缩略图一张张落成一面墙，再按拍子换六种内置主题，最后换成一套自己配的颜色。
+// 九种版式的缩略图一张张落成一面墙，再每半拍换一套风格（六种内置主题加六套自己配色的），最后九张牌各用一套。
 // 缩略图是真的出片结果，先跑 trailer/make-stills.mjs 生成。
-// data: { layoutsLabel, themesLabel, customLabel, customChip, beat, flipAt, stills }
+// data: { layoutsLabel, themesLabel, beat, flipAt, stills }
 import path from 'node:path'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
@@ -8,9 +8,13 @@ import { clamp, lerp, outCubic, outBack, hash, rgba, glow } from './fx.mjs'
 
 const { loadImage } = createRequire(path.join(process.cwd(), 'x.js'))('@napi-rs/canvas')
 const root = fileURLToPath(new URL('../', import.meta.url))
-const THEMES = ['keynote', 'grid', 'minimal', 'pop', 'blueprint', 'whiteboard', 'custom']
-// 换主题的顺序：先是开场用的 keynote，然后每拍换一个，最后一个是自己配色的
-const ORDER = ['keynote', 'grid', 'minimal', 'pop', 'blueprint', 'whiteboard', 'keynote', 'custom']
+const THEMES = ['keynote', 'grid', 'minimal', 'pop', 'blueprint', 'whiteboard', 'c1', 'c2', 'c3', 'c4', 'c5', 'c6']
+// 换风格的顺序：开场是 keynote，然后每半拍换一套
+const ORDER = ['keynote', 'grid', 'c2', 'pop', 'c1', 'minimal', 'blueprint', 'c4', 'c3', 'whiteboard', 'c5', 'c6', 'keynote']
+// 最后九张牌各用一套
+const MOSAIC = ['grid', 'c2', 'pop', 'c1', 'keynote', 'c4', 'blueprint', 'c3', 'c6']
+// 自己配色的那几套是在哪个内置主题上改的
+const BASE = { c1: 'grid', c2: 'keynote', c3: 'pop', c4: 'minimal', c5: 'blueprint', c6: 'whiteboard' }
 const NAMES = ['title', 'statement', 'bullets', 'number', 'bars', 'steps', 'compare', 'quote', 'end']
 // 缩略图按目录缓存：data.stills 是相对 docs/demos 的目录，默认 trailer/stills
 const CACHE = {}
@@ -31,7 +35,8 @@ export default function (ctx, s, E) {
   const gx = W - 120 * u - gw, gy = (H - gh) / 2
   const landAt = i => 0.3 + i * beat / 2
   // 现在是第几个主题
-  const step = clamp(Math.floor((t - flipAt) / beat), 0, 6), cur = t < flipAt ? 0 : step + 1
+  const half = beat / 2, last = ORDER.length - 2, mosaicAt = flipAt + (last + 1) * half
+  const step = clamp(Math.floor((t - flipAt) / half), 0, last), cur = t < flipAt ? 0 : step + 1, mosaic = t >= mosaicAt
 
   const zoom = 1 + 0.05 * t / s.dur
   ctx.save(); ctx.translate(gx + gw / 2, H / 2); ctx.scale(zoom, zoom); ctx.transform(1, -0.03, 0, 1, 0, 0); ctx.translate(-(gx + gw / 2), -H / 2)
@@ -43,8 +48,12 @@ export default function (ctx, s, E) {
     const ox = lerp((hash(i, 21) - 0.5) * 900 * u, 0, outCubic(p)), oy = lerp((hash(i, 22) - 0.5) * 700 * u, 0, outCubic(p)), rot = lerp((hash(i, 23) - 0.5) * 0.5, 0, outCubic(p))
     // 换主题：整张牌翻过去
     let img = IMG[ORDER[cur]][i], sx = 1
-    if (t >= flipAt) {
-      const q = (t - flipAt - step * beat - col * 0.045 - row * 0.02) / 0.3
+    if (mosaic) {
+      const q = (t - mosaicAt - (col + row) * 0.05) / 0.3
+      img = IMG[q < 0.5 ? ORDER[cur] : MOSAIC[i]][i]
+      if (q > 0 && q < 1) sx = Math.max(0.02, Math.abs(Math.cos(q * Math.PI)))
+    } else if (t >= flipAt) {
+      const q = (t - flipAt - step * half - col * 0.02 - row * 0.01) / 0.18
       if (q < 0.5) img = IMG[ORDER[step]][i]
       if (q > 0 && q < 1) sx = Math.max(0.02, Math.abs(Math.cos(q * Math.PI)))
     }
@@ -62,10 +71,10 @@ export default function (ctx, s, E) {
   const lx = 130 * u, my = H / 2
   const landed = Math.min(9, Math.max(0, Math.floor((t - 0.3 - 0.2) / (beat / 2)) + 1)), phase2 = t >= flipAt
   const fadeOut = phase2 ? 0 : 1 - clamp((t - (flipAt - 0.25)) / 0.25)
-  const own = cur === 7
-  const num = own ? '6+' : phase2 ? 6 : landed, label = own ? d.customLabel : phase2 ? d.themesLabel : d.layoutsLabel
-  const chip = own ? d.customChip : phase2 ? `"theme": "${ORDER[cur]}"` : landed > 0 ? `"layout": "${NAMES[landed - 1]}"` : ''
-  const since = own ? t - flipAt - 6 * beat : phase2 ? t - flipAt : t - landAt(Math.max(0, landed - 1)), pop = 1 + 0.16 * Math.exp(-Math.max(0, since) * 7)
+  const look = ORDER[cur]
+  const num = phase2 ? '∞' : landed, label = phase2 ? d.themesLabel : d.layoutsLabel
+  const chip = mosaic ? '"theme" + "colors"' : phase2 ? (BASE[look] ? `"${BASE[look]}" + "colors"` : `"theme": "${look}"`) : landed > 0 ? `"layout": "${NAMES[landed - 1]}"` : ''
+  const since = mosaic ? t - mosaicAt : phase2 ? t - flipAt - step * half : t - landAt(Math.max(0, landed - 1)), pop = 1 + (phase2 && !mosaic ? 0.06 : 0.16) * Math.exp(-Math.max(0, since) * 7)
   if (num) {
     ctx.save(); ctx.globalAlpha = phase2 ? clamp((t - flipAt) / 0.15) : fadeOut
     glow(ctx, lx + 150 * u, my - 110 * u, 420 * u, c.accent, 0.22)

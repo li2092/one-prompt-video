@@ -1,0 +1,16 @@
+{
+  "title": "From one sentence to MP4",
+  "theme": "blueprint",
+  "aspect": "16:9",
+  "seconds": 32,
+  "scenes": [
+    { "layout": "title", "kicker": "Inside one-prompt-video", "title": "From one sentence to MP4", "subtitle": "What the scripts do behind the scenes", "say": "How does a form turn into a video?" },
+    { "layout": "steps", "title": "Five stages", "items": ["Validate", "Build the timeline", "Draw frames", "Synthesize music", "Encode and check"], "say": "Validate, build the timeline, draw, add music, then encode and check." },
+    { "layout": "statement", "text": "A wrong form gets a precise answer: which scene, which field, how to fix", "highlight": "how to fix", "say": "If the form is wrong, the script says exactly how to fix it." },
+    { "layout": "bullets", "title": "The timeline follows the beat", "items": ["Every scene lasts a whole number of beats", "Cuts land on the beat", "Each element enters with a sound"], "say": "Scenes last whole beats. Cuts and sounds land on the beat." },
+    { "layout": "number", "value": "13", "unit": "s", "label": "to render a 35-second 1080p video", "note": "Measured on an Apple Silicon laptop", "say": "A 35-second video renders in 13 seconds." },
+    { "layout": "bullets", "title": "It checks its own output", "items": ["Resolution and duration", "Loudness and true peak", "Text that does not fit"], "say": "After rendering, the script checks its own output." },
+    { "layout": "statement", "text": "Same input, same video, every time", "highlight": "every time", "say": "Same input, same video, every time." },
+    { "layout": "end", "title": "No GPU, no browser", "subtitle": "Just Node.js and ffmpeg", "say": "No GPU. No browser." }
+  ]
+}

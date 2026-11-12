@@ -13,22 +13,23 @@
 ![agent skills](https://img.shields.io/badge/Agent%20Skills-SKILL.md-8a5cf6)
 ![no GPU](https://img.shields.io/badge/GPU-not%20needed-lightgrey)
 
-<img src="{{hero-zh}}" width="760" alt="one-prompt-video 宣传片的片段">
+<img src="https://github.com/user-attachments/assets/785b180e-654e-47c9-8f4d-2f6f957f4799" width="760" alt="one-prompt-video 宣传片的片段">
 
 </div>
 
 带声音的完整版，43 秒，点开播放：
 
-{{trailer-zh}}
+https://github.com/user-attachments/assets/060c046b-e0f1-4596-abe5-ac39dde2c76c
 
-<sub>画面由本技能的引擎逐帧渲染：自己写的三场画面加现成版式，源文件在 <a href="docs/demos/trailer">docs/demos/trailer</a>。配乐另用库乐队（GarageBand）的乐器采样制作，旁白是豆包语音合成的 AI 配音。技能自带的配乐是程序合成的，下面几支片子用的就是它。</sub>
+<sub>画面由本技能的引擎逐帧渲染：自己写的三场画面加现成版式，源文件在 <a href="docs/demos/trailer">docs/demos/trailer</a>。配乐用库乐队（GarageBand）的乐器采样制作，旁白是豆包语音合成的 AI 配音，做法在技能的 <a href="one-prompt-video/references/external-tools.md">external-tools.md</a> 里。下面几支片子用的是技能自带的、程序合成的配乐。</sub>
 
 ## 这是什么
 
 一个 [Agent Skill](https://agentskills.io)。装进 Claude Code、Codex 或任何支持技能的 agent 以后，你说一句话，它就交给你一支 20 到 90 秒的短视频：讲解、科普、产品介绍、数据播报、知识卡片，横屏竖屏都行。
 
 - **不用视频生成模型。** 每一帧都是代码画出来的：字不会错，数字不会变形，同一份输入永远出同一支片，哪里不满意改一个词重出。
-- **模型只填一张表。** 九种版式、六种内置主题，选一选、填一填。排时间、画画面、配乐、编码、自检都由脚本做。
+- **模型只填一张表。** 九种版式选一选、填一填，排时间、画画面、配乐、编码、自检都由脚本做。
+- **风格不设上限。** 内置主题只是起点：颜色、字体随你换，每一场的画面可以自己写；能力强的模型还能接 Blender、真实乐器的配乐和 AI 旁白。
 - **小模型也能跑。** 表填错了，脚本逐条说明错在第几场、哪个字段、正确的写法是什么。
 - **很轻。** 只要 Node.js 和 ffmpeg，不要显卡，不要浏览器。实测一支 30 多秒的 1080p 片子十几秒出完（Apple Silicon 笔记本）。
 
@@ -38,33 +39,37 @@
 
 ### 只填表出的片
 
+「一句话，出一支片」：七场全是现成版式，grid 主题。本页后面的示例 `video.json`、主题预览和总览图用的都是它。
+
+https://github.com/user-attachments/assets/0d4edfbe-d055-461e-a002-a9f1d7764109
+
 「从一句话到 MP4」：八场全是现成版式，blueprint 主题。
 
-{{how-it-works}}
+https://github.com/user-attachments/assets/719468d2-724e-4e50-8aae-8173fbd4984f
 
 「小模型也能出片」：竖屏，pop 主题，内容是本仓库的实测数据。
 
-{{small-model}}
-
-小模型 Claude Haiku 只读了技能说明，照这句话做出来的：「帮我给新品做个竖屏短视频发抖音：一款降噪耳机，卖点是续航 40 小时、通透模式、售价 199 元」。
-
-{{haiku-earbuds}}
+https://github.com/user-attachments/assets/efa0b62b-1af7-46d3-a628-f0b9c1c17cfe
 
 ### 加一场自己写的画面
 
 「one-prompt-video 是什么」：七场里有一场是自己写的画面代码（一句话变成 `video.json` 再变成 MP4 的那一场），其余是现成版式。
 
-{{intro-zh}}
+https://github.com/user-attachments/assets/606b438c-bbeb-47c3-80a2-c8c6352725d7
 
-### 主题
+### 风格不设上限
 
-六种内置主题，换主题只改一个词。
+同一场内容，十二套风格。前六套是内置主题，换一个词就行；后六套是在内置主题上用 `colors` 换了几个颜色配出来的，想配多少套都可以。
 
-<img src="{{themes-gif}}" width="640" alt="同一场内容换六种主题">
+<img src="docs/styles.gif" width="640" alt="同一场内容换十二套风格">
+
+<img src="docs/styles.jpg" width="100%" alt="十二套风格的预览">
+
+还不够的话，可以自己写某一场的画面，走三条参考生产线，或者借助外部工具，见后面的「进阶」。
+
+六种内置主题各取四场：
 
 <img src="docs/themes.jpg" width="100%" alt="六种内置主题的预览">
-
-内置的不够用，可以在 `video.json` 里用 `colors` 换掉任意一种颜色、用 `font` 换字体；还不够，某一场可以自己写画面代码，或者走后面的三条参考生产线。主题没有数量上限。
 
 ## 它怎么做到的
 
@@ -83,15 +88,15 @@ flowchart LR
 
 ```json
 {
-  "title": "什么是复利",
+  "title": "一句话，出一支片",
   "theme": "grid",
   "aspect": "16:9",
   "seconds": 32,
   "scenes": [
-    { "layout": "title", "title": "什么是复利", "subtitle": "收益也会产生收益", "say": "复利，就是让收益也去产生收益。" },
-    { "layout": "bars", "title": "1 万元按年化 7% 计算（万元）", "items": [{ "label": "10 年后", "value": 2.0 }, { "label": "20 年后", "value": 3.9 }, { "label": "30 年后", "value": 7.6 }] },
-    { "layout": "number", "value": "7.6", "unit": "倍", "label": "年化 7%，三十年后的本金倍数" },
-    { "layout": "end", "title": "复利，就是收益也生收益", "cta": "算一算" }
+    { "layout": "title", "title": "一句话，出一支片", "subtitle": "模型填一张表，脚本出片", "say": "说一句话，就能拿到一支短视频。" },
+    { "layout": "steps", "title": "怎么用", "items": ["说一句话", "模型填一张表", "脚本出片", "拿到 MP4"] },
+    { "layout": "number", "value": "13", "unit": "秒", "label": "出一支 35 秒的 1080p 片子", "note": "Apple Silicon 笔记本实测" },
+    { "layout": "end", "title": "一句话，出一支片", "cta": "装上试试" }
   ]
 }
 ```
@@ -136,9 +141,9 @@ Copy-Item -Recurse one-prompt-video\one-prompt-video "$HOME\.claude\skills\one-p
 ### 2. 说一句话
 
 ```text
-做一个 30 秒的视频，讲清楚什么是复利
-把这组数据做成短视频：四个季度的客户满意度是 72、78、85、91 分，突出一年涨了 19 分
-帮我给新品做个竖屏短视频：一款降噪耳机，续航 40 小时，售价 199 元
+做一个 30 秒的视频，介绍 one-prompt-video 这个技能
+把这组数据做成短视频：小模型六次测试的用时是 68、78、61、51、57、65 秒，突出全部一次跑通
+帮我做个竖屏短视频：一句话就能出片，不用显卡，不用视频生成模型
 ```
 
 第一次用时，agent 会跑一遍环境检查，缺画图库或 ffmpeg 会自动装或告诉你怎么装。
@@ -166,7 +171,7 @@ node /path/to/one-prompt-video/scripts/make.mjs demo/video.json     # 成片在 
 
 ## 为小模型设计
 
-用 Claude 的小模型 Haiku 测了三道题（讲复利、耳机竖屏带货、满意度数据），每道两轮。模型只读 `SKILL.md`，六次都一次跑通，没有一条命令报错，每次约一分钟。测试题和打分脚本在 [`evals/`](evals)。
+用 Claude 的小模型 Haiku 测了三道题（讲清一个概念、竖屏带货、把一组数据做成片），每道两轮。模型只读 `SKILL.md`，六次都一次跑通，没有一条命令报错，每次约一分钟。测试题和打分脚本在 [`evals/`](evals)。
 
 让小模型跑得通的几个设计：
 
@@ -179,16 +184,31 @@ node /path/to/one-prompt-video/scripts/make.mjs demo/video.json     # 成片在 
 
 ## 进阶
 
+从近到远，一层层往外走：
+
 | 想要 | 怎么做 |
 |---|---|
 | 换颜色、换字体、固定某一场的秒数 | [`references/video-json.md`](one-prompt-video/references/video-json.md) |
 | 加人声 | 放自己的录音，或配一条自己的配音命令：[`references/voice.md`](one-prompt-video/references/voice.md) |
-| 现成版式不够 | 某一场换成自己写的画面代码：[`references/custom-scenes.md`](one-prompt-video/references/custom-scenes.md) |
-| 做版式片以外的片子 | 三条参考生产线：[`references/pipelines.md`](one-prompt-video/references/pipelines.md) |
+| 某一场要特别的画面 | 这一场自己写画面代码，其余照常用版式：[`references/custom-scenes.md`](one-prompt-video/references/custom-scenes.md) |
+| 卡通短片、3D 场景、自然风景 | 三条参考生产线：[`references/pipelines.md`](one-prompt-video/references/pipelines.md) |
+| 写实渲染、真实乐器的配乐、AI 旁白 | 借助外部工具：[`references/external-tools.md`](one-prompt-video/references/external-tools.md) |
 
 三条参考生产线各带一个能跑的最小工程，给能力强的模型用：
 
 <img src="docs/pipelines.jpg" width="100%" alt="三条参考生产线：Canvas 2D、three.js、全屏着色器">
+
+### 借助外部工具
+
+用户的机器上有相应的软件或账号时，能力强的模型可以用这三种做法，说明和最小工程在 [`references/external-tools.md`](one-prompt-video/references/external-tools.md)：
+
+- Blender 渲染：全局光照、真实材质、反射、景深。要装好的 Blender。
+- 乐器采样配乐：铜管、合唱、竖琴、定音鼓的真实音色。要 macOS 上的库乐队或 Logic。
+- 豆包语音旁白：自然的中文人声，也能念英文、日文。要自己的火山引擎密钥。
+
+本页顶上的宣传片用了后两种。下面这支 8 秒的小样是作者用 Blender 这条路线做的。它的工程比技能里带的最小工程复杂得多（自己建的建筑和山体，加 CC0 的树和岩石素材），1080p 渲了 5 小时 37 分，放在这里是为了说明这条路线的画面上限，装上技能不等于一句话就能出这样的片子。
+
+https://github.com/user-attachments/assets/225be1e4-821d-4b5b-9432-e9ffde8ccc12
 
 本页演示片的源文件在 [`docs/demos/`](docs/demos)，可以照着重出。
 
@@ -204,13 +224,12 @@ node /path/to/one-prompt-video/scripts/make.mjs demo/video.json     # 成片在 
 
 它做的是讲清楚一件事的版式短片。实拍画面、真人出镜、角色表演的故事片不在范围内；剪辑已有的视频也不在范围内。
 
-{{tiangong-section}}
-
 ## 现状
 
-- 版本 0.1.0。只在 macOS（Apple Silicon）上实测过；Windows 和 Linux 的代码路径按文档写了，还没有实测，欢迎反馈。
-- 配乐和音效是程序合成的，只量过响度和峰值，好不好听要你自己听。
+- 版本 0.2.0。只在 macOS（Apple Silicon）上实测过；Windows 和 Linux 的代码路径按文档写了，还没有实测，欢迎反馈。
+- 自带的配乐和音效是程序合成的，只量过响度和峰值，好不好听要你自己听。
 - 默认没有人声。
+- 用 `colors` 换背景色对 `blueprint` 主题不起作用，`pop` 主题的背景是四种颜色轮换，只有第一种跟着换。
 - 技能的说明文件和脚本的提示信息目前是中文；片子的内容可以是任何语言，英文排版已支持。
 
 ## 目录
