@@ -47,6 +47,7 @@ export default {
 
 - `s.scene`：这一场在 `video.json` 里的内容。九种版式各有哪些字段见 `video-json.md`。必填的字段一定有；选填的要判断有没有。
 - `s.t`、`s.dur`：这一场已经过了几秒、一共几秒。`s.index`、`s.count`：第几场、共几场。
+- `s.cue(i)`：第 i 个元素的入场时刻（这一场内的秒数）。`s.t - s.cue(i)` 就是它入场以后过了多久，落地后的抖动、数字滚动、延迟出现的装饰用它算。
 - `s.p(i)`：第 i 个元素的入场进度，0 到 1。脚本给每个元素排了一个入场时刻并配了音效，画面上的元素要按这个进度出现，声音和画面才对得上。各版式的元素个数和顺序：
 
 | 版式 | 元素依次是 |
@@ -67,7 +68,7 @@ export default {
 | `E.L.box` | 能放内容的区域 `{x, y, w, h}`，四周的边和字幕带已经让开。`content(E)` 返回同一个区域 |
 | `E.pick(横屏的值, 竖屏的值)` | 按画幅取值。竖屏要另外摆，不是把横屏缩小 |
 | `E.T` `E.total` `E.sceneIndex` `E.sceneCount` | 全片的时刻和总长，当前第几场 |
-| `E.fit(文字, { role, weight, size, maxW, maxLines, maxH })` | 排字：放不下就缩字号，再放不下会记进报告。返回 `{ lines, size, lineH, width }`，再用 `drawLines(ctx, f.lines, x, y, f.lineH, 对齐)` 画。画面上所有来自 `video.json` 的字都用它排 |
+| `E.fit(文字, { role, weight, size, maxW, maxLines, maxH })` | 排字：放不下就缩字号，再放不下会记进报告。返回 `{ lines, size, lineH, width }`，再用 `drawLines(ctx, f.lines, x, y, f.lineH, 对齐)` 画。画面上所有来自 `video.json` 的字都用它排。只是试排（比较几种字号、几种宽度）时加 `silent: true`，放不下也不记进报告 |
 | `E.font(role, 字重, 字号)` | 返回能放进 `ctx.font` 的字符串。`role` 是 `title`、`body`、`num`、`mono`。不要写死字体名：别的机器上没有那个字体 |
 | `E.fonts.sans` `.serif` `.hand` `.mono` | 各类字体的名字列表，要绕开 `role` 直接指定时用 |
 | `E.enter(ctx, p, cx, cy, fn)` | 按 `motion` 的入场方式画一个元素 |

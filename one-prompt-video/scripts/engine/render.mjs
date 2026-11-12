@@ -27,12 +27,14 @@ export function makeRenderer({ v, theme, TL, fonts, W, H, createCanvas, custom =
       once(name, make) { if (!store.has(name)) store.set(name, make()); return store.get(name) },
       font: (role, weight, size) => `${weight} ${size.toFixed(1)}px ${roleStack[role] || roleStack.body}`,
       fit(text, o) {
-        const key = [text, o.role, o.weight, o.size, o.maxW, o.maxLines, o.maxH, o.lineGap, o.oneLine].join('|')
+        const key = [text, o.role, o.weight, o.size, o.maxW, o.maxLines, o.maxH, o.lineGap, o.oneLine, o.quiet, o.silent].join('|')
         let f = fitCache.get(key)
         if (!f) {
           f = fitText(lctx, String(text), { font: sz => E.font(o.role, o.weight, sz), maxW: o.maxW, maxLines: o.maxLines, size: o.size, minSize: o.minSize, lineGap: o.lineGap, maxH: o.maxH, oneLine: o.oneLine })
           fitCache.set(key, f)
           const short = [...String(text)].slice(0, 14).join('') + ([...String(text)].length > 14 ? '…' : '')
+          // silent：只是试排一下，放不下也不记进报告
+          if (o.silent) return f
           if (f.overflow) warnings.add(`第 ${sceneIndex + 1} 场：「${short}」字太多，放不下，已被截在框外。把这段字缩短。`)
           else if (!o.quiet && f.size < o.size * 0.72) warnings.add(`第 ${sceneIndex + 1} 场：「${short}」字偏多，字号被缩到原来的 ${Math.round(f.size / o.size * 100)}%。缩短一些更好看。`)
         }
