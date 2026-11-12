@@ -2,14 +2,14 @@
   "title": "Nine layouts for the thumbnails",
   "theme": "keynote",
   "scenes": [
-    { "layout": "title", "kicker": "In 30 seconds", "title": "Compound interest", "subtitle": "Returns that earn returns" },
-    { "layout": "statement", "text": "Time is the variable that matters most", "highlight": "Time" },
-    { "layout": "bullets", "title": "Three ingredients", "items": ["Principal", "Rate of return", "Time"] },
-    { "layout": "number", "value": "7.6", "unit": "x", "label": "Growth at 7% a year over 30 years" },
-    { "layout": "bars", "title": "$10,000 at 7% a year ($ thousand)", "items": [{ "label": "10 years", "value": 20 }, { "label": "20 years", "value": 39 }, { "label": "30 years", "value": 76 }] },
-    { "layout": "steps", "title": "How to compute it", "items": ["Principal", "Times (1 + rate)", "Repeat every year", "Final value"] },
-    { "layout": "compare", "title": "Simple vs compound", "left": { "title": "Simple", "items": ["Only principal earns", "Same gain every year"] }, "right": { "title": "Compound", "items": ["Gains earn too", "More every year"] } },
-    { "layout": "quote", "text": "Returns that earn returns", "by": "What compound interest means" },
-    { "layout": "end", "title": "Compound interest: returns earn returns", "subtitle": "Try another rate yourself", "cta": "Do the math" }
+    { "layout": "title", "kicker": "one-prompt-video", "title": "One prompt in, one video out", "subtitle": "The model fills in a form. Scripts render it." },
+    { "layout": "statement", "text": "The model fills in one form. Scripts do the rest.", "highlight": "one form" },
+    { "layout": "bullets", "title": "What the scripts do", "items": ["Build the timeline", "Draw every frame", "Synthesize music", "Check the result"] },
+    { "layout": "number", "value": "13", "unit": "s", "label": "to render a 35-second 1080p video" },
+    { "layout": "bars", "title": "Six small-model test runs", "unit": "s", "items": [{ "label": "1", "value": 68 }, { "label": "2", "value": 78 }, { "label": "3", "value": 61 }, { "label": "4", "value": 51 }, { "label": "5", "value": 57 }, { "label": "6", "value": 65 }] },
+    { "layout": "steps", "title": "How it works", "items": ["Say one sentence", "The model fills in a form", "Scripts render it", "You get an MP4"] },
+    { "layout": "compare", "title": "Compared with video generation", "left": { "title": "Video generation", "items": ["Text may be garbled", "One fix means a redo"] }, "right": { "title": "one-prompt-video", "items": ["Exact text and numbers", "Edit one word, re-render"] } },
+    { "layout": "quote", "text": "Make a 30-second video about one-prompt-video", "by": "What you say to your agent" },
+    { "layout": "end", "title": "One prompt in, one video out", "subtitle": "github.com/li2092/one-prompt-video", "cta": "Try it" }
   ]
 }

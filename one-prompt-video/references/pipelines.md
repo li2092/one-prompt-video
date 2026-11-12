@@ -73,4 +73,4 @@ node "SKILL/scripts/browser-render.mjs" 我的片子 --out 我的片子/out/film
 
 ## 声音
 
-三条线自己不出声音。可以借主生产线的合成器（`SKILL/scripts/engine/synth.mjs` 的 `Music` 类和 `sfxSignal`，用法看 `SKILL/scripts/engine/music.mjs`）按拍子写一段配乐，存成 WAV，再用 `--audio` 交给出片脚本。没有声音的片子要告诉用户。
+三条线自己不出声音。要真实乐器的配乐或人声旁白，见 `external-tools.md`。也可以借主生产线的合成器（`SKILL/scripts/engine/synth.mjs` 的 `Music` 类和 `sfxSignal`，用法看 `SKILL/scripts/engine/music.mjs`）按拍子写一段配乐，存成 WAV，再用 `--audio` 交给出片脚本。没有声音的片子要告诉用户。

@@ -36,6 +36,8 @@
 "tts": { "command": ["say", "-v", "Tingting", "-o", "{out}", "--data-format=LEI16@48000", "{text}"], "ext": "wav" }
 ```
 
+用户有豆包语音（火山引擎）的密钥时，有现成的脚本可以直接接，写法见 `external-tools.md` 第三节。
+
 上面是 macOS 的 `say`。苹果的许可只允许个人非商业使用这些声音，对外发布的片子换别的。Windows 可以用 PowerShell 调系统语音，Linux 可以用 `espeak-ng`，写法类似。
 
 ## 提醒用户的事
