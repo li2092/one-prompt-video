@@ -17,9 +17,9 @@ Say one sentence → the LLM fills in a form → one command renders an MP4 with
 
 </div>
 
-Full version with sound, 43 seconds:
+Full version with sound, 42 seconds:
 
-https://github.com/user-attachments/assets/56bd83db-cc7f-410d-b8aa-52ab861dd864
+https://github.com/user-attachments/assets/7da9e384-5efd-4d13-9077-716861572c67
 
 <sub>Every frame is rendered by this skill's engine: three hand-written scenes plus built-in layouts, with sources in <a href="docs/demos/trailer-en">docs/demos/trailer-en</a>. The score uses GarageBand instrument samples and the narration is an AI voice from Doubao TTS; both methods are described in the skill's <a href="one-prompt-video/references/external-tools.md">external-tools.md</a>. The videos below use the skill's own music, which is synthesized by code.</sub>
 
@@ -35,27 +35,27 @@ An [Agent Skill](https://agentskills.io). Install it into Claude Code, Codex, or
 
 ## Gallery
 
-The videos below have sound. Music and sound effects are synthesized by the skill.
+The videos below have sound. Music and sound effects are synthesized by the skill. The first second or two of fade-in has been trimmed from each so that the player shows a meaningful cover frame.
 
 ### One hand-written scene plus layouts
 
 "What is one-prompt-video": one of the seven scenes is custom drawing code (the one where a sentence becomes `video.json` and then an MP4). The rest are built-in layouts.
 
-https://github.com/user-attachments/assets/7854e420-31a5-4e4f-8a39-ec7ead67464f
+https://github.com/user-attachments/assets/5c2a59f2-fc30-4131-8ad0-5f0703192980
 
 ### Form only
 
 "One prompt in, one video out": seven scenes, all built-in layouts, grid theme. The theme preview and the contact sheet further down come from it.
 
-https://github.com/user-attachments/assets/0ddcdd04-0003-4e9c-867f-f9b516a330bb
+https://github.com/user-attachments/assets/382dc542-a11a-47e3-85dd-1de3ded48b5d
 
 "From one sentence to MP4": eight scenes, all built-in layouts, blueprint theme.
 
-https://github.com/user-attachments/assets/7fb1c289-26fc-44da-b194-833d110d2775
+https://github.com/user-attachments/assets/355e6fbd-de2d-4643-b70c-407456080292
 
 "Small models can make videos too": portrait, pop theme, using this repository's own test numbers.
 
-https://github.com/user-attachments/assets/2bc2475a-660c-4460-a138-6f62c07aafce
+https://github.com/user-attachments/assets/e6fcdb52-0e49-40bb-aafb-1fb708b34ff0
 
 ### No ceiling on style
 
