@@ -13,49 +13,58 @@
 ![agent skills](https://img.shields.io/badge/Agent%20Skills-SKILL.md-8a5cf6)
 ![no GPU](https://img.shields.io/badge/GPU-not%20needed-lightgrey)
 
-<img src="docs/demo-zh.gif" width="720" alt="用一句话做出来的讲解短片">
-
-<sub>技能自带的示例「番茄工作法」，由一份七场的 `video.json` 渲出。动图没有声音，成片带配乐和音效。</sub>
+<img src="{{hero-zh}}" width="760" alt="one-prompt-video 宣传片的片段">
 
 </div>
+
+带声音的完整版，43 秒，点开播放：
+
+{{trailer-zh}}
+
+<sub>画面由本技能的引擎逐帧渲染：自己写的三场画面加现成版式，源文件在 <a href="docs/demos/trailer">docs/demos/trailer</a>。配乐另用库乐队（GarageBand）的乐器采样制作，旁白是豆包语音合成的 AI 配音。技能自带的配乐是程序合成的，下面几支片子用的就是它。</sub>
 
 ## 这是什么
 
 一个 [Agent Skill](https://agentskills.io)。装进 Claude Code、Codex 或任何支持技能的 agent 以后，你说一句话，它就交给你一支 20 到 90 秒的短视频：讲解、科普、产品介绍、数据播报、知识卡片，横屏竖屏都行。
 
 - **不用视频生成模型。** 每一帧都是代码画出来的：字不会错，数字不会变形，同一份输入永远出同一支片，哪里不满意改一个词重出。
-- **模型只填一张表。** 九种版式、六种主题，选一选、填一填。排时间、画画面、配乐、编码、自检都由脚本做。
+- **模型只填一张表。** 九种版式、六种内置主题，选一选、填一填。排时间、画画面、配乐、编码、自检都由脚本做。
 - **小模型也能跑。** 表填错了，脚本逐条说明错在第几场、哪个字段、正确的写法是什么。
 - **很轻。** 只要 Node.js 和 ffmpeg，不要显卡，不要浏览器。实测一支 30 多秒的 1080p 片子十几秒出完（Apple Silicon 笔记本）。
 
 ## 看效果
 
-<table>
-<tr>
-<td width="62%" valign="top">
+下面的片子都带声音，配乐和音效是技能自己合成的。
 
-换主题只改一个词
+### 只填表出的片
 
-<img src="docs/themes.gif" width="100%" alt="同一场内容换六种主题">
+「从一句话到 MP4」：八场全是现成版式，blueprint 主题。
 
-同一场内容，`"theme"` 依次换成六个值。
+{{how-it-works}}
 
-</td>
-<td width="38%" valign="top">
+「小模型也能出片」：竖屏，pop 主题，内容是本仓库的实测数据。
 
-竖屏
+{{small-model}}
 
-<img src="docs/demo-portrait.gif" width="100%" alt="竖屏短视频">
+小模型 Claude Haiku 只读了技能说明，照这句话做出来的：「帮我给新品做个竖屏短视频发抖音：一款降噪耳机，卖点是续航 40 小时、通透模式、售价 199 元」。
 
-小模型 Haiku 照这句话做的：「帮我给新品做个竖屏短视频发抖音：一款降噪耳机，卖点是续航 40 小时、通透模式、售价 199 元」
+{{haiku-earbuds}}
 
-</td>
-</tr>
-</table>
+### 加一场自己写的画面
 
-六种主题，各取四场：
+「one-prompt-video 是什么」：七场里有一场是自己写的画面代码（一句话变成 `video.json` 再变成 MP4 的那一场），其余是现成版式。
 
-<img src="one-prompt-video/assets/themes.jpg" width="100%" alt="六种主题的预览">
+{{intro-zh}}
+
+### 主题
+
+六种内置主题，换主题只改一个词。
+
+<img src="{{themes-gif}}" width="640" alt="同一场内容换六种主题">
+
+<img src="docs/themes.jpg" width="100%" alt="六种内置主题的预览">
+
+内置的不够用，可以在 `video.json` 里用 `colors` 换掉任意一种颜色、用 `font` 换字体；还不够，某一场可以自己写画面代码，或者走后面的三条参考生产线。主题没有数量上限。
 
 ## 它怎么做到的
 
@@ -74,15 +83,15 @@ flowchart LR
 
 ```json
 {
-  "title": "番茄工作法",
+  "title": "什么是复利",
   "theme": "grid",
   "aspect": "16:9",
-  "seconds": 30,
+  "seconds": 32,
   "scenes": [
-    { "layout": "title", "title": "番茄工作法", "subtitle": "一次只做一件事", "say": "总是分心？试试番茄工作法。" },
-    { "layout": "number", "value": "25", "unit": "分钟", "label": "一个番茄钟的长度", "say": "把时间切成二十五分钟一段。" },
-    { "layout": "steps", "title": "怎么做", "items": ["选一件事", "定时 25 分钟", "专心做到铃响", "休息 5 分钟"] },
-    { "layout": "end", "title": "现在就定一个 25 分钟" }
+    { "layout": "title", "title": "什么是复利", "subtitle": "收益也会产生收益", "say": "复利，就是让收益也去产生收益。" },
+    { "layout": "bars", "title": "1 万元按年化 7% 计算（万元）", "items": [{ "label": "10 年后", "value": 2.0 }, { "label": "20 年后", "value": 3.9 }, { "label": "30 年后", "value": 7.6 }] },
+    { "layout": "number", "value": "7.6", "unit": "倍", "label": "年化 7%，三十年后的本金倍数" },
+    { "layout": "end", "title": "复利，就是收益也生收益", "cta": "算一算" }
   ]
 }
 ```
@@ -104,7 +113,7 @@ flowchart LR
 ### 1. 装技能
 
 ```bash
-git clone https://github.com/li2092/one-prompt-video.git
+git clone --depth 1 https://github.com/li2092/one-prompt-video.git
 
 # Claude Code
 mkdir -p ~/.claude/skills && cp -r one-prompt-video/one-prompt-video ~/.claude/skills/
@@ -116,9 +125,11 @@ mkdir -p ~/.codex/skills && cp -r one-prompt-video/one-prompt-video ~/.codex/ski
 Windows（PowerShell）：
 
 ```powershell
-git clone https://github.com/li2092/one-prompt-video.git
+git clone --depth 1 https://github.com/li2092/one-prompt-video.git
 Copy-Item -Recurse one-prompt-video\one-prompt-video "$HOME\.claude\skills\one-prompt-video"
 ```
+
+本页的视频和动图存在 GitHub 的附件服务上，不在仓库里，下载下来的仓库只有一两兆。
 
 别的 agent 按它自己的文档放技能目录。不支持技能的模型，把 `one-prompt-video/SKILL.md` 的内容贴进对话，把里面的 `SKILL` 换成这个目录的绝对路径。
 
@@ -179,6 +190,8 @@ node /path/to/one-prompt-video/scripts/make.mjs demo/video.json     # 成片在 
 
 <img src="docs/pipelines.jpg" width="100%" alt="三条参考生产线：Canvas 2D、three.js、全屏着色器">
 
+本页演示片的源文件在 [`docs/demos/`](docs/demos)，可以照着重出。
+
 ## 它不是什么
 
 | | 本技能 | 视频生成模型 |
@@ -190,6 +203,8 @@ node /path/to/one-prompt-video/scripts/make.mjs demo/video.json     # 成片在 
 | 硬件 | 普通电脑 | 要显卡或云服务 |
 
 它做的是讲清楚一件事的版式短片。实拍画面、真人出镜、角色表演的故事片不在范围内；剪辑已有的视频也不在范围内。
+
+{{tiangong-section}}
 
 ## 现状
 
@@ -207,7 +222,7 @@ one-prompt-video/            技能本体，装的就是这个目录
   references/                按需读的说明
   assets/                    示例 video.json、主题预览、参考生产线的最小工程
 evals/                       测试题和打分脚本
-docs/                        本页用的图
+docs/                        本页用的图，演示片的源文件在 docs/demos/
 ```
 
 ## 作者和许可

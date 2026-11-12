@@ -1,0 +1,15 @@
+{
+  "title": "Nine layouts for the thumbnails",
+  "theme": "keynote",
+  "scenes": [
+    { "layout": "title", "kicker": "In 30 seconds", "title": "Compound interest", "subtitle": "Returns that earn returns" },
+    { "layout": "statement", "text": "Time is the variable that matters most", "highlight": "Time" },
+    { "layout": "bullets", "title": "Three ingredients", "items": ["Principal", "Rate of return", "Time"] },
+    { "layout": "number", "value": "7.6", "unit": "x", "label": "Growth at 7% a year over 30 years" },
+    { "layout": "bars", "title": "$10,000 at 7% a year ($ thousand)", "items": [{ "label": "10 years", "value": 20 }, { "label": "20 years", "value": 39 }, { "label": "30 years", "value": 76 }] },
+    { "layout": "steps", "title": "How to compute it", "items": ["Principal", "Times (1 + rate)", "Repeat every year", "Final value"] },
+    { "layout": "compare", "title": "Simple vs compound", "left": { "title": "Simple", "items": ["Only principal earns", "Same gain every year"] }, "right": { "title": "Compound", "items": ["Gains earn too", "More every year"] } },
+    { "layout": "quote", "text": "Returns that earn returns", "by": "What compound interest means" },
+    { "layout": "end", "title": "Compound interest: returns earn returns", "subtitle": "Try another rate yourself", "cta": "Do the math" }
+  ]
+}
