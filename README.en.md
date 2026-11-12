@@ -34,16 +34,16 @@ An [Agent Skill](https://agentskills.io). Install it into Claude Code, Codex, or
 <tr>
 <td width="62%" valign="top">
 
-**Switch themes by changing one word**
+Switch themes by changing one word
 
 <img src="docs/themes.gif" width="100%" alt="The same scene in six themes">
 
-Same content, a different `"theme"` value.
+The same scene with `"theme"` set to each of the six values.
 
 </td>
 <td width="38%" valign="top">
 
-**Portrait**
+Portrait
 
 <img src="docs/demo-portrait.gif" width="100%" alt="A portrait short video">
 
@@ -65,16 +65,14 @@ Chinese works the same way:
 
 ```mermaid
 flowchart LR
-    A["You say one sentence"] --> B["The LLM writes video.json<br/>one layout per scene, plus text and numbers"]
-    B --> C{"make.mjs --check<br/>validation"}
-    C -- "errors: which scene, which field, how to fix" --> B
-    C -- pass --> D["Build the timeline<br/>cuts land on the beat"]
-    D --> E["Draw every frame"]
-    D --> F["Synthesize music and sound effects"]
-    E --> G["Encode MP4"]
-    F --> G
-    G --> H["Self-check report + contact sheet"]
+    A["You say<br/>one sentence"] --> B["The LLM writes<br/>video.json"]
+    B --> C{"Validate"}
+    C -- "errors: which scene,<br/>which field, how to fix" --> B
+    C -- pass --> D["Timeline, frames,<br/>music"]
+    D --> E["MP4, report,<br/>contact sheet"]
 ```
+
+The timeline follows the beat of the theme: every scene lasts a whole number of beats, and cuts and sound effects land on the beat, so picture and music stay in step.
 
 This file is all the model writes:
 
@@ -107,7 +105,7 @@ After rendering, the script checks resolution, duration, loudness, true peak and
 
 ## Quick start
 
-**1. Install the skill**
+### 1. Install the skill
 
 ```bash
 git clone https://github.com/li2092/one-prompt-video.git
@@ -128,7 +126,7 @@ Copy-Item -Recurse one-prompt-video\one-prompt-video "$HOME\.claude\skills\one-p
 
 For other agents, put the folder wherever that agent loads skills from. For a model without skill support, paste the content of `one-prompt-video/SKILL.md` into the conversation and replace `SKILL` with the absolute path of the folder.
 
-**2. Say one sentence**
+### 2. Say one sentence
 
 ```text
 Make a 30-second video that explains compound interest
@@ -138,7 +136,7 @@ Make a portrait video for our new noise-cancelling headphones: 40-hour battery, 
 
 On first use the agent runs an environment check. If the drawing library or ffmpeg is missing, it installs them or tells you how.
 
-**Without an agent**
+### Without an agent
 
 ```bash
 mkdir my-videos && cd my-videos
