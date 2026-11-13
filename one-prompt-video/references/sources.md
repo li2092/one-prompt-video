@@ -28,6 +28,11 @@
 | 手绘抖动每秒换 7 到 8 次 | hand-drawn-canvas-animation（MIT） |
 | three.js 里用程序生成的表面和多次采样累加出画质 | 一个公开的单文件 three.js 作品的源码 |
 
+## 工程文件的格式
+
+- Final Cut Pro 的 FCPXML：按 Apple 随 Final Cut Pro 附带的格式定义（FCPXML 1.8 的 DTD）写，生成的文件用它校验过。
+- 剪映草稿：格式没有公开说明。字段结构参照 pyJianYingDraft（Apache-2.0，github.com/GuanYixuan/pyJianYingDraft）生成的草稿，写入的代码是本技能自己的，只覆盖片段、声音、字幕三样。剪映客户端和它的平台条款不在这个许可范围内。
+
 ## 参考的网站和项目
 
 | 名字 | 地址 | 参考了什么 |

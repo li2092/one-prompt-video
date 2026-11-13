@@ -19,6 +19,7 @@ const SPEC = {
   quote: { need: ['text'], opt: ['by'] },
   end: { need: ['title'], opt: ['subtitle', 'cta'] },
   custom: { need: ['module', 'seconds'], opt: ['cues', 'data'] },
+  clip: { need: ['file'], opt: ['from', 'to', 'fit', 'volume', 'title'] },
 }
 const COMMON = ['layout', 'say', 'seconds']
 const EXAMPLE = {
@@ -32,6 +33,7 @@ const EXAMPLE = {
   quote: '{ "layout": "quote", "text": "引用的一句话", "by": "谁说的" }',
   end: '{ "layout": "end", "title": "收束的一句话", "subtitle": "补充一行" }',
   custom: '{ "layout": "custom", "module": "scenes/my.mjs", "seconds": 6 }',
+  clip: '{ "layout": "clip", "file": "素材/采访.mp4", "from": 12.4, "to": 18 }',
 }
 
 const isStr = x => typeof x === 'string' && x.trim() !== ''
@@ -48,7 +50,8 @@ export function validate(v) {
   if (v.seconds != null && !(typeof v.seconds === 'number' && v.seconds >= 8 && v.seconds <= 180)) err('最外层的 "seconds" 是全片的目标时长，要是 8 到 180 之间的数字（不带引号）。')
   for (const k of Object.keys(v)) if (!['title', 'theme', 'aspect', 'scenes', 'colors', 'font', 'tts', 'music', 'fps', 'seconds'].includes(k)) warn(`最外层有不认识的字段 "${k}"，已忽略（是不是拼错了？）`)
   if (!Array.isArray(v.scenes) || v.scenes.length === 0) { err('缺 "scenes"：一个数组，每个元素是一场。例：  "scenes": [ ' + EXAMPLE.title + ' ]'); return { errors, warnings } }
-  if (v.scenes.length > 20) err(`"scenes" 有 ${v.scenes.length} 场，最多 20 场。`)
+  const hasClip = v.scenes.some(s => s && s.layout === 'clip'), maxScenes = hasClip ? 60 : 20
+  if (v.scenes.length > maxScenes) err(`"scenes" 有 ${v.scenes.length} 场，最多 ${maxScenes} 场。`)
   if (v.scenes.length < 3) warn(`只有 ${v.scenes.length} 场，成片会很短；一般 5 到 9 场。`)
 
   v.scenes.forEach((s, i) => {
@@ -81,20 +84,28 @@ export function validate(v) {
     }
     if (s.layout === 'statement' && isStr(s.text) && s.highlight != null && !(isStr(s.highlight) && s.text.includes(s.highlight))) warn(`${A}的 "highlight" 要是 "text" 里原样出现的一个词，否则不会上色。`)
     if (s.layout === 'custom' && s.module != null && !isStr(s.module)) err(`${A}的 "module" 要是画面代码文件的路径。${ex}`)
+    if (s.layout === 'clip') {
+      if (s.file != null && !isStr(s.file)) err(`${A}的 "file" 要是素材文件的路径（相对 video.json）。${ex}`)
+      for (const k of ['from', 'to']) if (s[k] != null && !(typeof s[k] === 'number' && s[k] >= 0)) err(`${A}的 "${k}" 要是素材里的秒数（不带引号、不小于 0 的数字）。${ex}`)
+      if (typeof s.from === 'number' && typeof s.to === 'number' && s.to - s.from < 0.5) err(`${A}的 "to" 要比 "from" 至少大 0.5 秒。`)
+      if (s.fit != null && !['cover', 'contain'].includes(s.fit)) err(`${A}的 "fit" 只能是 "cover"（铺满画面，默认）或 "contain"（完整放在画面中间）。`)
+      if (s.volume != null && !(typeof s.volume === 'number' && s.volume >= 0 && s.volume <= 2)) err(`${A}的 "volume" 是素材原声的音量，0 到 2 之间的数字；0 是静音。`)
+      if (s.seconds != null) warn(`${A}的长度由 "from" 和 "to" 决定，"seconds" 已忽略。`)
+    }
   })
   if (!errors.length) {
-    if (v.scenes[0].layout !== 'title') warn('第 1 场一般用 "title" 版式开头。')
-    if (v.scenes[v.scenes.length - 1].layout !== 'end') warn('最后一场一般用 "end" 版式收尾。')
+    if (!hasClip && v.scenes[0].layout !== 'title') warn('第 1 场一般用 "title" 版式开头。')
+    if (!hasClip && v.scenes[v.scenes.length - 1].layout !== 'end') warn('最后一场一般用 "end" 版式收尾。')
     const kinds = new Set(v.scenes.map(s => s.layout))
-    if (v.scenes.length >= 5 && kinds.size < 3) warn(`全片只用了 ${kinds.size} 种版式，画面会单调；换几种版式（number、bars、steps、compare、quote、statement）。`)
+    if (!hasClip && v.scenes.length >= 5 && kinds.size < 3) warn(`全片只用了 ${kinds.size} 种版式，画面会单调；换几种版式（number、bars、steps、compare、quote、statement）。`)
     for (let i = 1; i < v.scenes.length; i++) if (v.scenes[i].layout === v.scenes[i - 1].layout && v.scenes[i].layout === 'bullets') warn(`第 ${i} 场和第 ${i + 1} 场连着用 bullets，把其中一场换成别的版式。`)
   }
   return { errors, warnings }
 }
 
 // 排时间线。beat 是一拍的秒数；每场的长度凑成整数拍，切点才落在拍子上。
-// voice[i]：第 i 场配音的秒数（没有就是 undefined）。
-export function buildTimeline(v, theme, { fps = 30, voice = [] } = {}) {
+// voice[i]：第 i 场配音的秒数（没有就是 undefined）。clip[i]：第 i 场是素材片段时它的秒数，这一场就这么长，不凑整拍。
+export function buildTimeline(v, theme, { fps = 30, voice = [], clip = [] } = {}) {
   const bpm = theme.bpm, beat = 60 / bpm
   const scenes = []
   let t0 = 0
@@ -102,11 +113,11 @@ export function buildTimeline(v, theme, { fps = 30, voice = [] } = {}) {
   const count = sc => Math.max(1, (COUNT[sc.layout] || (() => 1))(sc))
   // 没有配音时观众是看字，比听人念快：按每秒 7 个汉字估
   const guess = sc => Math.min(10, Math.max(3, 1.2 + Math.max(readSeconds(sc.say), 0.6 * readSeconds(visibleText(sc))) / 1.4 + 0.25 * count(sc)))
-  const fixed = (sc, i) => sc.seconds != null || voice[i]
+  const fixed = (sc, i) => sc.seconds != null || voice[i] || clip[i]
   // 给了全片目标时长的：把没写死时长的那些场按比例拉长或压短去凑
   let scale = 1
   if (v.seconds != null) {
-    const locked = v.scenes.reduce((a, sc, i) => a + (fixed(sc, i) ? (sc.seconds ?? voice[i] + 0.7) : 0), 0)
+    const locked = v.scenes.reduce((a, sc, i) => a + (fixed(sc, i) ? (clip[i] ?? sc.seconds ?? voice[i] + 0.7) : 0), 0)
     const free = v.scenes.reduce((a, sc, i) => a + (fixed(sc, i) ? 0 : guess(sc)), 0)
     if (free > 0) scale = Math.max(0.5, Math.min(2.5, (v.seconds - tailLen - locked) / free))
   }
@@ -118,7 +129,7 @@ export function buildTimeline(v, theme, { fps = 30, voice = [] } = {}) {
     else want = Math.max(2.5, guess(sc) * scale)
     if (voice[i]) want = Math.max(want, voice[i] + 0.4)
     const beats = Math.max(4, Math.ceil(want / beat - 1e-6))
-    const dur = beats * beat
+    const dur = clip[i] ? Math.round(clip[i] * fps) / fps : beats * beat
     const step = n > 1 ? Math.min(beat, Math.max(0.25, (dur * 0.55 - 0.35) / (n - 1))) : 0
     const cues = Array.from({ length: n }, (_, k) => +(0.35 + k * step).toFixed(3))
     scenes.push({ i, layout: sc.layout, t0, dur, cues, scene: sc })

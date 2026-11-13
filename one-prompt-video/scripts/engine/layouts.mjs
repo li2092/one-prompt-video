@@ -16,6 +16,7 @@ export const COUNT = {
   quote: s => 1 + (s.by ? 1 : 0),
   end: s => 1 + (s.subtitle ? 1 : 0) + (s.cta ? 1 : 0),
   custom: s => s.cues ?? 1,
+  clip: s => 1 + (s.title ? 1 : 0),
 }
 
 // 每种版式里画面上会出现的字（用来估这一场要停多久）
