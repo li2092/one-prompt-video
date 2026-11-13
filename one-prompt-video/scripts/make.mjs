@@ -4,17 +4,21 @@
 //   node make.mjs video.json --check      只校验，不出片（最快，改完先跑这个）
 //   node make.mjs video.json --sheet      只出总览图 out/sheet.jpg
 //   node make.mjs video.json --still 3.5  只出第 3.5 秒的一张静帧
+//   node make.mjs video.json --project    出成片，再导出能接着剪的工程：Final Cut Pro 的 .fcpxml、剪映草稿、.srt 字幕（在 out/project/）
 //   其他选项：--out <目录>  --no-audio  --theme <主题>（临时换主题，不改文件）
 import fs from 'node:fs'
 import path from 'node:path'
+import crypto from 'node:crypto'
 import { createRequire } from 'node:module'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import { resolveFonts, hasCJK } from './engine/core.mjs'
-import { getTheme, THEMES, THEME_IDS } from './engine/themes.mjs'
+import { resolveFonts, hasCJK, textUnits } from './engine/core.mjs'
+import { loadTheme, THEMES, THEME_IDS, STYLE_IDS } from './engine/themes.mjs'
 import { validate, buildTimeline, sizeOf } from './engine/timeline.mjs'
 import { makeRenderer } from './engine/render.mjs'
+import { captionChunks } from './engine/layouts.mjs'
+import { writeFcpxml, writeJianying, writeSrt, missingMedia, jianyingDraftRoot } from './engine/project.mjs'
 import { renderMusic, wavBuffer } from './engine/music.mjs'
-import { findFfmpeg, FFMPEG_HELP, mixAudio, prepMusic, openEncoder, probe, loudness, durationOf, run } from './engine/encode.mjs'
+import { findFfmpeg, FFMPEG_HELP, mixAudio, prepMusic, openEncoder, probe, loudness, durationOf, stem, clipAudio, clipFrames } from './engine/encode.mjs'
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const argv = process.argv.slice(2)
@@ -25,7 +29,7 @@ const file = argv.find((a, i) => !a.startsWith('--') && !withValue.has(argv[i - 
 const die = (msg) => { console.error('\n[出错] ' + msg + '\n'); process.exit(1) }
 
 if (!file || flag('--help')) {
-  console.log(fs.readFileSync(fileURLToPath(import.meta.url), 'utf8').split('\n').slice(1, 8).map(l => l.replace(/^\/\/ ?/, '')).join('\n'))
+  console.log(fs.readFileSync(fileURLToPath(import.meta.url), 'utf8').split('\n').slice(1, 9).map(l => l.replace(/^\/\/ ?/, '')).join('\n'))
   console.log(`\n主题：${THEME_IDS.map(id => `${id}（${THEMES[id].name}）`).join('、')}`)
   process.exit(file ? 0 : 1)
 }
@@ -59,8 +63,11 @@ if (errors.length) {
   console.error(`\n[出错] video.json 有 ${errors.length} 处要改：\n` + errors.map((e, i) => `  ${i + 1}. ${e}`).join('\n') + '\n\n改完重跑同一条命令。字段说明见技能目录的 references/video-json.md。\n')
   process.exit(1)
 }
-const theme = getTheme(v.theme || 'grid', v.colors)
-const dir = path.dirname(jsonPath), outDir = path.resolve(opt('--out', path.join(dir, 'out'))), tmp = path.join(outDir, 'tmp')
+const dir = path.dirname(jsonPath)
+let theme
+try { theme = await loadTheme(v.theme || 'grid', v.colors, dir) } catch (e) { die(`主题 "${v.theme}" 加载失败：${e.message}`) }
+if (!theme) die(`没有这个主题：${v.theme}`)
+const outDir = path.resolve(opt('--out', path.join(dir, 'out'))), tmp = path.join(outDir, 'tmp')
 const fps = v.fps === 24 || v.fps === 25 || v.fps === 60 ? v.fps : 30
 const [W, H] = sizeOf(v.aspect)
 
@@ -71,7 +78,7 @@ function loadCanvas() {
   }
   die(`没有装画图库 @napi-rs/canvas。在你的工作目录里跑一次：\n  node "${path.join(HERE, 'setup.mjs')}"`)
 }
-const { createCanvas, GlobalFonts } = loadCanvas()
+const { createCanvas, GlobalFonts, loadImage } = loadCanvas()
 const fonts = resolveFonts(GlobalFonts, path.join(dir, 'fonts'), v.font)
 const allText = JSON.stringify(v.scenes)
 if (fonts.missing && hasCJK(allText)) die(`${fonts.missing}\n装一个中文字体再重跑，任选其一：\n  · 把任意中文字体文件（.ttf / .otf）放进 ${path.join(dir, 'fonts')} 目录\n  · Linux：sudo apt install fonts-noto-cjk\n  · 下载思源黑体 / Noto Sans SC（开源，SIL OFL 许可）后放进上面的 fonts 目录`)
@@ -99,7 +106,19 @@ if (v.tts && Array.isArray(v.tts.command) && !flag('--check')) {
 }
 const voices = v.scenes.map((_, i) => voiceFile(i))
 const voiceDur = voices.map(f => (f ? durationOf(needFf(), f) : undefined))
-const TL = buildTimeline(v, theme, { fps, voice: voiceDur })
+// 素材片段（layout: clip）：先读规格，定下这一场多长
+const clipInfo = {}
+v.scenes.forEach((sc, i) => {
+  if (sc.layout !== 'clip') return
+  const f = path.resolve(dir, sc.file)
+  if (!fs.existsSync(f)) die(`第 ${i + 1} 场的素材找不到：${f}\n"file" 写相对 video.json 的路径。`)
+  const pr = probe(needFf(), f)
+  if (!pr.video || !pr.seconds) die(`第 ${i + 1} 场的素材读不出画面：${f}`)
+  const from = sc.from ?? 0, to = Math.min(sc.to ?? pr.seconds, pr.seconds)
+  if (to - from < 0.5) die(`第 ${i + 1} 场：素材全长 ${pr.seconds.toFixed(1)} 秒，从 "from" ${from} 到 "to" ${to} 取不出半秒以上的一段。`)
+  clipInfo[i] = { file: f, from, to, pr }
+})
+const TL = buildTimeline(v, theme, { fps, voice: voiceDur, clip: v.scenes.map((_, i) => clipInfo[i] && clipInfo[i].to - clipInfo[i].from) })
 
 // 自己写画面代码的场（layout: custom）
 const custom = {}
@@ -110,7 +129,24 @@ for (const S of TL.scenes) if (S.layout === 'custom') {
   if (typeof mod.default !== 'function') die(`${p} 要默认导出一个函数：export default function (ctx, s, E) { … }。写法见 references/custom-scenes.md`)
   custom[S.i] = mod.default
 }
-const R = makeRenderer({ v, theme, TL, fonts, W, H, createCanvas, custom })
+// 素材片段的画面：抽成一串图存在 out/clips/ 里，素材和取的范围没变就不重抽。只校验时不抽
+const clips = {}
+if (!flag('--check')) for (const [k, c] of Object.entries(clipInfo)) {
+  const sc = v.scenes[k], st = fs.statSync(c.file), cover = sc.fit !== 'contain'
+  const key = crypto.createHash('md5').update([c.file, st.size, st.mtimeMs, c.from, c.to, W, H, fps, cover].join('|')).digest('hex').slice(0, 10)
+  const cdir = path.join(outDir, 'clips', key)
+  if (!fs.existsSync(path.join(cdir, 'done'))) {
+    fs.mkdirSync(cdir, { recursive: true })
+    try { clipFrames(ff, { file: c.file, from: c.from, seconds: c.to - c.from, fps, W, H, cover, dir: cdir }) } catch (e) { die(`第 ${+k + 1} 场的素材抽不出画面：${e.message}`) }
+    fs.writeFileSync(path.join(cdir, 'done'), '')
+  }
+  const n = fs.readdirSync(cdir).filter(x => x.endsWith('.jpg')).length
+  const keep = new Map()      // 只留最近读的几帧
+  const load = async j => { if (!keep.has(j)) { keep.set(j, await loadImage(path.join(cdir, `f${String(j).padStart(5, '0')}.jpg`))); if (keep.size > 3) keep.delete(keep.keys().next().value) } return keep.get(j) }
+  const first = n ? await load(0) : null
+  clips[k] = { n, load, frame: j => keep.get(j) || null, w: first ? first.width : W, h: first ? first.height : H }
+}
+const R = makeRenderer({ v, theme, TL, fonts, W, H, createCanvas, custom, clips })
 
 console.log(`\n《${v.title}》 ${W}×${H} ${fps} 帧/秒  主题 ${theme.id}（${theme.name}）  ${TL.bpm} 拍/分  全片 ${TL.total.toFixed(1)} 秒`)
 console.log('  场  版式        起始    时长   ' + (voices.some(Boolean) ? '配音' : ''))
@@ -131,7 +167,7 @@ fs.writeFileSync(sheetPath, await sheet.encode('jpeg', 88))
 fs.writeFileSync(path.join(outDir, 'timeline.json'), JSON.stringify({ bpm: TL.bpm, beat: TL.beat, total: TL.total, scenes: TL.scenes.map(S => ({ i: S.i + 1, layout: S.layout, start: +S.t0.toFixed(3), seconds: +S.dur.toFixed(3), cues: S.cues })) }, null, 1))
 if (opt('--still') != null) {
   const T = Math.min(Math.max(0, Number(opt('--still')) || 0), TL.total - 1e-3), c = createCanvas(W, H)
-  R.drawFrame(c.getContext('2d'), T)
+  await R.prepare(T); R.drawFrame(c.getContext('2d'), T)
   const p = path.join(outDir, `still-${T.toFixed(2)}.png`); fs.writeFileSync(p, await c.encode('png')); console.log('\n静帧：' + p + '\n'); process.exit(0)
 }
 if (flag('--sheet')) { printNotes(); console.log('\n总览图：' + sheetPath + '\n'); process.exit(0) }
@@ -139,15 +175,20 @@ if (flag('--sheet')) { printNotes(); console.log('\n总览图：' + sheetPath + 
 // ---------- 5. 声音 ----------
 needFf()
 let audio = null, loud = null
-if (!flag('--no-audio') && v.music !== false) {
+// 素材片段的原声：当成人声混进去，配乐在它响的时候自动压低
+const clipSound = flag('--no-audio') ? [] : Object.entries(clipInfo).filter(([k, c]) => c.pr.audio && (v.scenes[k].volume ?? 1) > 0)
+  .map(([k, c]) => ({ file: clipAudio(ff, { file: c.file, from: c.from, seconds: c.to - c.from, volume: v.scenes[k].volume ?? 1, out: path.join(tmp, `clip-${k}.wav`) }), at: TL.scenes[k].t0 }))
+const quiet = v.music === false
+const own = typeof v.music === 'string' ? path.resolve(dir, v.music) : null
+const said = quiet && !clipSound.length ? [] : [...voices.map((f, i) => f && { file: f, at: TL.scenes[i].t0 + 0.3 }).filter(Boolean), ...clipSound]
+if (!flag('--no-audio') && (!quiet || clipSound.length)) {
   const t0 = Date.now()
-  const own = typeof v.music === 'string' ? path.resolve(dir, v.music) : null
   if (own && !fs.existsSync(own)) die(`"music" 写的配乐文件找不到：${own}\n把文件放到 video.json 旁边，或者删掉 "music" 用自带的配乐。`)
-  const [L, Rr] = renderMusic(TL, theme, { bed: !own })
+  const [L, Rr] = renderMusic(TL, theme, { bed: !own && !quiet, sfx: !quiet })
   const musicPath = path.join(tmp, 'music.wav'); fs.writeFileSync(own ? path.join(tmp, 'sfx.wav') : musicPath, wavBuffer(L, Rr))
   if (own) { try { prepMusic(ff, { file: own, sfx: path.join(tmp, 'sfx.wav'), out: musicPath, total: TL.total }) } catch (e) { die(e.message) } }
   audio = path.join(tmp, 'master.wav')
-  loud = mixAudio(ff, { music: musicPath, voices: voices.map((f, i) => f && { file: f, at: TL.scenes[i].t0 + 0.3 }).filter(Boolean), out: audio, tmp })
+  loud = mixAudio(ff, { music: musicPath, voices: said, out: audio, tmp })
   console.log(`\n配乐和混音完成（${((Date.now() - t0) / 1000).toFixed(1)} 秒）`)
 }
 
@@ -159,7 +200,7 @@ if (enc.encoder.weak) notes.push('这份 ffmpeg 里没有 H.264 编码器，成�
 const canvas = createCanvas(W, H), ctx = canvas.getContext('2d')
 const t1 = Date.now()
 for (let f = 0; f < TL.frames; f++) {
-  R.drawFrame(ctx, f / fps)
+  await R.prepare(f / fps); R.drawFrame(ctx, f / fps)
   await enc.write(canvas.data())
   if (f % Math.ceil(TL.frames / 10) === 0) process.stdout.write(`\r出帧 ${Math.round(f / TL.frames * 100)}%  `)
 }
@@ -183,13 +224,64 @@ const report = [
   `总览图：${sheetPath}`,
   `规格：${W}×${H}，${fps} 帧/秒，${TL.total.toFixed(1)} 秒，${pr.video?.codec || '?'}${audio ? ' + AAC 双声道' : '，无声'}`,
   `主题：${theme.id}（${theme.name}）；字体：${Object.entries(fonts.found).filter(([, n]) => n).map(([k, n]) => `${k}=${n}`).join('，')}`,
-  `声音：${audio ? (typeof v.music === 'string' ? '自己的配乐文件（' + path.basename(v.music) + '）加程序合成的音效' : '程序合成的配乐和音效') + (voices.some(Boolean) ? `，加 ${voices.filter(Boolean).length} 段人声` : '，没有人声') : '无'}`,
+  `声音：${audio ? (typeof v.music === 'string' ? '自己的配乐文件（' + path.basename(v.music) + '）加程序合成的音效' : '程序合成的配乐和音效') + (voices.some(Boolean) ? `，加 ${voices.filter(Boolean).length} 段人声` : '，没有人声') + (clipSound.length ? `，加 ${clipSound.length} 段素材原声` : '') : '无'}`,
   '', '时间线：', ...TL.scenes.map(S => `  ${pad2(S.i + 1)} ${S.layout.padEnd(10)} ${S.t0.toFixed(2)}s 起，${S.dur.toFixed(2)}s`),
   '', '自检：', ...checks.map(c => '  ' + c),
   ...(notes.length ? ['', '注意：', ...notes.map(n => '  · ' + n)] : []),
   '', '机器查不了的：画面好不好看、节奏合不合适、配乐好不好听。打开总览图逐格看一遍，成片要人看、要人听。',
 ].join('\n')
 fs.writeFileSync(path.join(outDir, 'report.txt'), report + '\n')
-fs.rmSync(tmp, { recursive: true, force: true })
 console.log('\n' + report + '\n')
+
+// ---------- 8. 导出工程（--project） ----------
+// 每一场一个不带字幕的视频文件（素材片段直接引用原文件），配乐、音效、人声各自一轨，字幕是能改的文字。
+if (flag('--project')) {
+  const pdir = path.join(outDir, 'project'), media = path.join(pdir, 'media')
+  fs.mkdirSync(media, { recursive: true })
+  const f0 = TL.scenes.map(S => Math.round(S.t0 * fps)), f1 = i => (i + 1 < f0.length ? f0[i + 1] : TL.frames)
+  const P = { name: safeName, W, H, fps, frames: TL.frames, video: [], audio: [], texts: [] }
+  for (const S of TL.scenes) {
+    const at = f0[S.i], len = f1(S.i) - at, c = clipInfo[S.i]
+    if (c) {
+      const src = Math.round(c.from * fps), srcLen = Math.floor(c.pr.seconds * fps)
+      P.video.push({ file: c.file, name: `${pad2(S.i + 1)} ${path.basename(c.file)}`, at, len: Math.min(len, srcLen - src), src, srcLen, w: c.pr.video.w, h: c.pr.video.h, audio: !!c.pr.audio, mute: (S.scene.volume ?? 1) === 0 })
+      continue
+    }
+    const out = path.join(media, `scene-${pad2(S.i + 1)}.mp4`), e = openEncoder(ff, { W, H, fps, audio: null, out, seconds: len / fps })
+    for (let f = at; f < at + len; f++) { await R.prepare(f / fps); R.drawFrame(ctx, f / fps, { caption: false }); await e.write(canvas.data()) }
+    await e.done()
+    P.video.push({ file: out, name: `${pad2(S.i + 1)} ${S.layout}`, at, len, src: 0, srcLen: len, w: W, h: H, audio: false })
+    process.stdout.write(`\r导出工程：第 ${S.i + 1}/${TL.scenes.length} 场  `)
+  }
+  if (audio) {
+    const g = loud?.gain ?? 0, gm = g - (said.length ? 5 : 0), whole = { at: 0, len: TL.frames, src: 0, srcLen: TL.frames }
+    if (!quiet) {
+      const bed = path.join(tmp, 'bed.wav'), fx = path.join(tmp, 'fx.wav')
+      if (own) prepMusic(ff, { file: own, out: bed, total: TL.total }); else fs.writeFileSync(bed, wavBuffer(...renderMusic(TL, theme, { sfx: false })))
+      fs.writeFileSync(fx, wavBuffer(...renderMusic(TL, theme, { bed: false })))
+      P.audio.push({ file: stem(ff, { file: bed, out: path.join(media, 'music.wav'), gain: gm }), role: 'music', ...whole })
+      P.audio.push({ file: stem(ff, { file: fx, out: path.join(media, 'sfx.wav'), gain: gm }), role: 'effects', ...whole })
+    }
+    voices.forEach((f, i) => { if (f && said.length) { const len = Math.round(voiceDur[i] * fps); P.audio.push({ file: stem(ff, { file: f, out: path.join(media, `voice-${pad2(i + 1)}.wav`), gain: g }), name: `人声 ${pad2(i + 1)}`, role: 'dialogue', at: Math.round((TL.scenes[i].t0 + 0.3) * fps), len, src: 0, srcLen: len }) } })
+  }
+  for (const S of TL.scenes) if (S.scene.say) {
+    const chunks = captionChunks(S.scene.say, H > W ? 16 : 28), lens = chunks.map(c => textUnits(c)), tot = lens.reduce((a, b) => a + b, 0), span = Math.max(0.5, S.dur - 0.3)
+    let acc = 0
+    chunks.forEach((c, k) => { const d = span * lens[k] / tot, a = Math.round((S.t0 + acc) * fps), b = Math.round((S.t0 + acc + d) * fps); if (b > a) P.texts.push({ text: c.replace(/[，、：:,]$/u, ''), at: a, len: b - a }); acc += d })
+  }
+  const fcp = writeFcpxml(P, path.join(pdir, `${safeName}.fcpxml`)), jy = writeJianying(P, path.join(pdir, '剪映草稿', safeName)), srt = P.texts.length ? writeSrt(P, path.join(pdir, `${safeName}.srt`)) : null
+  const lost = missingMedia(P), jyRoot = jianyingDraftRoot()
+  const lines = [
+    '工程（能接着剪）：' + pdir,
+    `  Final Cut Pro：菜单「文件 > 导入 > XML…」选 ${fcp}`,
+    `  剪映：把文件夹 ${jy} 整个复制到剪映的草稿目录${jyRoot ? '（' + jyRoot + '）' : '（剪映「全局设置 > 草稿位置」里能看到）'}，重开剪映，草稿列表里就有「${safeName}」`,
+    ...(srt ? [`  字幕文件（别的剪辑软件用）：${srt}`] : []),
+    `  时间线：${P.video.length} 段画面，${P.audio.length} 条声音，${P.texts.length} 条字幕。${Object.keys(clipInfo).length ? '素材片段引用的是原文件，原声在原文件里；片段上加的角标不带过去。' : ''}`,
+    '  工程里写的是绝对路径：文件夹挪了位置或换了机器，要在剪辑软件里重新链接素材。剪映打开草稿后会改写它，要改内容请重新导出一份。',
+    ...(lost.length ? ['  [问题] 工程引用的这些文件不存在：', ...lost.map(f => '    ' + f)] : ['  [通过] 工程引用的文件都在']),
+  ]
+  fs.appendFileSync(path.join(outDir, 'report.txt'), '\n' + lines.join('\n') + '\n')
+  console.log('\r' + lines.join('\n') + '\n')
+}
+fs.rmSync(tmp, { recursive: true, force: true })
 process.exit(bad ? 2 : 0)

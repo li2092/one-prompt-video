@@ -1,5 +1,8 @@
 // 内置的风格主题。主题只管「长什么样、怎么动、配什么乐」，不管内容；同一份 video.json 换主题不用改别的。
 // 新主题：复制一个对象，改颜色、字体、bg、card 就能用；在 video.json 里也可以用 "colors" 覆盖颜色。
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { rgba, mix, rng, hash, roundRect, lerp, clamp } from './core.mjs'
 
 const TAU = Math.PI * 2
@@ -448,6 +451,22 @@ THEMES.chalk = {
 }
 
 export const THEME_IDS = Object.keys(THEMES)
+
+// 风格包：styles/<id>/index.mjs。一个风格包是一整套画面，可以把九种版式都按自己的样子重画；用到时才加载。
+const STYLE_DIR = new URL('./styles/', import.meta.url)
+const styleDir = fileURLToPath(STYLE_DIR)
+export const STYLE_IDS = fs.existsSync(styleDir) ? fs.readdirSync(styleDir, { withFileTypes: true }).filter(d => d.isDirectory() && fs.existsSync(fileURLToPath(new URL(d.name + '/index.mjs', STYLE_DIR)))).map(d => d.name).sort() : []
+export const ALL_IDS = [...THEME_IDS, ...STYLE_IDS.filter(id => !THEMES[id])]
+// id 也可以是一个 .mjs 文件的路径（自己写的风格包，相对 baseDir）
+export async function loadTheme(id, colors, baseDir = process.cwd()) {
+  if (THEMES[id]) return getTheme(id, colors)
+  const own = String(id).endsWith('.mjs')
+  if (!own && !STYLE_IDS.includes(id)) return null
+  const mod = await import(own ? pathToFileURL(path.resolve(baseDir, id)).href : new URL(id + '/index.mjs', STYLE_DIR).href)
+  if (!mod.default || typeof mod.default !== 'object' || !mod.default.c || typeof mod.default.bg !== 'function') throw new Error(`风格包 ${id} 要默认导出一个对象，至少有 c（八个颜色）和 bg(ctx, E)。写法见 references/style-packs.md`)
+  const t = { ...base, ...mod.default, id: own ? path.basename(path.dirname(path.resolve(baseDir, id))) : id }
+  return colors ? { ...t, c: { ...t.c, ...colors } } : t
+}
 
 // video.json 里的 "colors" 可以覆盖主题色
 export function getTheme(id, colors) {

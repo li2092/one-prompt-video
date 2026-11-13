@@ -1,10 +1,10 @@
 ---
 name: one-prompt-video
-description: 把一句话需求做成带配乐和字幕的 MP4 短视频：讲解、科普、产品介绍、数据播报、知识卡片，20 到 90 秒，横屏或竖屏。只需要填一份 video.json，一条命令出片；不用视频生成模型，Windows、macOS、Linux 通用。Use this whenever the user wants a video made from a sentence, topic, text or data — "做个视频"、"生成一个短视频"、"讲解视频"、"宣传片"、"动画视频"、"make a video / explainer / short clip" — even if they give only a topic. Not for editing existing footage, and not for AI-generated footage.
+description: 把一句话需求做成带配乐和字幕的 MP4 短视频：讲解、科普、产品介绍、数据播报、知识卡片，20 到 90 秒，横屏或竖屏。只需要填一份 video.json，一条命令出片；能把实拍素材的片段剪进去，能导出 Final Cut Pro 和剪映的工程接着剪；不用视频生成模型，Windows、macOS、Linux 通用。Use this whenever the user wants a video made from a sentence, topic, text or data — "做个视频"、"生成一个短视频"、"讲解视频"、"宣传片"、"动画视频"、"make a video / explainer / short clip" — even if they give only a topic; also for cutting clips of existing footage into a video ("剪辑"、"混剪"、"把这段视频剪进去") and exporting a Final Cut Pro / 剪映 (CapCut China) project. Not for AI-generated footage.
 license: MIT
 metadata:
   author: JiMiL, vivhuang
-  version: "0.4.0"
+  version: "0.5.0"
 compatibility: Requires Node.js 18+ and ffmpeg (scripts/setup.mjs checks and helps install). No GPU, no browser.
 ---
 
@@ -30,7 +30,7 @@ node "SKILL/scripts/setup.mjs"
 |---|---|
 | 多长 | 30 秒左右，5 到 8 场 |
 | 横屏竖屏 | 横屏 `16:9`；提到手机、竖屏、抖音、小红书、视频号用 `9:16` |
-| 风格 | 按下面的主题表挑一个最贴内容的 |
+| 风格 | 按下面的主题表和风格包表挑一个最贴内容的；用户点名了一种风格（「像打游戏」「做成聊天记录」「新闻播报那种」）就用对应的风格包 |
 | 语言 | 和用户说话的语言一致 |
 | 人声 | 不要。默认是字幕加配乐。本技能不带配音服务：用户要人声时，先告诉他配音要自己准备（一个能从命令行出声的 TTS，或自己的录音），再照 `references/voice.md` 接 |
 
@@ -89,6 +89,8 @@ node "SKILL/scripts/make.mjs" 片名/video.json            # 出片
 
 每种版式都可以加 `say`（字幕）和 `seconds`（这一场固定多少秒）。
 
+用户给了视频素材（实拍、录屏、已有的片子）时，还有第十种：`clip`，把素材里的一段放进来，和上面九种混着排，整支片子全是 `clip` 就是剪辑。写法：`{ "layout": "clip", "file": "素材/采访.mp4", "from": 12.4, "to": 18 }`。怎么看素材、怎么定取哪一段，见 `references/editing.md`。
+
 ## 十二种内置主题
 
 | theme | 样子 | 适合 |
@@ -106,7 +108,33 @@ node "SKILL/scripts/make.mjs" 片名/video.json            # 出片
 | `ink` | 宣纸、远山、朱红印章 | 传统文化、诗词、历史 |
 | `bold` | 黑白粗体、硬切、一种红色 | 观点、口号、榜单 |
 
-主题的预览图在 `SKILL/assets/themes.jpg`。同一份 `video.json` 换主题只改 `theme` 一个词。这十二种只是现成的起点：用户要别的颜色用 `colors` 换，要别的样子照 `references/custom-scenes.md` 自己画。
+主题的预览图在 `SKILL/assets/themes.jpg`。同一份 `video.json` 换主题只改 `theme` 一个词。
+
+## 风格包
+
+主题换的是颜色、背景和线条，九种版式的摆法不变。风格包把九种版式各按自己的样子重画，还带自己的转场、字幕和音效。用法和主题一样，`theme` 写它的名字，`video.json` 的其余部分一个字不用改。
+
+| theme | 样子 | 适合 |
+|---|---|---|
+| `arcade` | 8-bit 像素游戏：砖块、金币、关卡地图 | 讲步骤、比高低、轻松的产品介绍 |
+| `chat` | 手机里的一段聊天记录，内容是一条条气泡 | 口语化讲解、案例、问答 |
+| `comic` | 黑框分格、网点、速度线、拟声字 | 有转折的故事、前后反差 |
+| `collage` | 牛皮纸、撕纸、胶带、剪下来的字 | 轻松的科普、盘点、栏目开场 |
+| `papercraft` | 多层卡纸的景箱、纸片小人、定格抖动 | 轻松的科普、产品介绍、小故事 |
+| `clay` | 暖色黏土定格，圆润的小角色 | 入门讲解、给孩子看的内容 |
+| `isometric` | 2.5D 的机器、传送带、检查站 | 讲流程、讲系统怎么运转 |
+| `cosmos` | 深空、星云、发光的星体和轨道 | 讲全局、讲层次、系列开篇 |
+| `news` | 演播室、标题条、滚动字幕条 | 要点速递、周报、数据播报 |
+| `dashboard` | 暗色数据大屏：面板依次点亮、仪表弧、柱状图 | 评测、监控、成本这类带数字的内容 |
+| `skit` | 扁平插画的办公室，两个小人对内容有反应 | 给非专业观众讲道理、职场话题 |
+| `variety` | 多层描边花字、放射线、吉祥物、弹幕条 | 最热闹的短视频、吐槽、盘点 |
+| `vhs` | 录像带：扫描线、换台、老电视、走带计时 | 怀旧向、系列节目的片头和预告 |
+| `detective` | 软木板、拍立得、便签、红线 | 排查问题、复盘一件事的来龙去脉 |
+| `chrome` | 镀铬立体字、流动的液态渐变、星形闪光 | 年轻向的短句、潮流话题，不适合严肃内容 |
+
+预览图在 `SKILL/assets/styles.jpg`。风格包的装饰比主题多，一场里的字要更短；`news` 会把内容排成新闻节目的样子，内容不是真新闻时在回报里提醒用户一句。
+
+这些只是现成的起点，风格不设上限：用户要别的颜色用 `colors` 换；要某一场不一样照 `references/custom-scenes.md` 自己画；要一整套新的样子（手账、黑胶唱片、地铁线路图，什么都行）照 `references/style-packs.md` 写一个自己的风格包。
 
 ## 写内容的规矩
 
@@ -122,9 +150,13 @@ node "SKILL/scripts/make.mjs" 片名/video.json            # 出片
 |---|---|
 | 全部字段、换颜色、换字体、固定某一场的秒数 | `references/video-json.md` |
 | 加人声（配音要用户自己找 TTS 或自己录），换成自己的配乐文件 | `references/voice.md`、`references/video-json.md` |
+| 用户给了视频素材要剪进去，或者要剪辑已有的视频 | `references/editing.md` |
+| 用户要在 Final Cut Pro、剪映里接着剪（出片命令加 `--project`） | `references/editing.md` |
 | 现成版式不够，想自己写某一场的画面代码 | `references/custom-scenes.md` |
+| 现成的主题和风格包都不对，要一整套新的样子 | `references/style-packs.md`（写一个风格包，要自己写几百行画面代码并对着图改，先确认自己做得了） |
+| 用户要的是有场景、有角色、有故事的短片，或整支片子都是自己设计的画面（剪纸、插画、像素动画、图解、特效） | `references/film.md`（自由画面的短片：你写每一帧怎么画，脚本管镜头、配乐、出片和自检；要能看图、能写上千行代码） |
 | 安装失败、字体方框、ffmpeg 报错 | `references/troubleshooting.md` |
-| 用户明确要叙事短片、3D 写实场景、自然风景这类这条生产线做不了的片子 | `references/pipelines.md`（三条参考生产线，要自己写代码，先确认自己做得了） |
+| 用户明确要 3D 场景、全屏着色器的自然风景这类画布画不了的片子 | `references/pipelines.md`（参考生产线，要自己写代码，先确认自己做得了） |
 | 用户机器上有 Blender、库乐队，或有豆包语音的密钥，想要写实渲染、真实乐器的配乐、自然的人声 | `references/external-tools.md`（借助外部工具，给能力强的模型，先确认自己做得了） |
 
-这条生产线做不了的：剪辑已有的视频、真人或实拍画面、角色表演的故事片。遇到这类需求如实告诉用户。
+这个技能做不了的：凭空生成真人或实拍的画面（实拍只能用用户给的素材）、对素材做调色抠像这类精修（导出工程交给剪辑软件做）。遇到这类需求如实告诉用户。

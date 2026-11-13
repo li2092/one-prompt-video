@@ -61,6 +61,8 @@ export function renderMusic(TL, theme, { sfx = true, bed = true } = {}) {
       S.cues.forEach((c, k) => M.place(softAttack(sfxSignal(theme.sfx.enter, i * 7 + k + 1)), S.t0 + c, { gain: 0.26, pan: ((k % 3) - 1) * 0.25, verb: 0.15 }))
     })
   }
+  // 风格包自己加的音效（金币、盖章这一类）：sounds(TL) 返回 [{ t 全片的秒数, kind, gain, pan }]
+  if (sfx && typeof theme.sounds === 'function') for (const x of theme.sounds(TL) || []) { const sig = sfxSignal(x.kind, x.seed ?? 1); if (sig) M.place(softAttack(sig), Math.max(0, x.t), { gain: x.gain ?? 0.3, pan: x.pan ?? 0, verb: x.verb ?? 0.2 }) }
   let [L, R] = M.render({ verb: { room: 0.8, damp: 0.4, wet: 1 } })
   const n = Math.round(TL.total * SR)
   L = L.subarray(0, n); R = R.subarray(0, n)

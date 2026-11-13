@@ -69,6 +69,22 @@ The built-in themes, three scenes each (in Chinese):
 
 <img src="one-prompt-video/assets/themes.jpg" width="100%" alt="Preview of the built-in themes">
 
+### Style packs: a whole look of their own
+
+A theme changes colors and lines. A style pack redraws all nine layouts its own way: in the chat pack every bullet is a message bubble, in the arcade pack a bar chart is a stack of bricks, on the detective board steps are joined with red string. Usage is the same, one word in `"theme"`. Fifteen ship with the skill, and a model can write a new one by following `references/style-packs.md`.
+
+<img src="one-prompt-video/assets/styles.jpg" width="100%" alt="Preview of the fifteen style packs">
+
+### Cut real footage in, export a project to keep editing
+
+- Add a `clip` scene to `video.json` with a source file and in and out times, and the footage sits on the same timeline as the generated scenes. A file made only of `clip` scenes is an edit of existing video.
+- Add `--project` to the render command to also get a Final Cut Pro `.fcpxml`, a Jianying (剪映) draft and an `.srt`: one clip per scene, separate tracks for music, effects and voice, and captions as editable text.
+- The FCPXML validates against the format definition that ships with Final Cut Pro. Opening the projects in Final Cut Pro and Jianying is still being verified; the Jianying draft format is undocumented and may break after an update.
+
+### Free-form short films
+
+For a short with scenes, characters and a story, the model follows `references/film.md` and writes how each frame is drawn; the script handles the shot list, music, resumable rendering and checks. Node.js and ffmpeg only, no browser.
+
 ## How it works
 
 ```mermaid
@@ -224,7 +240,7 @@ It makes layout-based videos that explain one thing clearly. Live-action footage
 
 ## Status
 
-- Version 0.4.0. Tested on macOS (Apple Silicon) only. The Windows and Linux code paths are written but have not been run yet; reports are welcome.
+- Version 0.5.0. Tested on macOS (Apple Silicon) only. The Windows and Linux code paths are written but have not been run yet; reports are welcome.
 - Without external tools, the default output has code-synthesized music and no voice-over, which is plainer than the demos above. Compare with [the default output of the same "One prompt in, one video out"](https://github.com/user-attachments/assets/382dc542-a11a-47e3-85dd-1de3ded48b5d).
 - Music, both built-in and sample-based, has only been measured for loudness and peaks; whether it sounds good is for you to judge.
 - The skill instructions (`SKILL.md`, `references/`) and the script messages are in Chinese for now. Video content can be in any language, and English typesetting is supported.

@@ -6,7 +6,7 @@
 |---|---|---|
 | `title` | 是 | 片名，也是输出文件名 |
 | `scenes` | 是 | 数组，1 到 20 场，一般 5 到 9 场 |
-| `theme` | 否 | `grid`（默认）、`minimal`、`pop`、`keynote`、`blueprint`、`whiteboard`、`chalk`、`neon`、`terminal`、`paper`、`ink`、`bold` |
+| `theme` | 否 | 内置主题：`grid`（默认）、`minimal`、`pop`、`keynote`、`blueprint`、`whiteboard`、`chalk`、`neon`、`terminal`、`paper`、`ink`、`bold`。风格包：`SKILL.md` 风格包表里的名字。自己写的风格包：相对 `video.json` 的 `.mjs` 路径（见 `style-packs.md`） |
 | `aspect` | 否 | `"16:9"`（默认，1920×1080）、`"9:16"`（1080×1920）、`"1:1"`（1080×1080） |
 | `seconds` | 否 | 全片目标时长（8 到 180）。脚本把没写死时长的场按比例拉长或压短去凑；每场的长度会凑成整数拍，所以成片和目标差一两秒是正常的 |
 | `colors` | 否 | 覆盖主题色，见下 |
@@ -27,6 +27,7 @@
 
 ```json
 { "layout": "title", "title": "大标题", "subtitle": "副标题", "kicker": "标题上方的小字" }
+{ "layout": "clip", "file": "素材/采访.mp4", "from": 12.4, "to": 18, "fit": "cover", "volume": 1, "title": "角标" }   // 素材的一段，见 editing.md
 { "layout": "statement", "text": "一句要让人记住的话", "highlight": "记住" }
 { "layout": "bullets", "title": "场标题", "items": ["第一条", "第二条", "第三条"] }
 { "layout": "number", "value": "25", "unit": "分钟", "label": "这个数说明什么", "note": "再补一行小字" }

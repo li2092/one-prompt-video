@@ -11,9 +11,36 @@ export const ease = {
   inOut: p => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2),
   back: p => { const c = 1.70158; return 1 + (c + 1) * Math.pow(p - 1, 3) + c * Math.pow(p - 1, 2) },
   expo: p => (p >= 1 ? 1 : 1 - Math.pow(2, -10 * p)),
+  sine: p => -(Math.cos(Math.PI * p) - 1) / 2,
+  outExpo: p => (p >= 1 ? 1 : 1 - Math.pow(2, -10 * p)),
+  inOutExpo: p => (p <= 0 ? 0 : p >= 1 ? 1 : p < 0.5 ? Math.pow(2, 20 * p - 10) / 2 : (2 - Math.pow(2, -20 * p + 10)) / 2),
+  outBack: p => { if (p <= 0) return 0; const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2) },
+  outElastic: p => (p <= 0 ? 0 : p >= 1 ? 1 : Math.pow(2, -10 * p) * Math.sin((p * 10 - 0.75) * (2 * Math.PI) / 3) + 1),
 }
 // 从 t0 开始、历时 d 秒的进度（0 到 1，带缓动）
 export const prog = (t, t0, d, e = ease.out) => e(clamp((t - t0) / Math.max(1e-6, d)))
+export const invLerp = (a, b, x) => clamp((x - a) / (b - a))
+// k(t, t0, dur, e)：t 在 [t0, t0+dur] 内从 0 走到 1，带缓动；之前为 0，之后为 1
+export const k = (t, t0, dur, e = ease.inOut) => e(clamp((t - t0) / Math.max(1e-6, dur)))
+// 进入再退出：[t0, t0+a] 升到 1，[t1-b, t1] 降到 0
+export const inOut = (t, t0, t1, a = 0.4, b = 0.4, e = ease.inOut) => Math.min(k(t, t0, a, e), 1 - k(t, t1 - b, b, e))
+// 平滑噪声（一维，-1 到 1），用于手绘抖动、呼吸
+export function noise1(x, seed = 0) {
+  const h = n => { const s = Math.sin(n * 127.1 + seed * 311.7) * 43758.5453; return s - Math.floor(s) }
+  const i = Math.floor(x), f = x - i, u = f * f * (3 - 2 * f)
+  return lerp(h(i), h(i + 1), u) * 2 - 1
+}
+// 逐字显现：返回前 n 个字（p 从 0 到 1）
+export const typeOn = (s, p) => [...s].slice(0, Math.round([...s].length * clamp(p))).join('')
+// 带字距的单行文字（逐字画）
+export function spacedText(ctx, s, x, y, spacing, align = 'left') {
+  const chars = [...s], ws = chars.map(c => ctx.measureText(c).width), total = ws.reduce((a, b) => a + b, 0) + spacing * (chars.length - 1), save = ctx.textAlign
+  ctx.textAlign = 'left'
+  let cx = align === 'center' ? x - total / 2 : align === 'right' ? x - total : x
+  chars.forEach((c, i) => { ctx.fillText(c, cx, y); cx += ws[i] + spacing })
+  ctx.textAlign = save
+  return total
+}
 
 // 种子随机：同一个种子永远得到同一串数
 export function rng(seed = 1) {

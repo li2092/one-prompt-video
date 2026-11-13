@@ -76,15 +76,38 @@ export function mixAudio(ff, { music, voices = [], out, tmp, target = -14, tpMax
   if (!m || !isFinite(m.I)) { must(ff, ['-y', '-i', pre, '-c:a', 'pcm_s16le', out], '写音轨'); return null }
   const need = +(target - m.I).toFixed(2), limit = Math.min(1, Math.pow(10, (tpMax - need) / 20)).toFixed(4)
   must(ff, ['-y', '-i', pre, '-af', `alimiter=limit=${limit}:level=false:attack=5:release=120,volume=${need}dB`, '-ar', '48000', '-c:a', 'pcm_s16le', out], '母带')
-  return loudness(ff, out)
+  const fin = loudness(ff, out)
+  if (fin) fin.gain = need
+  return fin
+}
+
+// 分轨：把一条声音按给定的增益另存一份（导出工程时，配乐、音效、人声各一个文件）
+export function stem(ff, { file, out, gain = 0, tpMax = -1.8 }) {
+  const limit = Math.min(1, Math.pow(10, (tpMax - gain) / 20)).toFixed(4)
+  must(ff, ['-y', '-i', file, '-af', `aresample=48000,alimiter=limit=${limit}:level=false:attack=5:release=120,volume=${gain.toFixed(2)}dB`, '-ar', '48000', '-ac', '2', '-c:a', 'pcm_s16le', out], '写分轨')
+  return out
+}
+
+// 从素材里取一段声音：两头各 30 毫秒淡变（否则接缝处有爆音）
+export function clipAudio(ff, { file, from, seconds, volume = 1, out }) {
+  const fo = Math.max(0, seconds - 0.03).toFixed(3)
+  must(ff, ['-y', '-ss', String(from), '-t', seconds.toFixed(3), '-i', file, '-vn', '-af', `afade=t=in:d=0.03,afade=t=out:st=${fo}:d=0.03,volume=${volume}`, '-ar', '48000', '-ac', '2', '-c:a', 'pcm_s16le', out], '取素材的声音')
+  return out
+}
+
+// 从素材里取一段画面，按帧率存成一串 JPEG。cover 铺满 W×H，否则完整缩进 W×H
+export function clipFrames(ff, { file, from, seconds, fps, W, H, cover, dir }) {
+  const vf = cover ? `fps=${fps},scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H}` : `fps=${fps},scale=${W}:${H}:force_original_aspect_ratio=decrease`
+  must(ff, ['-y', '-ss', String(from), '-t', seconds.toFixed(3), '-i', file, '-an', '-vf', vf, '-q:v', '2', '-start_number', '0', path.join(dir, 'f%05d.jpg')], '取素材的画面')
 }
 
 // 用户自己的配乐文件：裁到全片长、片尾淡出、响度拉到和自带配乐差不多（-19 LUFS），再叠上音效
-export function prepMusic(ff, { file, sfx, out, total, target = -19 }) {
+export function prepMusic(ff, { file, sfx = null, out, total, target = -19 }) {
   const m = loudness(ff, file)
   if (!m || !isFinite(m.I)) throw new Error(`配乐文件读不了或者没有声音：${file}`)
   const gain = (target - m.I).toFixed(2), T = total.toFixed(3), st = Math.max(0, total - 1.1).toFixed(3)
   const graph = `[0:a]aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo,volume=${gain}dB,apad=whole_dur=${T},atrim=0:${T},afade=t=out:st=${st}:d=1.1[m];[1:a]aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo[s];[m][s]amix=inputs=2:normalize=0[o]`
+  if (!sfx) { must(ff, ['-y', '-i', file, '-filter_complex', graph.split(';')[0].replace('[m]', '[o]'), '-map', '[o]', '-ar', '48000', '-ac', '2', '-c:a', 'pcm_f32le', out], '处理配乐文件'); return }
   must(ff, ['-y', '-i', file, '-i', sfx, '-filter_complex', graph, '-map', '[o]', '-ar', '48000', '-ac', '2', '-c:a', 'pcm_f32le', out], '处理配乐文件')
 }
 

@@ -18,7 +18,7 @@
 
 ## 做法的出处
 
-本技能的全部代码由作者（JiMiL、vivhuang）编写，其中合成器和全屏着色器的管道来自作者自己更早的工程。下面这些公开项目的做法给了启发，只借做法，没有搬代码：
+本技能的代码由作者（JiMiL、vivhuang）编写，其中合成器和全屏着色器的管道来自作者自己更早的工程。`scripts/engine/styles/` 下的风格包移植自一套由JiMiL 指挥 Claude Opus 5.5 设计的风格库。下面这些公开项目的做法给了启发，只借做法，没有搬代码：
 
 | 做法 | 出处 |
 |---|---|
@@ -27,6 +27,22 @@
 | 画面事件登记成表、音效从表里取时刻；页面不请求外部地址 | javascript-animation-skills（MIT） |
 | 手绘抖动每秒换 7 到 8 次 | hand-drawn-canvas-animation（MIT） |
 | three.js 里用程序生成的表面和多次采样累加出画质 | 一个公开的单文件 three.js 作品的源码 |
+
+## 工程文件的格式
+
+- Final Cut Pro 的 FCPXML：按 Apple 随 Final Cut Pro 附带的格式定义（FCPXML 1.8 的 DTD）写，生成的文件用它校验过。
+- 剪映草稿：格式没有公开说明。字段结构参照 pyJianYingDraft（Apache-2.0，github.com/GuanYixuan/pyJianYingDraft）生成的草稿，写入的代码是本技能自己的，只覆盖片段、声音、字幕三样。剪映客户端和它的平台条款不在这个许可范围内。
+
+## 参考的网站和项目
+
+| 名字 | 地址 | 参考了什么 |
+|---|---|---|
+| 纯代码作品合集（awesome-opus5.5-frontend-showcases，MIT） | 网站 <https://openvglab.github.io/awesome-opus5.5-frontend-showcases/>，仓库 <https://github.com/OpenVGLab/awesome-opus5.5-frontend-showcases> | 自由画面短片这条路线的对标。中秋专题的两支全代码短片《月圆》《月宫小剧场》给出了画面的水准（层次、主光源、媒材的质感、画面里的字很少）、分镜脚本的写法和「转场在画面里要有来由」；它展示的类型（矢量插画场景、角色小动画、体素世界、像素画面、模拟和可视化、图解）是本技能风格范围的参照 |
+| hand-drawn-canvas-animation（MIT） | <https://github.com/alesha-pro/tools/tree/main/skills/hand-drawn-canvas-animation> | 手绘短片的流程：先完成一个代表镜头再铺开，快动作出连续帧条，抖动每秒换几次 |
+| animate（MIT） | <https://github.com/cth9191/animate> | 拍子网格和帧的换算、切点落在拍子上、每秒一格的总览图 |
+| javascript-animation-skills（MIT） | <https://github.com/iart-ai/javascript-animation-skills> | 画面事件登记成表、模板的值只是起点、检查没有加载外部资源 |
+
+对这些网站和项目只参考做法和水准，不搬它们的画面、题材、文案和代码。
 
 ## 借助外部工具的部分
 

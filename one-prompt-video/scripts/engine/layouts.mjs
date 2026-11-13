@@ -16,6 +16,7 @@ export const COUNT = {
   quote: s => 1 + (s.by ? 1 : 0),
   end: s => 1 + (s.subtitle ? 1 : 0) + (s.cta ? 1 : 0),
   custom: s => s.cues ?? 1,
+  clip: s => 1 + (s.title ? 1 : 0),
 }
 
 // 每种版式里画面上会出现的字（用来估这一场要停多久）
@@ -26,10 +27,10 @@ export function visibleText(s) {
   return arr.filter(Boolean).join(' ')
 }
 
-const content = E => ({ x: E.safe.l, y: E.safe.t, w: E.W - E.safe.l - E.safe.r, h: E.H - E.safe.t - E.safe.b })
+export const content = E => ({ x: E.safe.l, y: E.safe.t, w: E.W - E.safe.l - E.safe.r, h: E.H - E.safe.t - E.safe.b })
 
 // 场标题：左上角一行，带主题的下划线。返回标题下面可用区域的 y
-function heading(ctx, s, E, text) {
+export function heading(ctx, s, E, text) {
   const { u, theme } = E, a = content(E)
   if (!text) return a.y
   const size = (E.portrait ? 72 : 68) * u
@@ -42,12 +43,12 @@ function heading(ctx, s, E, text) {
 }
 
 // 把 "1,280"、"80%"、"¥3.5 万" 拆成 前缀 / 数 / 后缀，好让数字滚动上去
-function splitNumber(v) {
+export function splitNumber(v) {
   const m = /^([^\d-]*)(-?[\d,]*\.?\d+)(.*)$/.exec(String(v).trim())
   if (!m) return null
   return { pre: m[1], num: Number(m[2].replace(/,/g, '')), dec: decimalsOf(m[2]), comma: m[2].includes(','), post: m[3] }
 }
-function rolling(v, p) {
+export function rolling(v, p) {
   const n = splitNumber(v)
   if (!n) return String(v)
   const cur = n.num * ease.out(clamp(p))
