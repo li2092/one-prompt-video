@@ -23,7 +23,10 @@ node "SKILL/scripts/film.mjs" 片名/film.mjs --sheet           # 每个镜头�
 node "SKILL/scripts/film.mjs" 片名/film.mjs --strip           # 每秒一格
 node "SKILL/scripts/film.mjs" 片名/film.mjs --shot 3          # 只出第 3 个镜头的小样（半尺寸、无声）
 node "SKILL/scripts/film.mjs" 片名/film.mjs                   # 出成片，报告存在 片名/out/report.txt
+node "SKILL/scripts/film.mjs" 片名/film.mjs --frames          # 画得慢的片子用这个：每帧存成 PNG，约 8 分钟停一次，重跑同一条命令接着出
 ```
+
+出成片之前先量一帧要多久：出一张静帧看用时，乘以总帧数。全片超过几分钟的用 `--frames`，命令到时限会自己停下并说明出到第几帧，重跑同一条命令就接着出，全部出完自动编码。改了代码以后帧会全部重出。静止不变的东西（背景、纹理）用 `E.once` 只画一次，是最省时间的办法。
 
 环境和主生产线一样：先在工作目录跑一次 `node "SKILL/scripts/setup.mjs"`。
 

@@ -24,9 +24,9 @@ export default {
   fontTitle: 'sans', fontBody: 'sans', fontNum: 'mono',      // sans | serif | hand | mono
   wTitle: 900, wBody: 600, radius: 0,
   motion: 'pop',            // rise | pop | fade | slam | draw：E.enter() 用哪种入场
-  transition: 'cut',        // cut | fade | slide
+  transition: 'cut',        // cut | fade | slide；也可以写成函数，自己做转场（见下）
   solidAccent: true,        // 强调色卡片是实心的，上面用 onAccent 色写字
-  bg(ctx, E) { … },                          // 每一帧先画背景
+  bg(ctx, E, s) { … },                       // 每一帧先画背景；s.layout 是这一场的版式，s.index 是第几场，背景可以按场换
   layouts: {                                 // 想重画哪种版式就写哪种，没写的用默认摆法
     title(ctx, s, E) { … }, statement, bullets, number, bars, steps, compare, quote, end,
   },
@@ -36,8 +36,22 @@ export default {
   line, bar, mark, underline,
   music: { style: 'drive', prog: ['C', 'G', 'Am', 'F'], lead: 'marimba', drums: true },   // style: calm | ambient | drive | bright；lead: piano | epiano | marimba | pluck
   sfx: { enter: 'pop', cut: 'thud', accent: 'chime' },       // tick click type pop thud chime whoosh swell glitch
+  sounds(TL) { return [{ t: 3.2, kind: 'chime', gain: 0.3 }] },   // 自己加的音效（可选）：t 是全片的秒数，TL.scenes[i] 有每场的 t0、dur、cues、layout
 }
 ```
+
+自己做转场：把 `transition` 写成函数，再写 `transitionDur`（秒，默认 0.5）。每一场开头的这段时间里，引擎把上一场和这一场各画成一张整图交给你，`p` 从 0 走到 1：
+
+```js
+transitionDur: 0.6,
+transition(ctx, A, B, p, E, info) {        // A 上一场，B 这一场，都是和画面一样大的画布；info = { from, to, fromLayout, toLayout }
+  const x = E.W * E.ease.inOut(p)
+  ctx.drawImage(B, 0, 0)
+  ctx.save(); ctx.beginPath(); ctx.rect(x, 0, E.W - x, E.H); ctx.clip(); ctx.drawImage(A, 0, 0); ctx.restore()
+}
+```
+
+转场期间上一场会以 `s.t` 大于 `s.dur` 继续被画，这一场从 `s.t = 0` 开始画，所以版式的入场动画照常进行。字幕和最上层画在转场之上。
 
 `layouts`、`bg`、`caption`、`overlay` 里的 `this` 都是这个对象本身，颜色用 `this.c` 取（用户可能用 `colors` 换过，所以不要把颜色写死在函数里）。
 

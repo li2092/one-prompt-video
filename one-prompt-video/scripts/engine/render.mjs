@@ -63,25 +63,47 @@ export function makeRenderer({ v, theme, TL, fonts, W, H, createCanvas, custom =
     return TL.scenes[k]
   }
 
-  function drawFrame(ctx, T) {
-    const S = sceneAt(T), t = Math.min(T - S.t0, S.dur + TL.tail), E = makeE(T, S.i)
-    const s = { scene: S.scene, t, dur: S.dur, index: S.i, count: TL.scenes.length, cue: i => S.cues[Math.min(i, S.cues.length - 1)], p: i => clamp((t - S.cues[Math.min(i, S.cues.length - 1)]) / enterDur) }
-    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; ctx.shadowBlur = 0; ctx.shadowColor = 'transparent'
-    ctx.save(); theme.bg(ctx, E); ctx.restore()
+  const resetCtx = c => { c.setTransform(1, 0, 0, 1, 0, 0); c.globalAlpha = 1; c.globalCompositeOperation = 'source-over'; c.shadowBlur = 0; c.shadowColor = 'transparent' }
+  // 把一场画到 ctx 上（背景加内容，不含字幕）。t 是这一场已过的秒数，转场时上一场会以 t 大于 dur 被画。
+  // plain：不加引擎自带的淡入、推移（风格包自己做转场时用）
+  function drawScene(ctx, S, t, T, plain) {
+    const E = makeE(T, S.i)
+    const s = { scene: S.scene, layout: S.layout, t, dur: S.dur, index: S.i, count: TL.scenes.length, cue: i => S.cues[Math.min(i, S.cues.length - 1)], p: i => clamp((t - S.cues[Math.min(i, S.cues.length - 1)]) / enterDur) }
+    resetCtx(ctx)
+    ctx.save(); theme.bg(ctx, E, s); ctx.restore()
     // 内容先画到一张透明的层上，再整层贴上去：转场时整层一起淡入、推移
-    lctx.setTransform(1, 0, 0, 1, 0, 0); lctx.globalAlpha = 1; lctx.globalCompositeOperation = 'source-over'; lctx.shadowBlur = 0; lctx.shadowColor = 'transparent'
+    resetCtx(lctx)
     lctx.clearRect(0, 0, W, H)
     lctx.save()
     const draw = S.layout === 'custom' ? custom[S.i] : (theme.layouts && theme.layouts[S.layout]) || LAYOUTS[S.layout]
     draw.call(theme, lctx, s, E)
     lctx.restore()
-    const last = S.i === TL.scenes.length - 1
-    const tin = theme.transition === 'cut' ? 1 : clamp(t / 0.3), tout = theme.transition === 'cut' || last ? 1 : clamp((S.dur - t) / 0.2)
+    const last = S.i === TL.scenes.length - 1, cut = plain || theme.transition === 'cut'
+    const tin = cut ? 1 : clamp(t / 0.3), tout = cut || last ? 1 : clamp((S.dur - t) / 0.2)
     ctx.save()
     ctx.globalAlpha = Math.min(ease.out(tin), tout)
-    const dx = theme.transition === 'slide' ? ((1 - ease.out(tin)) * 70 - (1 - tout) * 50) * u : 0
+    const dx = !plain && theme.transition === 'slide' ? ((1 - ease.out(tin)) * 70 - (1 - tout) * 50) * u : 0
     ctx.drawImage(layer, dx, 0)
     ctx.restore()
+    return { E, s }
+  }
+
+  let canvA = null, canvB = null
+  function drawFrame(ctx, T) {
+    const S = sceneAt(T), t = Math.min(T - S.t0, S.dur + TL.tail)
+    // 风格包自己的转场：transition 写成函数时，每一场开头的 transitionDur 秒里，把上一场和这一场各画成一张整图交给它
+    const own = typeof theme.transition === 'function', td = Math.min(theme.transitionDur ?? 0.5, S.dur * 0.5)
+    let r
+    if (own && S.i > 0 && t < td) {
+      if (!canvA) { canvA = createCanvas(W, H); canvB = createCanvas(W, H) }
+      const P = TL.scenes[S.i - 1]
+      drawScene(canvA.getContext('2d'), P, P.dur + t, T, true)
+      r = drawScene(canvB.getContext('2d'), S, t, T, true)
+      resetCtx(ctx)
+      ctx.save(); theme.transition(ctx, canvA, canvB, clamp(t / td), r.E, { from: P.i, to: S.i, fromLayout: P.layout, toLayout: S.layout }); ctx.restore()
+      resetCtx(ctx)
+    } else r = drawScene(ctx, S, t, T, own)
+    const { E, s } = r
     ctx.save(); if (theme.caption) theme.caption(ctx, s, E); else drawCaption(ctx, s, E); ctx.restore()
     // 风格包的最上层：扫描线、角标、外框这一类
     if (theme.overlay) { ctx.save(); theme.overlay(ctx, E, s); ctx.restore() }

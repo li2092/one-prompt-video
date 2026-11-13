@@ -5,7 +5,8 @@
 //   node film.mjs 片名/film.mjs --strip          出每秒一格的连续总览图
 //   node film.mjs 片名/film.mjs --shot 3         只出第 3 个镜头的小样（半尺寸、无声）
 //   node film.mjs 片名/film.mjs                  出成片
-//   其他选项：--out <目录>  --no-audio
+//   node film.mjs 片名/film.mjs --frames         画得慢的片子：每帧存成 PNG，到时限就停，重跑同一条命令接着出，出完再编码
+//   其他选项：--out <目录>  --no-audio  --budget <秒>（--frames 时每次最多跑多久，默认 480）
 // film.mjs 的写法见技能目录的 references/film.md。
 import fs from 'node:fs'
 import path from 'node:path'
@@ -22,12 +23,12 @@ const HERE = path.dirname(fileURLToPath(import.meta.url))
 const argv = process.argv.slice(2)
 const flag = n => argv.includes(n)
 const opt = (n, d) => { const i = argv.indexOf(n); return i >= 0 && argv[i + 1] != null ? argv[i + 1] : d }
-const withValue = new Set(['--out', '--still', '--shot'])
+const withValue = new Set(['--out', '--still', '--shot', '--budget'])
 const file = argv.find((a, i) => !a.startsWith('--') && !withValue.has(argv[i - 1]))
 const die = msg => { console.error('\n[出错] ' + msg + '\n'); process.exit(1) }
 
 if (!file || flag('--help')) {
-  console.log(fs.readFileSync(fileURLToPath(import.meta.url), 'utf8').split('\n').slice(1, 9).map(l => l.replace(/^\/\/ ?/, '')).join('\n'))
+  console.log(fs.readFileSync(fileURLToPath(import.meta.url), 'utf8').split('\n').slice(1, 10).map(l => l.replace(/^\/\/ ?/, '')).join('\n'))
   process.exit(file ? 0 : 1)
 }
 
@@ -244,22 +245,52 @@ if (!flag('--no-audio')) {
 // ---------- 6. 逐帧编码 ----------
 const safeName = meta.title.replace(/[\\/:*?"<>|\r\n]+/g, ' ').trim().slice(0, 60) || 'film'
 const outFile = path.join(outDir, `${safeName}.mp4`)
-const enc = openEncoder(ff, { W, H, fps, audio, out: outFile, seconds: total })
-if (enc.encoder.weak) notes.push('这份 ffmpeg 里没有 H.264 编码器，成片用 MPEG-4 编的，个别播放器可能打不开。')
 const t1 = Date.now()
 let lastSig = null, run = 0, longest = 0, longestAt = 0
-for (let f = 0; f < frames; f++) {
-  drawFrame(ctx, f / fps)
-  const data = canvas.data()
-  // 连续多少帧完全一样（隔着取一些字节比较）
+// 连续多少帧完全一样（隔着取一些字节比较）
+function watch(data, f) {
   let sig = 0; for (let i = 0; i < data.length; i += 9973) sig = (Math.imul(sig, 31) + data[i]) | 0
   if (sig === lastSig) { run++; if (run > longest) { longest = run; longestAt = f } } else run = 0
   lastSig = sig
-  await enc.write(data)
-  if (f % Math.ceil(frames / 20) === 0) process.stdout.write(`\r出帧 ${Math.round(f / frames * 100)}%  `)
 }
-await enc.done()
-process.stdout.write(`\r出帧 100%（${frames} 帧，${((Date.now() - t1) / 1000).toFixed(1)} 秒）\n`)
+let enc
+if (flag('--frames')) {
+  // 分段续跑：帧存在 out/frames-<代码的指纹>/，代码一改指纹就变，旧的帧不会被误用
+  const srcs = fs.readdirSync(dir).filter(n => /\.(mjs|js|json)$/.test(n)).sort().map(n => { const st = fs.statSync(path.join(dir, n)); return `${n}:${st.size}:${Math.round(st.mtimeMs)}` }).join('|')
+  let h = 0; for (const ch of srcs) h = (Math.imul(h, 31) + ch.charCodeAt(0)) | 0
+  const fdir = path.join(outDir, 'frames-' + (h >>> 0).toString(16)), budget = Number(opt('--budget', 480)) * 1000
+  fs.mkdirSync(fdir, { recursive: true })
+  const fpath = f => path.join(fdir, `f${String(f).padStart(5, '0')}.png`)
+  let done = 0
+  for (let f = 0; f < frames; f++) {
+    if (fs.existsSync(fpath(f))) { done++; continue }
+    if (Date.now() - t1 > budget) break
+    drawFrame(ctx, f / fps)
+    fs.writeFileSync(fpath(f) + '.part', await canvas.encode('png')); fs.renameSync(fpath(f) + '.part', fpath(f)); done++
+    if (done % 30 === 0) process.stdout.write(`\r出帧 ${done}/${frames}  `)
+  }
+  if (done < frames) {
+    fs.rmSync(tmp, { recursive: true, force: true })
+    console.log(`\n已出 ${done}/${frames} 帧（${((Date.now() - t1) / 1000).toFixed(0)} 秒）。重跑同一条命令接着出；全部出完会自动编码。\n`)
+    process.exit(3)
+  }
+  enc = openEncoder(ff, { W, H, fps, audio, out: outFile, seconds: total, png: true })
+  for (let f = 0; f < frames; f++) { const buf = fs.readFileSync(fpath(f)); watch(buf, f); await enc.write(buf) }
+  await enc.done()
+  process.stdout.write(`\r出帧 100%（${frames} 帧，帧存在 ${fdir}）\n`)
+} else {
+  enc = openEncoder(ff, { W, H, fps, audio, out: outFile, seconds: total })
+  for (let f = 0; f < frames; f++) {
+    drawFrame(ctx, f / fps)
+    const data = canvas.data()
+    watch(data, f)
+    await enc.write(data)
+    if (f % Math.ceil(frames / 20) === 0) process.stdout.write(`\r出帧 ${Math.round(f / frames * 100)}%  `)
+  }
+  await enc.done()
+  process.stdout.write(`\r出帧 100%（${frames} 帧，${((Date.now() - t1) / 1000).toFixed(1)} 秒）\n`)
+}
+if (enc.encoder.weak) notes.push('这份 ffmpeg 里没有 H.264 编码器，成片用 MPEG-4 编的，个别播放器可能打不开。')
 if (longest / fps >= 1.5) notes.push(`第 ${((longestAt - longest) / fps).toFixed(1)} 到 ${(longestAt / fps).toFixed(1)} 秒画面完全静止了 ${(longest / fps).toFixed(1)} 秒。`)
 
 // ---------- 7. 自检 ----------
