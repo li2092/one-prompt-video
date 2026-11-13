@@ -41,8 +41,6 @@ https://github.com/user-attachments/assets/4a6eb480-7430-4076-b320-c1aea5d31f0c
 
 ## 看效果
 
-<details>
-<summary>只填表出的四支演示片（带旁白，点开看）</summary>
 
 下面四支片子的画面各由一份 `video.json` 出。配音是豆包语音，每支换一个音色、语气和语速；配乐是库乐队的乐器采样，每支一种编曲。这两样用的是技能里「借助外部工具」的做法：配音要自己的密钥，采样配乐只能在 macOS 上做。为了让播放器的封面有画面，每支开头加了一帧封面。播放器默认静音，记得点喇叭图标。
 
@@ -65,8 +63,6 @@ https://github.com/user-attachments/assets/1bec9149-21b1-4973-81be-457f3c279f72
 「one-prompt-video 是什么」：七场里有一场是自己写的画面代码（一句话变成 `video.json` 再变成 MP4 的那一场），其余是现成版式。男声，从容；钢琴、圆号、合唱、竖琴。
 
 https://github.com/user-attachments/assets/d89fea91-f7cd-4c06-b54d-4c51cbde7e3f
-
-</details>
 
 ### 风格不设上限
 

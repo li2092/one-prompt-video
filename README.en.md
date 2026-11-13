@@ -41,8 +41,6 @@ An [Agent Skill](https://agentskills.io). Install it into Claude Code, Codex, or
 
 ## Gallery
 
-<details>
-<summary>Four demo videos made by filling in the table only (with narration, click to open)</summary>
 
 Each of the four videos below is rendered from a single `video.json`. Narration is Doubao TTS, with a different voice, tone and pace for each video. The scores are GarageBand instrument samples, with a different arrangement for each. Both come from the skill's external-tools methods: narration needs your own API key, and sample-based scores can only be made on macOS. A single cover frame has been added at the start of each so that the player shows a meaningful cover. The player starts muted, so click the speaker icon.
 
@@ -65,8 +63,6 @@ https://github.com/user-attachments/assets/5c3f65bf-3ed3-4f40-bf06-600a764e2309
 "Small models can make videos too": portrait, pop theme, using this repository's own test numbers. A fast, lively female voice; marimba, electric bass and vibraphone.
 
 https://github.com/user-attachments/assets/0aa34997-b250-4b0a-ace8-a029054c62f0
-
-</details>
 
 ### No ceiling on style
 
