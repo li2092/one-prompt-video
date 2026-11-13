@@ -5,9 +5,8 @@ let mk = null
 export const useE = E => { mk = E.createCanvas }
 
 export const PAL = {
-  sky: '#5c94fc', white: '#fcfcfc', black: '#000000', ink: '#101018',
-  cloudSh: '#a4c8fc', farCloud: '#a4c8fc', farCloudDk: '#7cacfc', grass: '#00a800', grassHi: '#80d010', grassDk: '#005800',
-  brick: '#c84c0c', brickHi: '#fcbcb0', brickDk: '#7c2800',
+  white: '#fcfcfc', black: '#000000', ink: '#101018', grassHi: '#80d010',
+  soil: '#5c4a9c', soilHi: '#9c88dc', soilDk: '#2c2050', turf: '#b4e04c', turfDk: '#4c8c3c', trunk: '#3c2c4c',
   coin: '#fcd800', coinHi: '#fcfcb0', coinDk: '#ac7c00', orange: '#fc9838', red: '#e83828',
   blue: '#2038ec', cyan: '#3cbcfc', pink: '#fc74b4', gray: '#bcbcbc', grayDk: '#747474',
   green: '#00b800', greenHi: '#b8f818', sand: '#fcd8a8',

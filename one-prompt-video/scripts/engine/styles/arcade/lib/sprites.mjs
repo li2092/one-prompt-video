@@ -1,4 +1,5 @@
 // 像素贴图（移植自风格库的 G-街机关卡 lib/sprites.mjs）：全部用字符画定义（'.' 透明），1 格 = 1 像素，画时按格放大。
+import { mix } from '../../../core.mjs'
 import { PAL, sprite, tint } from './px.mjs'
 
 const K = PAL.ink
@@ -63,27 +64,27 @@ const COIN_F = [
 ]
 export const coin = f => sprite(COIN_F[((f % 4) + 4) % 4], { K, Y: PAL.coin, y: PAL.coinDk, W: PAL.coinHi }, 'coin' + (((f % 4) + 4) % 4))
 
-// 问号块 16×16（used：顶过之后的空块）
-export function qblock(state = 'q', fr = 0) {
-  const body = state === 'q' ? (fr % 3 === 2 ? PAL.coinDk : PAL.orange) : '#9c4a00'
-  const rows = [
-    'KKKKKKKKKKKKKKKK', 'KOOOOOOOOOOOOOOK', 'KOdOOOOOOOOOOdOK', 'KOOOOKKKKKOOOOOK', 'KOOOKWWWWWKOOOOK', 'KOOOKWKKKWWKOOOK', 'KOOOOKOOOKWWKOOK',
-    'KOOOOOOOOKWWKOOK', 'KOOOOOOKKWWKOOOK', 'KOOOOOOKWWKOOOOK', 'KOOOOOOOKKOOOOOK', 'KOOOOOOKWWKOOOOK', 'KOOOOOOKWWKOOOOK', 'KOdOOOOOKKOOOOdK', 'KOOOOOOOOOOOOOOK', 'KKKKKKKKKKKKKKKK']
-  const r2 = state === 'q' ? rows : rows.map((r, j) => (j === 0 || j === 15 ? r : 'K' + (j === 2 || j === 13 ? 'OdOOOOOOOOOOdO' : 'OOOOOOOOOOOOOO') + 'K'))
-  return sprite(r2, { K, O: body, d: PAL.ink, W: PAL.white }, `qb:${state}`)
+// 地面砖 16×16：菱格，两色菱形相间，菱形左上一道亮边（pal 换色：城市灰、地下石色）
+const ARGYLE = Array.from({ length: 16 }, (_, y) => Array.from({ length: 16 }, (_, x) => {
+  const px = x + 0.5, py = y + 0.5, inner = Math.abs(px - 8) + Math.abs(py - 8) < 8
+  const dx = inner ? px - 8 : px - (px < 8 ? 0 : 16), dy = inner ? py - 8 : py - (py < 8 ? 0 : 16), d = Math.abs(dx) + Math.abs(dy)
+  return inner && d >= 7 ? 'K' : d >= (inner ? 6 : 7) && dx < 0 && dy < 0 ? 'H' : inner ? 'B' : 'D'
+}).join(''))
+export const groundTile = (pal = {}) => {
+  const B = pal.B || PAL.soil
+  return sprite(ARGYLE, { B, D: pal.D || mix(B, PAL.ink, 0.28), H: pal.H || PAL.soilHi, K: pal.K || PAL.soilDk }, 'gt')
 }
-// 地面砖 16×16（pal 换色：城堡灰、地下蓝）
-export const groundTile = (pal = {}) => sprite([
-  'BBBBBBBBBKBBBBBB', 'HBBBBBBBBKHBBBBB', 'HBBBBBBBBKHBBBBB', 'HBBBBBBBBKHBBBBB', 'HBBBBBBBBKHBBBBB', 'HBBBBBBBBKHBBBBB',
-  'HBBBBBBBBKHBBBBB', 'KKKKKKKKKKKKKKKK', 'BBBBKHBBBBBBBBBB', 'BBBBKHBBBBBBBBBB', 'BBBBKHBBBBBBBBBB', 'BBBBKHBBBBBBBBBB',
-  'BBBBKHBBBBBBBBBB', 'BBBBKHBBBBBBBBBB', 'BBBBKHBBBBBBBBBB', 'KKKKKKKKKKKKKKKK'],
-{ B: pal.B || PAL.brick, H: pal.H || PAL.brickHi, K: pal.K || PAL.brickDk }, 'gt')
-// 墙砖 8×8（砖块柱、地下关天花板）
-export const brick8 = (pal = {}) => sprite(['KKKKKKKK', 'BHHBKBHB', 'BBBBKBBB', 'KKKKKKKK', 'BKBHHBBK', 'BKBBBBBK', 'BKBBBBBK', 'KKKKKKKK'],
-  { B: pal.B || PAL.brick, H: pal.H || PAL.brickHi, K: pal.K || PAL.ink }, 'b8')
-// 旗子
-export const flagImg = (col = PAL.green) => sprite([
-  'KKKKKKKKKKKK', 'KFFFFFFFFFFK', 'KFFFFFFFFFK.', 'KFFFFFFFFK..', 'KFFFFFFFK...', 'KFFFFFFK....', 'KFFFFFFFK...', 'KFFFFFFFFK..', 'KKKKKKKKKKK.'],
-{ K, F: col }, 'flag')
+// 圆角块 8×8（柱子、地下关墙壁）：四角缺一格，左上亮、右下暗、一点高光
+export const block8 = (pal = {}) => {
+  const B = pal.B || PAL.gray, H = pal.H || mix(B, PAL.white, 0.45)
+  return sprite(['.KKKKKK.', 'KHHHHHBK', 'KHWHBBBK', 'KHHBBBDK', 'KHBBBBDK', 'KBBBBBDK', 'KBDDDDDK', '.KKKKKK.'],
+    { B, H, D: pal.D || mix(B, PAL.ink, 0.35), W: mix(H, PAL.white, 0.6), K: pal.K || PAL.ink }, 'b8')
+}
+// 奖杯 16×16：两个把手、杯身左边一道亮、底座
+export const trophy = (col = PAL.coin) => sprite([
+  '..KKKKKKKKKKKK..', 'yyKWWYYYYYYYyKyy', 'y.KWYYYYYYYYyK.y', 'y.KWYYYYYYYYyK.y', '.yKWYYYYYYYYyKy.', '..KWYYYYYYYYyK..',
+  '..KYYYYYYYYyyK..', '...KYYYYYYyyK...', '....KKYYYyKK....', '......KYyK......', '......KYyK......', '.....KYYYyK.....',
+  '....KYYYYYyK....', '...KKKKKKKKKK...', '...KBBBBBBBBK...', '...KKKKKKKKKK...'],
+{ K, Y: col, y: mix(col, PAL.ink, 0.35), W: mix(col, PAL.white, 0.65), B: '#4c3c6c' }, 'trophy')
 // 星光（四角闪）
 export const sparkle = f => sprite(f % 2 ? ['..W..', '..W..', 'WWWWW', '..W..', '..W..'] : ['W...W', '.W.W.', '..W..', '.W.W.', 'W...W'], { W: PAL.white }, 'spk' + (f % 2))

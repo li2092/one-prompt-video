@@ -1,12 +1,12 @@
 // 街机关卡（arcade）：8-bit 平台游戏风。所有图形落在 6px 像素网格上，每种版式是一个游戏画面：
-// title 标题画面、statement 黄昏城堡里的消息框、bullets 星空装备栏、number 奖励关分数跳字、bars 砖块塔 / 竖屏血条、
-// steps 海上世界地图、compare 1P 对 2P、quote 地下关 NPC 对话、end 通关画面。字幕是 RPG 对话框，最上层是扫描线和 HUD。
-// 画法库（像素网格、点阵字、中文像素字、贴图、小机器人、布景）移植自风格库的 G-街机关卡，见 lib/ 和 NOTES.md。
+// title 标题画面、statement 黄昏城市里的消息框、bullets 星空装备栏、number 奖励关分数跳字、bars 方块塔 / 竖屏血条、
+// steps 海上世界地图、compare 1P 对 2P、quote 地下关 NPC 对话、end 领奖台通关画面。字幕是 RPG 对话框，最上层是扫描线和 HUD。
+// 场和场之间是像素马赛克转场。画法库（像素网格、点阵字、中文像素字、贴图、小机器人、布景）移植自风格库的 G-街机关卡，见 lib/ 和 NOTES.md。
 import { clamp, mix, formatNumber, decimalsOf, textUnits, drawLines } from '../../core.mjs'
 import { COUNT, captionChunks, rolling } from '../../layouts.mjs'
-import { PAL, useE, screenView, view, ptext, pwidth, panel, step, blink, popQ } from './lib/px.mjs'
-import { G, sky, stars, motes, ground, overworld, castles, castle, hud, burst, fireworks, coinRain, drawBot, hop, flagPole } from './lib/world.mjs'
-import { coin, icon, BOT_W, BOT_H, GEAR_ORDER, botShadow, brick8, sparkle } from './lib/sprites.mjs'
+import { PAL, useE, cellOf, screenView, view, ptext, pwidth, panel, step, blink, popQ } from './lib/px.mjs'
+import { G, sky, stars, motes, ground, overworld, skyline, podium, confetti, hud, burst, fireworks, coinRain, drawBot, hop } from './lib/world.mjs'
+import { coin, icon, BOT_W, BOT_H, GEAR_ORDER, botShadow, block8, trophy, sparkle } from './lib/sprites.mjs'
 import { hiLines, bigLines, segLines, highlightSegs, reveal, revealSegs, valueText } from './lib/text.mjs'
 
 const dk = (col, k) => mix(col, '#000000', k)
@@ -37,10 +37,21 @@ function tail(ctx, V, x, y, dir, fill, line) {
     V.r(ctx, xx, y + j, w, 1, fill)
   }
 }
-// 一排砖平台（主角站在上面）
-function platform(ctx, V, x, y, w, c) {
-  const img = brick8({ B: dk(c.accent2, 0.25), H: lt(c.accent2, 0.5), K: PAL.ink })
-  for (let xx = x; xx < x + w; xx += 8) V.img(ctx, img, xx, y)
+// 悬浮台（主角站在上面）：深色台面、亮边，底下三个喷口火苗一闪一闪
+function hoverPad(ctx, V, x, y, w, c, t) {
+  V.r(ctx, x + 1, y, w - 2, 6, PAL.ink); V.r(ctx, x, y + 1, w, 4, PAL.ink)
+  V.r(ctx, x + 1, y + 1, w - 2, 1, lt(c.muted, 0.4)); V.r(ctx, x + 1, y + 2, w - 2, 3, dk(c.muted, 0.5))
+  for (let k = 0; k < 3; k++) {
+    const fx = Math.round(x + w * (k + 0.5) / 3) - 2, f = (Math.floor(t * 12) + k) % 3
+    V.r(ctx, fx, y + 6, 4, 2 + f, PAL.orange); V.r(ctx, fx + 1, y + 6, 2, 1 + f, c.accent)
+  }
+}
+// 一摞圆角块的柱子：从 gy 往上 h 格，宽 w 格
+function blockTower(ctx, V, x, gy, w, h, pal) {
+  const S = V.S, img = block8(pal)
+  ctx.save(); ctx.beginPath(); ctx.rect(x * S, (gy - h) * S, w * S, h * S); ctx.clip()
+  for (let yy = gy - 8; yy > gy - h - 8; yy -= 8) for (let xx = x; xx < x + w; xx += 8) V.img(ctx, img, xx, yy)
+  ctx.restore()
 }
 // 星空关底：紫色底、两层视差星、上漂光点
 function starfield(ctx, E, g, t, base) {
@@ -55,11 +66,24 @@ function starfield(ctx, E, g, t, base) {
 
 export default {
   name: '街机关卡', mood: '8-bit 像素游戏，轻松向，讲步骤、比高低、产品介绍都行', bpm: 140,
-  c: { bg: '#5c94fc', fg: '#fcfcfc', muted: '#bcbcbc', accent: '#fcd800', accent2: '#e83828', card: '#000000', line: '#fcfcfc', onAccent: '#101018' },
+  c: { bg: '#2aa6a8', fg: '#fcfcfc', muted: '#bcbcbc', accent: '#fcd800', accent2: '#e8386c', card: '#000000', line: '#fcfcfc', onAccent: '#101018' },
   fontTitle: 'sans', fontBody: 'sans', fontNum: 'mono', wTitle: 900, wBody: 700, radius: 0,
-  motion: 'pop', transition: 'cut', solidAccent: true,
+  motion: 'pop', solidAccent: true,
   music: { style: 'drive', prog: ['C', 'G', 'Am', 'F'], lead: 'marimba', drums: true },
   sfx: { enter: 'pop', cut: 'whoosh', accent: 'chime' },
+
+  // 像素马赛克转场：上一场的格子 1→2→4→8→16 倍放大，过半换成这一场，再一档档缩回原样
+  transitionDur: 0.5,
+  transition(ctx, A, B, p, E) {
+    const q = p < 0.5 ? p * 2 : (1 - p) * 2, lv = Math.round(q * 4), src = p < 0.5 ? A : B
+    if (lv === 0) { ctx.drawImage(src, 0, 0); return }
+    const b = cellOf(E) << lv, sw = Math.ceil(E.W / b), sh = Math.ceil(E.H / b)
+    const small = E.once(`mosaic:${sw}x${sh}`, () => E.createCanvas(sw, sh)), sx = small.getContext('2d')
+    sx.imageSmoothingEnabled = true; sx.imageSmoothingQuality = 'high'
+    sx.clearRect(0, 0, sw, sh); sx.drawImage(src, 0, 0, sw, sh)
+    ctx.imageSmoothingEnabled = false
+    ctx.drawImage(small, 0, 0, sw * b, sh * b)
+  },
 
   bg(ctx, E) { ctx.fillStyle = this.c.bg; ctx.fillRect(0, 0, E.W, E.H) },
 
@@ -83,7 +107,7 @@ export default {
       const big = E.fit(sc.title, { role: 'title', weight: 900, size: (P ? 124 : 136) * E.u, maxW: a.w * 0.8, maxLines: 3, lineGap: 1.16, oneLine: true })
       const sub = sc.subtitle ? E.fit(sc.subtitle, { role: 'body', weight: 800, size: 54 * E.u, maxW: a.w * 0.9, maxLines: 2 }) : null
       const kick = sc.kicker ? E.fit(sc.kicker, { role: 'body', weight: 800, size: 40 * E.u, maxW: a.w * 0.7, maxLines: 1 }) : null
-      const plW = Math.ceil(big.width / S) + 22, plH = Math.ceil(big.lines.length * big.lineH / S) + 12
+      const plW = Math.ceil(big.width / S) + 28, plH = Math.ceil(big.lines.length * big.lineH / S) + 12
       const kH = kick ? Math.ceil(kick.lineH / S) + 6 : 0, sH = sub ? Math.ceil(sub.lines.length * sub.lineH / S) : 0
       const top = g.by, bot = g.GY - bh - 6
       let total = (kick ? kH - 3 : 0) + plH + (sub ? 5 + sH : 0)
@@ -93,14 +117,14 @@ export default {
       const pk = kick ? s.p(i++) : 0, pt = s.p(i++), ps = sub ? s.p(i++) : 0
       const ky = y
       if (kick) y += kH - 3
-      // 招牌：红底、亮边暗边、四颗铆钉
+      // 招牌：切角的卡带标签，上沿一道亮条、下沿暗条，两头各一颗星
       if (pt > 0) {
         const x0 = Math.round(g.cx - plW / 2), y0 = y + drop4(pt, 24), col = c.accent2
-        SV.r(ctx, x0 + 2, y0 + 2, plW, plH, PAL.ink)
-        SV.r(ctx, x0, y0, plW, plH, PAL.ink); SV.r(ctx, x0 + 1, y0 + 1, plW - 2, plH - 2, col)
-        SV.r(ctx, x0 + 1, y0 + 1, plW - 2, 2, lt(col, 0.45)); SV.r(ctx, x0 + 1, y0 + 1, 2, plH - 2, lt(col, 0.45))
-        SV.r(ctx, x0 + 1, y0 + plH - 3, plW - 2, 2, dk(col, 0.45)); SV.r(ctx, x0 + plW - 3, y0 + 1, 2, plH - 2, dk(col, 0.45))
-        for (const [rx, ry] of [[4, 4], [plW - 7, 4], [4, plH - 7], [plW - 7, plH - 7]]) { SV.r(ctx, x0 + rx, y0 + ry, 3, 3, dk(col, 0.6)); SV.r(ctx, x0 + rx, y0 + ry, 2, 2, lt(col, 0.6)) }
+        const slab = (dx, dy, w, h, f) => { SV.r(ctx, dx + 2, dy, w - 4, h, f); SV.r(ctx, dx + 1, dy + 1, w - 2, h - 2, f); SV.r(ctx, dx, dy + 2, w, h - 4, f) }
+        slab(x0 + 2, y0 + 2, plW, plH, PAL.ink); slab(x0, y0, plW, plH, PAL.ink); slab(x0 + 1, y0 + 1, plW - 2, plH - 2, col)
+        SV.r(ctx, x0 + 3, y0 + 2, plW - 6, 1, lt(col, 0.5)); SV.r(ctx, x0 + 3, y0 + 4, plW - 6, 1, lt(col, 0.25))
+        SV.r(ctx, x0 + 3, y0 + plH - 3, plW - 6, 1, dk(col, 0.45))
+        for (const sx of [x0 + 4, x0 + plW - 11]) SV.img(ctx, icon('star'), sx, Math.round(y0 + plH / 2 - 3))
         bigLines(ctx, E, big, g.cx * S, (y0 + 6) * S, c.fg, { align: 'center', sd: 2 })
       }
       if (kick && pk > 0) {
@@ -114,16 +138,17 @@ export default {
       if (push && s.p(i - 1) >= 1 && Math.floor(t * 3) % 3 !== 2) ptext(ctx, SV, '▶ PUSH START', g.cx, y + 6, 1, c.fg, { align: 'center', shadow: PAL.ink })
     },
 
-    // 一句话：黄昏城堡关，消息框里逐字打出像素大字，高亮词是金币黄；主角站在框下面
+    // 一句话：黄昏城市关，消息框里逐字打出像素大字，高亮词是金币黄；主角站在框下面
     statement(ctx, s, E) {
       useE(E)
       const c = this.c, g = G(E), S = g.S, sc = s.scene, P = g.P, t = s.t
       const SV = screenView(E)
-      sky(ctx, SV, g.LW, g.LH, [dk(c.bg, 0.86), dk(c.bg, 0.66), mix(dk(c.bg, 0.4), '#8c3cfc', 0.3), mix(c.bg, PAL.orange, 0.6)])
+      sky(ctx, SV, g.LW, g.LH, [dk(c.bg, 0.86), mix(dk(c.bg, 0.7), '#3c1c6c', 0.5), mix(dk(c.bg, 0.4), '#9c3c9c', 0.55), mix('#fc8c5c', c.bg, 0.15)])
       stars(ctx, SV, t, g.LW, Math.round(g.LH * 0.4), 40, 1, [PAL.white, lt(c.bg, 0.3), null, null], 6)
-      const VB = view(E, { cx: g.LW / 2 + t * 4, cy: g.LH / 2 })
-      castles(ctx, VB, g.GY, VB.x0 - 90, VB.x1 + 90, dk(c.bg, 0.72), mix(c.accent, PAL.orange, 0.4))
-      ground(ctx, SV, g.GY, 0, g.LW, { B: '#7c7c7c', H: '#bcbcbc', K: '#202020' })
+      const VF = view(E, { cx: g.LW / 2 + t * 2, cy: g.LH / 2 }), VB = view(E, { cx: g.LW / 2 + t * 4, cy: g.LH / 2 })
+      skyline(ctx, VF, g.GY - 10, VF.x0 - 30, VF.x1 + 30, mix(dk(c.bg, 0.55), '#5c3c8c', 0.5), mix(c.accent, '#5c3c8c', 0.55), t, 7)
+      skyline(ctx, VB, g.GY, VB.x0 - 30, VB.x1 + 30, mix(dk(c.bg, 0.78), '#1c0c2c', 0.4), mix(c.accent, PAL.orange, 0.4), t)
+      ground(ctx, SV, g.GY, 0, g.LW, { B: '#6c6c7c', H: '#a8a8bc', K: '#202028' })
       const k = P ? 3 : 2, bw = BOT_W * k, bh = BOT_H * k, pad = P ? 7 : 8, sideW = P ? 0 : bw + 10
       const f = E.fit(sc.text, { role: 'title', weight: 900, size: (P ? 96 : 104) * E.u, maxW: (g.bw - 2 * sideW - 2 * pad) * S, maxLines: P ? 6 : 3, lineGap: 1.34 })
       const pw = Math.ceil(f.width / S) + pad * 2, ph = Math.ceil(f.lines.length * f.lineH / S) + pad * 2 - 2
@@ -175,7 +200,7 @@ export default {
       const ids = GEAR_ORDER.slice(0, n), gearIn = {}
       ids.forEach((id, i) => { gearIn[id] = s.p(i + 1) })
       const all = s.p(n) >= 1, j = all ? hop(t % 1.4, 0.2, 0.4) : 0
-      platform(ctx, SV, bx - 12, by + bh, bw + 24, c)
+      hoverPad(ctx, SV, bx - 8, by + bh, bw + 16, c, t)
       drawBot(ctx, SV, t, bx, by - Math.round(j * 8), k, { pose: j > 0 ? 'jump' : 'stand', gear: ids, gearIn, glow: all })
     },
 
@@ -231,7 +256,7 @@ export default {
       if (note) { const p = s.p(i++); if (p > 0) hiLines(ctx, E, note, g.cx * S, y + [4, 2, 0, 0][Math.min(3, Math.floor(p * 4))] * S, c.muted, { align: 'center', weight: 700 }) }
     },
 
-    // 柱状图：横屏是一排砖块塔，一层一层长高，最高（或指定）的那座是金砖，主角跳上塔顶；竖屏是 RPG 状态栏里的血条
+    // 柱状图：横屏是一排方块塔，一层一层长高，最高（或指定）的那座是金块，主角站在旁边跳；竖屏是 RPG 状态栏里的血条
     bars(ctx, s, E) {
       useE(E)
       const c = this.c, g = G(E), S = g.S, sc = s.scene, P = g.P, t = s.t, n = sc.items.length
@@ -252,10 +277,7 @@ export default {
           const lf = E.fit(it.label, { role: 'body', weight: 800, size: 38 * E.u, maxW: slot * S * 0.94, maxLines: 2, maxH: (g.bb - gy - 2) * S })
           if (p <= 0) return
           if (h > 0) {
-            const img = brick8(i === hi ? gold : stone)
-            ctx.save(); ctx.beginPath(); ctx.rect(x * S, (gy - h) * S, bwC * S, h * S); ctx.clip()
-            for (let yy = gy - 8; yy > gy - h - 8; yy -= 8) for (let xx = x; xx < x + bwC; xx += 8) SV.img(ctx, img, xx, yy)
-            ctx.restore()
+            blockTower(ctx, SV, x, gy, bwC, h, i === hi ? gold : stone)
             SV.box(ctx, x - 1, gy - h - 1, bwC + 2, h + 1, PAL.ink)
           }
           const top = gy - h
@@ -406,13 +428,13 @@ export default {
     quote(ctx, s, E) {
       useE(E)
       const c = this.c, g = G(E), S = g.S, sc = s.scene, P = g.P, t = s.t
-      const SV = screenView(E), brickPal = { B: mix(c.bg, '#0c3c9c', 0.5), H: lt(c.bg, 0.25), K: PAL.ink }
+      const SV = screenView(E), stonePal = { B: mix(c.bg, '#4c3c7c', 0.6), H: lt(c.bg, 0.2), K: PAL.ink }, img = block8(stonePal)
       SV.r(ctx, 0, 0, g.LW, g.LH, dk(c.bg, 0.9))
       const pil = Math.max(8, Math.floor((g.bx - 2) / 8) * 8), ceil = P ? 33 : 13
-      for (let y = 0; y < g.GY; y += 8) for (let x = 0; x < pil; x += 8) { SV.img(ctx, brick8(brickPal), x, y); SV.img(ctx, brick8(brickPal), g.LW - pil + x, y) }
-      // 天花板一排砖，挂几块往下垂的砖
-      for (let x = pil; x < g.LW - pil; x += 8) { SV.img(ctx, brick8(brickPal), x, ceil); if (((x - pil) / 8) % 7 === 3) SV.img(ctx, brick8(brickPal), x, ceil + 8) }
-      ground(ctx, SV, g.GY, 0, g.LW, brickPal)
+      for (let y = 0; y < g.GY; y += 8) for (let x = 0; x < pil; x += 8) { SV.img(ctx, img, x, y); SV.img(ctx, img, g.LW - pil + x, y) }
+      // 天花板一排石块，挂几块往下垂的
+      for (let x = pil; x < g.LW - pil; x += 8) { SV.img(ctx, img, x, ceil); if (((x - pil) / 8) % 7 === 3) SV.img(ctx, img, x, ceil + 8) }
+      ground(ctx, SV, g.GY, 0, g.LW, stonePal)
       motes(ctx, SV, t, g.LW, g.by, g.GY, P ? 12 : 16, [dk(c.bg, 0.4), lt(c.bg, 0.3), dk(c.bg, 0.4)], 5)
       const pad = 6, frW = 58, frH = 64, tw = P ? g.bw - 2 * pad : g.bw - 2 * pad - frW - 5
       const f = E.fit(sc.text, { role: 'body', weight: 800, size: (P ? 64 : 72) * E.u, maxW: tw * S, maxLines: P ? 7 : 5, lineGap: 1.42 })
@@ -440,7 +462,8 @@ export default {
       }
     },
 
-    // 片尾：夜里的通关画面。旗子升到顶，城堡前放烟花，STAGE CLEAR 下面是收束的话和一个选中的按钮
+    // 片尾：夜里的通关画面。领奖台从地里升起，三个机器人落到台上（冠军在中间、全身装备），旁边台座上的奖杯在闪；
+    // 烟花、彩纸，STAGE CLEAR 下面是收束的话和一个选中的按钮。横屏领奖台在左下、奖杯在右下；竖屏两样并排在文字下面
     end(ctx, s, E) {
       useE(E)
       const c = this.c, g = G(E), S = g.S, sc = s.scene, a = E.L.box, P = g.P, t = s.t
@@ -448,19 +471,37 @@ export default {
       sky(ctx, SV, g.LW, g.LH, [dk(c.bg, 0.93), dk(c.bg, 0.86), dk(c.bg, 0.76)])
       stars(ctx, SV, t, g.LW, g.LH, 60, 2, [PAL.white, lt(c.bg, 0.4), dk(c.bg, 0.3), null], 1)
       stars(ctx, SV, t, g.LW, g.LH, 20, 6, [PAL.white, PAL.coinHi, PAL.white], 4, 2)
-      const p0 = s.p(0), cols = [c.accent, PAL.white, PAL.pink, PAL.cyan]
-      for (let k = 0; k < 20; k++) { const t0 = s.cue(0) + 0.4 + k * 0.6; if (t0 > s.dur + 1) break; fireworks(ctx, SV, t, t0, [[Math.round(g.bx + ((k * 0.37 + 0.13) % 1) * g.bw), Math.round(g.by + 10 + ((k * 0.61) % 1) * (P ? 60 : 40)), 0]], cols, 2) }
-      castle(ctx, SV, g.LW - (P ? 38 : 42), g.GY, 1, dk(c.accent2, 0.35), dk(c.accent2, 0.6))
+      const cols = [c.accent, PAL.white, PAL.pink, PAL.cyan], t0 = s.cue(0)
+      for (let k = 0; k < 20; k++) { const tf = t0 + 0.4 + k * 0.6; if (tf > s.dur + 1) break; fireworks(ctx, SV, t, tf, [[Math.round(g.bx + ((k * 0.37 + 0.13) % 1) * g.bw), Math.round(g.by + 10 + ((k * 0.61) % 1) * (P ? 60 : 40)), 0]], cols, 2) }
+      confetti(ctx, SV, t, t0 + 0.5, g.LW, g.GY, P ? 46 : 64, [c.accent, PAL.pink, PAL.cyan, PAL.white, c.accent2], 3)
       ground(ctx, SV, g.GY, 0, g.LW)
-      const poleX = Math.round(g.bx + (P ? 2 : 6)), poleH = P ? 70 : Math.round(g.GY - g.by - 10)
-      flagPole(ctx, SV, poleX, g.GY, poleH, step(clamp(p0 * 1.2), 6), c.accent)
-      const j = p0 >= 1 ? hop((t - s.cue(0)) % 1.1, 0.4, 0.45) : 0
-      drawBot(ctx, SV, t, poleX + 6, g.GY - 36 - Math.round(j * 14), 2, { pose: j > 0 ? 'jump' : 'stand' })
+      const k = P ? 2 : 1, stW = P ? 34 : 22, hs = P ? [32, 25, 21] : [22, 16, 13], bw = BOT_W * k, bh = BOT_H * k
+      const tW = 32, pedW = tW + 8, pedH = P ? 8 : 10, pedY = g.GY - pedH
+      const podX = P ? Math.round(g.cx - (3 * stW + 8 + pedW) / 2) : Math.round(Math.max(6, g.bx - 12))
+      const pedX = P ? podX + 3 * stW + 8 : Math.round(Math.min(g.LW - 6, g.br + 12) - pedW)
+      const rise = step(clamp((t - t0) / 0.45), 5), tops = podium(ctx, SV, podX, g.GY, stW, hs, [c.accent, '#c8cce0', '#d0864c'], rise, k)
+      // 台子升好以后三个机器人依次落下；冠军隔一会儿跳一下，二、三名换机身色、错开着小跳
+      const pals = [{ W: lt(c.accent2, 0.35), L: dk(c.accent2, 0.1) }, null, { W: '#9ce0a8', L: '#4ca86c' }]
+      for (let m = 0; m < 3 && rise >= 1; m++) {
+        const pin = (t - t0 - 0.5 - m * 0.08) / 0.3, win = m === 1
+        if (pin <= 0) continue
+        const j = pin >= 1 ? hop((t - t0 + m * 0.37) % (win ? 1.1 : 1.6), 0.4, win ? 0.45 : 0.35) * (win ? 1 : 0.6) : 0
+        const x = podX + m * stW + Math.round((stW - bw) / 2), y = tops[m] - bh + drop4(Math.min(1, pin), 10) - Math.round(j * 12)
+        drawBot(ctx, SV, t, x, y, k, { pose: j > 0 ? 'jump' : 'stand', pal: pals[m], gear: win ? GEAR_ORDER.filter(id => id !== 'shield') : [], glow: win, flip: m === 2 })
+      }
+      // 奖杯：落到台座上，之后一上一下地晃、身边星光闪
+      const pC = clamp((t - t0 - 0.2) / 0.36)
+      if (pC > 0) {
+        SV.r(ctx, pedX, pedY, pedW, pedH, PAL.ink); SV.r(ctx, pedX + 1, pedY + 1, pedW - 2, pedH - 1, '#3c3458'); SV.r(ctx, pedX + 1, pedY + 1, pedW - 2, 1, '#6c6488')
+        const tx = pedX + 4, ty = pedY - tW + drop4(pC, 16) - (pC >= 1 && Math.floor(t * 2) % 2 ? 1 : 0)
+        SV.img(ctx, trophy(c.accent), tx, ty, 2)
+        if (pC >= 1) for (let m = 0; m < 3; m++) if (blink(t + m * 0.23, 3)) SV.img(ctx, sparkle(Math.floor(t * 6) + m), tx + [3, tW - 6, tW / 2 - 2][m], ty + [7, 3, -7][m])
+      }
       const big = E.fit(sc.title, { role: 'title', weight: 900, size: (P ? 112 : 120) * E.u, maxW: a.w * (P ? 0.84 : 0.7), maxLines: 3, lineGap: 1.2, oneLine: true })
       const sub = sc.subtitle ? E.fit(sc.subtitle, { role: 'body', weight: 800, size: 48 * E.u, maxW: a.w * (P ? 0.84 : 0.7), maxLines: 2 }) : null
       const cta = sc.cta ? E.fit(sc.cta, { role: 'body', weight: 900, size: 52 * E.u, maxW: a.w * 0.5, maxLines: 1 }) : null
       const bH = Math.ceil(big.lines.length * big.lineH / S), sH = sub ? Math.ceil(sub.lines.length * sub.lineH / S) + 4 : 0, cH = cta ? Math.ceil(cta.lineH / S) + 14 : 0
-      const regB = P ? g.GY - poleH - 6 : g.GY - 4, total = 20 + bH + sH + cH
+      const regB = P ? g.GY - Math.max(hs[0] + bh + 14, pedH + tW + 4) - 6 : g.GY - 4, total = 20 + bH + sH + cH
       let y = Math.round(g.by + Math.max(0, (regB - g.by - total) / 2)), i = 0
       const pT = s.p(i++)
       if (pT > 0) {
@@ -515,7 +556,28 @@ export default {
     const cnt = Math.max(1, (COUNT[s.scene.layout] || (() => 1))(s.scene))
     let got = 0
     for (let i = 0; i < cnt; i++) if (s.t >= s.cue(i)) got++
-    hud(ctx, E, { c: this.c, lives: 3, score: s.index * 1000 + got * 100, coins: s.index * 3 + got, stage: s.index === s.count - 1 ? 'GOAL' : `STAGE 1-${s.index + 1}` })
+    hud(ctx, E, { c: this.c, lives: 3, score: s.index * 1000 + got * 100, coins: s.index * 3 + got, stage: s.index === s.count - 1 ? 'GOAL' : `STAGE ${String(s.index + 1).padStart(2, '0')}` })
+  },
+
+  // 游戏音效：引擎已经给每个元素入场配了 pop、场和场之间配了 whoosh，这里只在吃金币、打字、装备落位、VS、通关这些时刻加，一场不超过三个。
+  // 时刻和画面里的动画对齐：入场进度 p 在 cue 之后 0.36 秒走满（motion 'pop'），drop4 落定在 p=0.75
+  sounds(TL) {
+    const out = [], ED = 0.36
+    for (const S of TL.scenes) {
+      const at = (dt, kind, gain, pan = 0, seed = 1) => { if (dt >= 0 && dt < S.dur) out.push({ t: S.t0 + dt, kind, gain, pan, seed }) }
+      const cue = i => S.cues[Math.min(i, S.cues.length - 1)], sc = S.scene, n = (sc.items || []).length
+      switch (S.layout) {
+        case 'title': for (let i = 0; i < 3; i++) at(0.9 + i * 1.3, 'tick', 0.34, -0.2); break                  // 主角吃到前三枚金币
+        case 'statement': case 'quote': for (let i = 0; i < 3; i++) at(cue(0) + 0.3 + i * 0.12, 'type', 0.16, 0, i + 1); break   // 对话框开始打字
+        case 'bullets': for (let i = 1; i < Math.min(n, 3); i++) at(cue(i) + ED * 0.75, 'click', 0.3); at(cue(n) + ED, 'chime', 0.24, 0.3); break   // 装备落位，最后一件装齐
+        case 'number': { const done = cue(0) + Math.min(1.4, S.dur * 0.35); at(done, 'chime', 0.26); at(done + 0.3, 'tick', 0.3, -0.3); at(done + 0.55, 'tick', 0.3, 0.3); break }   // 分数跳完、金币雨
+        case 'bars': { const v = sc.items.map(it => Number(it.value)), hi = sc.highlight != null ? Number(sc.highlight) - 1 : v.indexOf(Math.max(...v)); at(cue(hi + 1) + ED, 'chime', 0.24); break }   // 金块塔长满
+        case 'steps': for (let i = 2; i < Math.min(n, 4); i++) at(cue(i) + ED, 'tick', 0.3); at(cue(n) + ED, 'chime', 0.24); break   // 走到岛上，走到最后一座
+        case 'compare': at(cue(2), 'thud', 0.42); at(cue(2) + 0.02, 'glitch', 0.2); break                       // VS 砸下来
+        case 'end': at(cue(0) + 0.2 + ED * 0.75, 'chime', 0.28); at(cue(0) + 0.4, 'thud', 0.22, -0.3); at(cue(0) + 1, 'thud', 0.22, 0.3); break   // 奖杯落定、头两朵烟花
+      }
+    }
+    return out
   },
 
   // 默认摆法会用的零件（只有 custom 场会用到）：方角像素卡片、实心柱、方块标记、虚线下划线

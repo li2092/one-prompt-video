@@ -1,7 +1,8 @@
 // 关卡布景和公共件（移植自风格库的 G-街机关卡 lib/world.mjs、lib/actors.mjs）：
-// 天空 / 云 / 山 / 地面、星空、光点、城堡剪影、HUD、粒子、机器人、旗杆。
+// 天空 / 长条云 / 台地 / 树 / 地面、星空、光点、城市天际线、领奖台、HUD、粒子、彩纸、机器人。
+import { mix } from '../../../core.mjs'
 import { PAL, view, screenView, ptext, cellOf, blink } from './px.mjs'
-import { icon, groundTile, coin, sparkle, bot, botFlash, BOT_W, GEAR, gearImg, flagImg } from './sprites.mjs'
+import { icon, groundTile, coin, sparkle, bot, botFlash, BOT_W, GEAR, gearImg } from './sprites.mjs'
 
 // 版式（格）：S 每格像素，LW×LH 整屏，b* 是内容区，GY 是地面顶（内容区下沿，字幕压在地面上）
 export function G(E) {
@@ -19,13 +20,10 @@ export function sky(ctx, V, LW, LH, cols) {
     for (let x = 0; x < LW; x += 2) { V.r(ctx, x, y - 2, 1, 1, cols[i]); V.r(ctx, x + 1, y - 1, 1, 1, cols[i]); V.r(ctx, x + 1, y, 1, 1, cols[i - 1]) }
   }
 }
-export function cloud(ctx, V, x, y) {
-  const c = PAL.white, s = PAL.cloudSh
-  V.disc(ctx, x, y + 2, 6, s); V.disc(ctx, x + 8, y - 1, 8, s); V.disc(ctx, x + 17, y + 2, 6, s)
-  V.disc(ctx, x, y + 1, 6, c); V.disc(ctx, x + 8, y - 2, 8, c); V.disc(ctx, x + 17, y + 1, 6, c)
-  V.r(ctx, x - 6, y + 1, 29, 6, c); V.r(ctx, x - 5, y + 6, 27, 1, s)
+// 长条云：两层扁条，下沿一道暗边
+export function streak(ctx, V, x, y, w, col, sh) {
+  V.r(ctx, x, y, w, 2, col); V.r(ctx, x + 3, y - 1, Math.round(w * 0.5), 1, col); V.r(ctx, x + 2, y + 2, w - 4, 1, sh)
 }
-export function farCloud(ctx, V, x, y) { V.r(ctx, x, y, 14, 3, PAL.farCloud); V.r(ctx, x + 3, y - 2, 7, 2, PAL.farCloud); V.r(ctx, x + 2, y + 3, 12, 1, PAL.farCloudDk) }
 // 视差星空：n 颗星按 speed（格/秒）往左卷，cols 闪烁色
 export function stars(ctx, V, t, LW, LH, n, speed, cols, seed = 1, size = 1) {
   for (let i = 0; i < n; i++) {
@@ -45,54 +43,92 @@ export function motes(ctx, V, t, LW, y0, y1, n, cols, seed = 1) {
     if (i % 3 === 0) { V.r(ctx, x - 1, y, 1, 1, c); V.r(ctx, x + 1, y, 1, 1, c); V.r(ctx, x, y - 1, 1, 1, c); V.r(ctx, x, y + 1, 1, 1, c) }
   }
 }
-// 山：阶梯三角；灌木
-export function hill(ctx, V, x, base, h, col = '#00a844', hi = PAL.grassHi) {
-  for (let j = 0; j < h; j++) { const w = Math.round((h - j) * 1.6); V.r(ctx, x - w, base - j - 1, w * 2, 1, col) }
-  V.r(ctx, x - 2, base - h + 3, 1, 2, hi); V.r(ctx, x + 2, base - h + 5, 1, 2, hi); V.r(ctx, x - 5, base - h + 9, 1, 2, hi)
+// 平顶台地：上窄下宽三层，横向岩层纹，顶边和左边一道亮
+export function mesa(ctx, V, x, base, w, h, col, line, hi) {
+  const a = Math.round(h * 0.45), b = Math.round(h * 0.75)
+  for (const [tx, ty, tw, th] of [[x, base - h, w, a], [x - 4, base - h + a, w + 8, b - a], [x - 9, base - h + b, w + 18, h - b]]) {
+    V.r(ctx, tx, ty, tw, th, col)
+    for (let y = ty + 3; y < ty + th; y += 4) V.r(ctx, tx + 2, y, tw - 4, 1, line)
+    V.r(ctx, tx, ty, tw, 1, hi); V.r(ctx, tx, ty, 1, th, hi)
+  }
 }
-export function bush(ctx, V, x, base, n = 3) {
-  for (let i = 0; i < n; i++) V.disc(ctx, x + i * 7, base - 4, 5, PAL.grassHi)
-  V.r(ctx, x - 5, base - 4, n * 7 + 4, 4, PAL.grassHi)
-  for (let i = 0; i < n; i++) V.r(ctx, x + i * 7 - 1, base - 6, 2, 1, PAL.green)
+// 圆冠树：细树干、圆树冠，左上一块亮
+export function tree(ctx, V, x, base, h, r, col, hi) {
+  V.r(ctx, x - 1, base - h, 2, h, PAL.trunk)
+  const cy = base - h - r + 2
+  V.disc(ctx, x, cy, r, col)
+  V.disc(ctx, x - Math.round(r * 0.35), cy - Math.round(r * 0.35), Math.round(r * 0.45), hi)
 }
-// 地面：砖块铺到屏幕底，越往下越暗（不抢字幕）
-export function ground(ctx, V, gy, x0, x1, pal) {
+// 地面：菱格土铺到屏幕底，越往下越暗（不抢字幕）。turf = [草色, 草下暗线]，给外景加一层草皮
+export function ground(ctx, V, gy, x0, x1, pal, turf) {
   const img = groundTile(pal), a = Math.floor(x0 / 16) * 16
   for (let x = a; x < x1; x += 16) for (let y = gy; y < V.y1; y += 16) V.img(ctx, img, x, y)
+  if (turf) {
+    V.r(ctx, a, gy, x1 - a, 3, turf[0]); V.r(ctx, a, gy + 3, x1 - a, 1, turf[1])
+    for (let x = a; x < x1; x += 6) { V.r(ctx, x + 1, gy - 1, 3, 1, turf[0]); V.r(ctx, x + 4, gy + 1, 1, 1, turf[1]) }
+  }
   if (gy + 20 < V.y1) V.r(ctx, x0, gy + 20, x1 - x0, V.y1 - gy - 19, 'rgba(0,0,0,0.25)')
 }
-// 平台游戏外景（卷轴）：sx = 镜头左缘世界坐标（格）；返回最近一层的视图
+// 平台游戏外景（卷轴）：青绿天、长条云、远处平顶台地、中景圆冠树、草皮和菱格土。
+// sx = 镜头左缘世界坐标（格）；o.hills=false 不画台地和树；返回最近一层的视图
 export function overworld(ctx, E, g, sx, o = {}) {
-  const SV = screenView(E)
-  sky(ctx, SV, g.LW, g.LH, o.sky)
+  const SV = screenView(E), bg = o.sky, lt = k => mix(bg, PAL.white, k)
+  sky(ctx, SV, g.LW, g.LH, [mix(bg, PAL.ink, 0.22), bg, lt(0.18), lt(0.36)])
   const at = (k, dr = 0) => view(E, { cx: g.LW / 2 + sx * k + dr, cy: g.LH / 2 })
   const VF = at(0.1, (o.drift ?? 0) * 0.4), fy = g.P ? [96, 132, 80, 150] : [44, 64, 36, 74]
-  for (let i = -2; i < 14; i++) farCloud(ctx, VF, i * (g.P ? 64 : 80) + 12, fy[(i + 8) % 4])
-  const V0 = at(0.25, o.drift ?? 0), cy = g.P ? [76, 112, 66] : [34, 52, 28]
-  for (let i = -2; i < 10; i++) cloud(ctx, V0, i * (g.P ? 110 : 150) + 30, cy[(i + 3) % 3])
+  for (let i = -2; i < 14; i++) streak(ctx, VF, i * (g.P ? 64 : 80) + 12, fy[(i + 8) % 4], 16 + ((i + 9) % 3) * 6, lt(0.45), lt(0.28))
   if (o.hills !== false) {
-    const V1 = at(0.55)
-    for (let i = -1; i < 12; i++) { const x = i * 96 + 40; hill(ctx, V1, x, o.gy, i % 2 ? 22 : 34); bush(ctx, V1, x + 44, o.gy, 2 + (i % 2)) }
+    const VM = at(0.18), col = mix(bg, '#d0b4f4', 0.7)
+    for (let i = -2; i < 12; i++) mesa(ctx, VM, i * 120 + 30 + (i % 2) * 14, o.gy, [34, 56, 26][(i + 6) % 3], [30, 20, 42][(i + 6) % 3] * (g.P ? 1.3 : 1), col, mix(col, PAL.ink, 0.1), mix(col, PAL.white, 0.3))
+  }
+  const V0 = at(0.25, o.drift ?? 0), cy = g.P ? [76, 112, 66] : [34, 52, 28]
+  for (let i = -2; i < 10; i++) streak(ctx, V0, i * (g.P ? 110 : 150) + 30, cy[(i + 3) % 3], 30 + ((i + 6) % 3) * 8, lt(0.8), lt(0.5))
+  if (o.hills !== false) {
+    const V1 = at(0.55), col = mix(bg, '#0c3c3c', 0.55), hi = mix(col, '#c8f4a0', 0.3)
+    for (let i = -2; i < 16; i++) { const j = (i + 8) % 4; tree(ctx, V1, i * 46 + 20 + j * 5, o.gy, [8, 12, 6, 10][j], [7, 9, 5, 8][j], col, hi); if (j === 1) tree(ctx, V1, i * 46 + 37, o.gy, 6, 5, col, hi) }
   }
   const V = at(1)
-  ground(ctx, V, o.gy, V.x0 - 16, V.x1 + 16, o.groundPal)
+  ground(ctx, V, o.gy, V.x0 - 16, V.x1 + 16, o.groundPal, [PAL.turf, PAL.turfDk])
   return V
 }
-// 城堡剪影一排（黄昏关、夜景）
-export function castles(ctx, V, gy, x0, x1, col, win) {
-  for (let x = Math.floor(x0 / 90) * 90 + 20; x < x1; x += 90) {
-    V.r(ctx, x, gy - 40, 30, 40, col); for (let j = 0; j < 4; j++) V.r(ctx, x + j * 8, gy - 44, 5, 4, col)
-    V.r(ctx, x + 12, gy - 22, 6, 10, win)
+// 城市天际线（黄昏关）：高低不一的楼，有的楼顶是天线（红灯闪），窗户有亮有暗、偶尔换一盏
+export function skyline(ctx, V, gy, x0, x1, col, win, t, seed = 1) {
+  for (let i = Math.floor(x0 / 22) - 1; i * 22 < x1; i++) {
+    const h0 = Math.imul(i + 1000, 2654435761) ^ (seed * 40503), hs = k => ((h0 >>> k) & 0xff)
+    const w = 14 + (hs(1) % 3) * 4, h = 24 + (hs(5) % 5) * 8, x = i * 22 + (hs(9) % 4)
+    V.r(ctx, x, gy - h, w, h, col)
+    if (hs(13) % 3 === 0) { V.r(ctx, x + (w >> 1), gy - h - 7, 1, 7, col); if (blink(t + i * 0.37, 1.5)) V.r(ctx, x + (w >> 1), gy - h - 8, 1, 1, PAL.red) }
+    else if (hs(13) % 3 === 1) V.r(ctx, x + 3, gy - h - 3, w - 6, 3, col)
+    for (let wy = gy - h + 4, r = 0; wy < gy - 4; wy += 5, r++) for (let wx = x + 2, q = 0; wx < x + w - 3; wx += 4, q++) {
+      const lit = (Math.imul(h0 ^ (r * 31 + q * 7), 2246822519) >>> 28) < 6, flip = (Math.floor(t * 0.7) + r * 3 + q * 5 + i) % 23 === 0
+      if (lit !== flip) V.r(ctx, wx, wy, 2, 2, win)
+    }
   }
 }
-// 城堡（终点）：砖墙、垛口、门洞，(x, gy) 是左下角
-export function castle(ctx, V, x, gy, k, wall, dark) {
-  const w = 44 * k, h = 30 * k
-  V.r(ctx, x, gy - h, w, h, wall); for (let j = 0; j < 6; j++) V.r(ctx, x + j * 8 * k, gy - h - 5 * k, 5 * k, 5 * k, wall)
-  V.r(ctx, x + 10 * k, gy - h - 18 * k, 24 * k, 18 * k, wall); for (let j = 0; j < 3; j++) V.r(ctx, x + 10 * k + j * 9 * k, gy - h - 22 * k, 6 * k, 4 * k, wall)
-  for (let yy = gy - h - 18 * k; yy < gy; yy += 4 * k) V.r(ctx, x, yy, w, 1, dark)
-  V.r(ctx, x + 17 * k, gy - 14 * k, 10 * k, 14 * k, PAL.ink); V.disc(ctx, x + 22 * k, gy - 14 * k, 5 * k, PAL.ink)
-  V.r(ctx, x + 19 * k, gy - h - 12 * k, 6 * k, 6 * k, PAL.ink)
+// 领奖台：三级台阶 [二, 一, 三]，左下角 (x, gy)，每级宽 w、高 hs[k]；rise 0..1 台子从地里升起。返回三级台面的 y
+export function podium(ctx, V, x, gy, w, hs, cols, rise, unit = 1) {
+  return [1, 0, 2].map((rank, k) => {
+    const h = Math.round(hs[rank] * rise), xx = x + k * w, col = cols[rank], top = gy - h
+    if (h > 0) {
+      V.r(ctx, xx, top, w, h, PAL.ink)
+      V.r(ctx, xx + 1, top + 1, w - 2, h - 1, col)
+      V.r(ctx, xx + 1, top + 1, w - 2, 2, mix(col, PAL.white, 0.45)); V.r(ctx, xx + w - 3, top + 3, 2, h - 3, mix(col, PAL.ink, 0.3))
+      if (h >= 7 * unit + 5) ptext(ctx, V, String(rank + 1), xx + w / 2, top + 3 + unit, unit, PAL.ink, { align: 'center' })
+    }
+    return top
+  })
+}
+// 彩纸：t0 以后从屏幕上方往下飘，到 y1 再从头来；两种朝向轮换，像在翻
+const h01 = (i, s) => { const v = Math.sin(i * 12.9898 + s * 78.233) * 43758.5453; return v - Math.floor(v) }
+export function confetti(ctx, V, t, t0, LW, y1, n, cols, seed = 1) {
+  const d = t - t0
+  if (d < 0) return
+  for (let i = 0; i < n; i++) {
+    const sp = 18 + h01(i, seed) * 22, yr = d * sp - h01(i, seed + 1) * 70
+    if (yr < 0) continue
+    const y = (yr % (y1 + 6)) - 4, x = Math.round(h01(i, seed + 2) * LW + Math.sin(t * 2.2 + i) * 3), f = (Math.floor(t * 6) + i) % 2
+    V.r(ctx, x, y, f ? 2 : 1, f ? 1 : 2, cols[i % cols.length])
+  }
 }
 
 // ---------- HUD：{ lives, score, coins, stage, c } ----------
@@ -135,7 +171,6 @@ export function burst(ctx, V, t, t0, x, y, cols = [PAL.coin, PAL.white, PAL.oran
 }
 export function fireworks(ctx, V, t, t0, pts, cols, big = 1) { pts.forEach(([x, y, dt], i) => burst(ctx, V, t, t0 + dt, x, y, cols, 16 + 6 * (big - 1), 50 + 20 * (big - 1), 0.9, i * 3 + 1, big)) }
 // 全屏金币雨
-const h01 = (i, s) => { const v = Math.sin(i * 12.9898 + s * 78.233) * 43758.5453; return v - Math.floor(v) }
 export function coinRain(ctx, V, t, t0, LW, LH, n = 36, dur = 1.6, k = 2, seed = 3, top = 0) {
   const d = t - t0
   if (d < 0 || d > dur + 1.2) return
@@ -164,10 +199,3 @@ export function drawBot(ctx, V, t, x, y, k, o = {}) {
   })
 }
 export const hop = (t, t0, dur) => { const p = (t - t0) / dur; return p <= 0 || p >= 1 ? 0 : Math.sin(Math.PI * p) }
-// 旗杆：底在 (x, gy)，高 h；flagP 0..1 旗子从底升到顶
-export function flagPole(ctx, V, x, gy, h, flagP, col) {
-  V.r(ctx, x - 3, gy - 4, 8, 4, PAL.grassDk)
-  V.r(ctx, x, gy - h, 2, h - 4, PAL.grayDk); V.r(ctx, x + 1, gy - h, 1, h - 4, PAL.white)
-  V.disc(ctx, x + 1, gy - h - 2, 2, PAL.green)
-  V.img(ctx, flagImg(col), x + 2, Math.round(gy - 14 - (h - 20) * flagP), 1)
-}
