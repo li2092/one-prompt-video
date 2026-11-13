@@ -79,7 +79,7 @@ A theme changes colors and lines. A style pack redraws all nine layouts its own 
 
 - Add a `clip` scene to `video.json` with a source file and in and out times, and the footage sits on the same timeline as the generated scenes. A file made only of `clip` scenes is an edit of existing video.
 - Add `--project` to the render command to also get a Final Cut Pro `.fcpxml`, a Jianying (剪映) draft and an `.srt`: one clip per scene, separate tracks for music, effects and voice, and captions as editable text.
-- The FCPXML validates against the format definition that ships with Final Cut Pro. Opening the projects in Final Cut Pro and Jianying is still being verified; the Jianying draft format is undocumented and may break after an update.
+- The FCPXML has been imported into Final Cut Pro successfully. The Jianying draft format is undocumented; drafts from this version have not been opened in Jianying yet, and the format may break after an update.
 
 ### Free-form short films
 

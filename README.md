@@ -79,7 +79,7 @@ https://github.com/user-attachments/assets/d89fea91-f7cd-4c06-b54d-4c51cbde7e3f
 
 - `video.json` 里加一场 `clip`，写素材文件和起止秒数，实拍片段就和生成的画面排在同一条时间线上；全是 `clip` 就是剪辑已有的视频。
 - 出片命令加 `--project`，同时导出 Final Cut Pro 的 `.fcpxml`、剪映草稿和 `.srt` 字幕：每一场是一个片段，配乐、音效、人声各一轨，字幕是能改的文字。
-- 工程文件通过了 Final Cut Pro 自带格式定义的校验；在 Final Cut Pro 和剪映里实际打开的情况还在验证，剪映的草稿格式没有公开说明，升级后可能失效。
+- Final Cut Pro 的工程实测能导入。剪映的草稿格式没有公开说明，这一版生成的草稿还没有在剪映里实测，剪映升级后也可能失效。
 
 ### 自由画面的短片
 
