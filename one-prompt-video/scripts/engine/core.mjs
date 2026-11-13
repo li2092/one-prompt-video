@@ -109,7 +109,7 @@ export const hasCJK = s => CJK.test(String(s))
 // 把一段话拆成不可再拆的小块：一个中文词一块（「满意」「模式」不会被折成两行），一个英文词或一串数字一块。
 // 中文分词用 Node 自带的 Intl.Segmenter；没有它的环境退回一个汉字一块。
 const SEG = typeof Intl !== 'undefined' && Intl.Segmenter ? new Intl.Segmenter('zh', { granularity: 'word' }) : null
-function tokens(text) {
+function tokens(text, keep = []) {
   const out = []
   let buf = '', han = ''
   const flushHan = () => { if (!han) return; if (SEG) for (const s of SEG.segment(han)) out.push(s.segment); else out.push(...han); han = '' }
@@ -122,15 +122,26 @@ function tokens(text) {
     else buf += ch
   }
   flush(); flushHan()
+  // keep 里的词（高亮词）不许折开：把盖住它的那几块并成一块
+  for (const kp of keep) {
+    if (!kp) continue
+    for (let from = 0; ;) {
+      const at = out.join('').indexOf(kp, from); if (at < 0) break
+      let pos = 0, i0 = -1, i1 = -1
+      for (let i = 0; i < out.length; i++) { const end = pos + out[i].length; if (i0 < 0 && end > at) i0 = i; if (end >= at + kp.length) { i1 = i; break } pos = end }
+      if (i0 >= 0 && i1 > i0) out.splice(i0, i1 - i0 + 1, out.slice(i0, i1 + 1).join(''))
+      from = at + kp.length
+    }
+  }
   return out
 }
 
 // 按宽度折行。标点不放行首，左括号和左引号不放行尾。
-export function wrapText(ctx, text, maxW) {
+export function wrapText(ctx, text, maxW, keep) {
   const lines = []
   let line = ''
   const push = () => { lines.push(line.trimEnd()); line = '' }
-  for (const tk of tokens(text)) {
+  for (const tk of tokens(text, keep)) {
     if (tk === '\n') { push(); continue }
     if (line === '' && tk === ' ') continue
     const next = line + tk
@@ -151,7 +162,7 @@ export function wrapText(ctx, text, maxW) {
 
 // 在给定的宽和行数里放下一段字：放不下就缩小字号，缩到下限还放不下就报告溢出。
 // font(size) 返回 ctx.font 字符串。返回 { size, lines, lineH, overflow }
-export function fitText(ctx, text, { font, maxW, maxLines = 2, size, minSize = size * 0.55, lineGap = 1.28, maxH = Infinity, oneLine = false }) {
+export function fitText(ctx, text, { font, maxW, maxLines = 2, size, minSize = size * 0.55, lineGap = 1.28, maxH = Infinity, oneLine = false, keep }) {
   let s = size
   // 短标题：宁可缩小一点放进一行，也不折成两行（折行容易把一个词切开）
   if (oneLine && !String(text).includes('\n')) {
@@ -159,13 +170,13 @@ export function fitText(ctx, text, { font, maxW, maxLines = 2, size, minSize = s
   }
   for (;;) {
     ctx.font = font(s)
-    let lines = wrapText(ctx, text, maxW)
+    let lines = wrapText(ctx, text, maxW, keep)
     const widths = lines.map(l => ctx.measureText(l).width)
     if (lines.length > 1 && widths[widths.length - 1] < Math.max(...widths) * 0.34) {
       // 最后一行只剩一两个字：行数不变的前提下把行宽收窄，各行就匀了
       let lo = maxW * 0.45, hi = maxW
-      for (let k = 0; k < 7; k++) { const mid = (lo + hi) / 2; if (wrapText(ctx, text, mid).length <= lines.length) hi = mid; else lo = mid }
-      lines = wrapText(ctx, text, hi)
+      for (let k = 0; k < 7; k++) { const mid = (lo + hi) / 2; if (wrapText(ctx, text, mid, keep).length <= lines.length) hi = mid; else lo = mid }
+      lines = wrapText(ctx, text, hi, keep)
     }
     const wide = Math.max(...lines.map(l => ctx.measureText(l).width))
     const lineH = s * lineGap

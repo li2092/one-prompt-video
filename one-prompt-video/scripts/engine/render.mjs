@@ -29,10 +29,12 @@ export function makeRenderer({ v, theme, TL, fonts, W, H, createCanvas, custom =
       once(name, make) { if (!store.has(name)) store.set(name, make()); return store.get(name) },
       font: (role, weight, size) => `${weight} ${size.toFixed(1)}px ${roleStack[role] || roleStack.body}`,
       fit(text, o) {
-        const key = [text, o.role, o.weight, o.size, o.maxW, o.maxLines, o.maxH, o.lineGap, o.oneLine, o.quiet, o.silent].join('|')
+        const key = [TL.scenes[sceneIndex]?.scene.highlight, text, o.role, o.weight, o.size, o.maxW, o.maxLines, o.maxH, o.lineGap, o.oneLine, o.quiet, o.silent].join('|')
         let f = fitCache.get(key)
         if (!f) {
-          f = fitText(lctx, String(text), { font: sz => E.font(o.role, o.weight, sz), maxW: o.maxW, maxLines: o.maxLines, size: o.size, minSize: o.minSize, lineGap: o.lineGap, maxH: o.maxH, oneLine: o.oneLine })
+          // 这一场的高亮词出现在这段字里，就不许把它折成两行（太长的除外，否则字会被缩得很小）
+          const hl = TL.scenes[sceneIndex]?.scene.highlight, keep = typeof hl === 'string' && hl.length > 1 && hl.length <= 10 && String(text).includes(hl) ? [hl] : undefined
+          f = fitText(lctx, String(text), { keep, font: sz => E.font(o.role, o.weight, sz), maxW: o.maxW, maxLines: o.maxLines, size: o.size, minSize: o.minSize, lineGap: o.lineGap, maxH: o.maxH, oneLine: o.oneLine })
           fitCache.set(key, f)
           const short = [...String(text)].slice(0, 14).join('') + ([...String(text)].length > 14 ? '…' : '')
           // silent：只是试排一下，放不下也不记进报告
