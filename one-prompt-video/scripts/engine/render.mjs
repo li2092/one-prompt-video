@@ -138,6 +138,7 @@ export function makeRenderer({ v, theme, TL, fonts, W, H, createCanvas, custom =
     const { E, s } = r
     if (opt.caption !== false) { ctx.save(); if (theme.caption) theme.caption(ctx, s, E); else drawCaption(ctx, s, E); ctx.restore() }
     // 风格包的最上层：扫描线、角标、外框这一类
+    E.noCaption = opt.caption === false      // 在 overlay 里自己画字幕的风格包要看这个：导出工程时字幕另成一轨，画面上不画
     if (theme.overlay) { ctx.save(); theme.overlay(ctx, E, s); ctx.restore() }
     // 开头从黑场淡入，片尾淡到黑
     const dark = Math.max(1 - clamp(T / 0.35), clamp((T - (TL.total - 0.8)) / 0.7))

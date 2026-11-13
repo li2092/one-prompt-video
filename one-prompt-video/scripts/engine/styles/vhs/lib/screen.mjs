@@ -161,7 +161,7 @@ function headSwitch(ctx, E) {
 // 隐藏字幕：电视机自己解出来叠在画面上，所以画在录像带质感之后，不带色边和噪点。每行一块黑底白字
 function captions(ctx, s, E) {
   const say = s.scene.say
-  if (!say || !E.captionH) return
+  if (!say || !E.captionH || E.noCaption) return
   const { W, H, u } = E, por = E.portrait
   const chunks = captionChunks(say, por ? 16 : 28), lens = chunks.map(c => textUnits(c)), total = lens.reduce((a, b) => a + b, 0)
   const span = Math.max(0.5, s.dur - 0.3)
