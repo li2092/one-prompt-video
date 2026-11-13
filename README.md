@@ -69,6 +69,22 @@ https://github.com/user-attachments/assets/d89fea91-f7cd-4c06-b54d-4c51cbde7e3f
 
 <img src="one-prompt-video/assets/themes.jpg" width="100%" alt="内置主题的预览">
 
+### 风格包：一整套自己的画面
+
+主题换的是颜色和线条，风格包把九种版式各按自己的样子重画：聊天界面里每条要点是一个气泡，街机关卡里柱状图是一摞砖块，线索板上的步骤用红线连起来。用法一样，`"theme"` 换一个词。现成的有十五个，也可以让模型按 `references/style-packs.md` 现写一个新的。
+
+<img src="one-prompt-video/assets/styles.jpg" width="100%" alt="十五个风格包的预览">
+
+### 剪进实拍素材，导出工程接着剪
+
+- `video.json` 里加一场 `clip`，写素材文件和起止秒数，实拍片段就和生成的画面排在同一条时间线上；全是 `clip` 就是剪辑已有的视频。
+- 出片命令加 `--project`，同时导出 Final Cut Pro 的 `.fcpxml`、剪映草稿和 `.srt` 字幕：每一场是一个片段，配乐、音效、人声各一轨，字幕是能改的文字。
+- 工程文件通过了 Final Cut Pro 自带格式定义的校验；在 Final Cut Pro 和剪映里实际打开的情况还在验证，剪映的草稿格式没有公开说明，升级后可能失效。
+
+### 自由画面的短片
+
+要有场景、有角色、有故事的短片，模型按 `references/film.md` 直接写每一帧怎么画，脚本管镜头表、配乐、分段续跑和自检。只要 Node.js 和 ffmpeg，不要浏览器。
+
 ## 它怎么做到的
 
 ```mermaid
@@ -224,7 +240,7 @@ https://github.com/user-attachments/assets/225be1e4-821d-4b5b-9432-e9ffde8ccc12
 
 ## 现状
 
-- 版本 0.4.0。只在 macOS（Apple Silicon）上实测过；Windows 和 Linux 的代码路径按文档写了，还没有实测，欢迎反馈。
+- 版本 0.5.0。只在 macOS（Apple Silicon）上实测过；Windows 和 Linux 的代码路径按文档写了，还没有实测，欢迎反馈。
 - 不接外部工具时的默认输出是程序合成的配乐、没有人声，比上面的演示片简单。[同一支「一句话，出一支片」的默认输出](https://github.com/user-attachments/assets/80fd4bbb-2e34-457d-8688-b6d547401871)可以对比着看。
 - 配乐（自带的和采样的）只量过响度和峰值，好不好听要你自己听。
 - 技能的说明文件和脚本的提示信息目前是中文；片子的内容可以是任何语言，英文排版已支持。

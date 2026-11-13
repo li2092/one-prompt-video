@@ -4,7 +4,7 @@ description: 把一句话需求做成带配乐和字幕的 MP4 短视频：讲�
 license: MIT
 metadata:
   author: JiMiL, vivhuang
-  version: "0.4.0"
+  version: "0.5.0"
 compatibility: Requires Node.js 18+ and ffmpeg (scripts/setup.mjs checks and helps install). No GPU, no browser.
 ---
 
@@ -125,6 +125,12 @@ node "SKILL/scripts/make.mjs" 片名/video.json            # 出片
 | `isometric` | 2.5D 的机器、传送带、检查站 | 讲流程、讲系统怎么运转 |
 | `cosmos` | 深空、星云、发光的星体和轨道 | 讲全局、讲层次、系列开篇 |
 | `news` | 演播室、标题条、滚动字幕条 | 要点速递、周报、数据播报 |
+| `dashboard` | 暗色数据大屏：面板依次点亮、仪表弧、柱状图 | 评测、监控、成本这类带数字的内容 |
+| `skit` | 扁平插画的办公室，两个小人对内容有反应 | 给非专业观众讲道理、职场话题 |
+| `variety` | 多层描边花字、放射线、吉祥物、弹幕条 | 最热闹的短视频、吐槽、盘点 |
+| `vhs` | 录像带：扫描线、换台、老电视、走带计时 | 怀旧向、系列节目的片头和预告 |
+| `detective` | 软木板、拍立得、便签、红线 | 排查问题、复盘一件事的来龙去脉 |
+| `chrome` | 镀铬立体字、流动的液态渐变、星形闪光 | 年轻向的短句、潮流话题，不适合严肃内容 |
 
 预览图在 `SKILL/assets/styles.jpg`。风格包的装饰比主题多，一场里的字要更短；`news` 会把内容排成新闻节目的样子，内容不是真新闻时在回报里提醒用户一句。
 
