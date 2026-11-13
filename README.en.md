@@ -13,15 +13,15 @@ Say one sentence → the LLM fills in a form → one command renders an MP4 with
 ![agent skills](https://img.shields.io/badge/Agent%20Skills-SKILL.md-8a5cf6)
 ![no GPU](https://img.shields.io/badge/GPU-not%20needed-lightgrey)
 
-<img src="https://github.com/user-attachments/assets/aa4fee16-3d77-4bf4-a7b6-e1cefc0bdfab" width="760" alt="A clip from the one-prompt-video trailer">
+<img src="docs/hero.jpg" width="760" alt="A frame from the showcase short: a paper whale swims out of the screen">
 
 </div>
 
-Full version with narration and score, 42 seconds. **GitHub's player starts muted: press play, then click the speaker icon at the bottom right.** The same goes for every video on this page:
+The showcase short, 45 seconds, no narration (the on-screen line reads "a whale swims over the rooftops"). **GitHub's player starts muted: press play, then click the speaker icon at the bottom right.** The same goes for every video on this page:
 
-https://github.com/user-attachments/assets/7da9e384-5efd-4d13-9077-716861572c67
+https://github.com/user-attachments/assets/4a6eb480-7430-4076-b320-c1aea5d31f0c
 
-<sub>Every frame is rendered by this skill's engine: three hand-written scenes plus built-in layouts, with sources in <a href="docs/demos/trailer-en">docs/demos/trailer-en</a>. The score uses GarageBand instrument samples and the narration is an AI voice from Doubao TTS; both methods are described in the skill's <a href="one-prompt-video/references/external-tools.md">external-tools.md</a>.</sub>
+<sub>Every frame is drawn by code. No video generation model and no image assets: the model follows the skill's <a href="one-prompt-video/references/film.md">free-form film route</a> and writes the drawing code, and the script handles shots, music and rendering. The score uses GarageBand instrument samples.</sub>
 
 ## What it is
 
@@ -34,6 +34,9 @@ An [Agent Skill](https://agentskills.io). Install it into Claude Code, Codex, or
 - **Lightweight.** Node.js and ffmpeg. No GPU, no browser. A 30-second 1080p video renders in about 13 seconds on an Apple Silicon laptop.
 
 ## Gallery
+
+<details>
+<summary>Four demo videos made by filling in the table only (with narration, click to open)</summary>
 
 Each of the four videos below is rendered from a single `video.json`. Narration is Doubao TTS, with a different voice, tone and pace for each video. The scores are GarageBand instrument samples, with a different arrangement for each. Both come from the skill's external-tools methods: narration needs your own API key, and sample-based scores can only be made on macOS. A single cover frame has been added at the start of each so that the player shows a meaningful cover. The player starts muted, so click the speaker icon.
 
@@ -56,6 +59,8 @@ https://github.com/user-attachments/assets/5c3f65bf-3ed3-4f40-bf06-600a764e2309
 "Small models can make videos too": portrait, pop theme, using this repository's own test numbers. A fast, lively female voice; marimba, electric bass and vibraphone.
 
 https://github.com/user-attachments/assets/0aa34997-b250-4b0a-ace8-a029054c62f0
+
+</details>
 
 ### No ceiling on style
 

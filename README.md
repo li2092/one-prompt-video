@@ -13,15 +13,15 @@
 ![agent skills](https://img.shields.io/badge/Agent%20Skills-SKILL.md-8a5cf6)
 ![no GPU](https://img.shields.io/badge/GPU-not%20needed-lightgrey)
 
-<img src="https://github.com/user-attachments/assets/785b180e-654e-47c9-8f4d-2f6f957f4799" width="760" alt="one-prompt-video 宣传片的片段">
+<img src="docs/hero.jpg" width="760" alt="展示短片《沿线剪下》里的一帧：纸鲸游出幕布">
 
 </div>
 
-带旁白和配乐的完整版，42 秒。**GitHub 的播放器默认静音，播放后点右下角的喇叭图标打开声音**，本页所有视频都一样：
+展示短片《沿线剪下》，45 秒，没有旁白。**GitHub 的播放器默认静音，播放后点右下角的喇叭图标打开声音**，本页所有视频都一样：
 
-https://github.com/user-attachments/assets/bbe739b1-32a2-4042-b0e6-c4116cb0daa9
+https://github.com/user-attachments/assets/4a6eb480-7430-4076-b320-c1aea5d31f0c
 
-<sub>画面由本技能的引擎逐帧渲染：自己写的三场画面加现成版式，源文件在 <a href="docs/demos/trailer">docs/demos/trailer</a>。配乐用库乐队（GarageBand）的乐器采样制作，旁白是豆包语音合成的 AI 配音，做法在技能的 <a href="one-prompt-video/references/external-tools.md">external-tools.md</a> 里。</sub>
+<sub>整支片子的每一帧都是代码画的，没有用视频生成模型，也没有用图片素材：模型按技能里 <a href="one-prompt-video/references/film.md">自由画面的短片</a> 那条路线写画面代码，脚本管镜头、配乐和出片。配乐用库乐队（GarageBand）的乐器采样制作。</sub>
 
 ## 这是什么
 
@@ -34,6 +34,9 @@ https://github.com/user-attachments/assets/bbe739b1-32a2-4042-b0e6-c4116cb0daa9
 - **很轻。** 只要 Node.js 和 ffmpeg，不要显卡，不要浏览器。实测一支 30 多秒的 1080p 片子十几秒出完（Apple Silicon 笔记本）。
 
 ## 看效果
+
+<details>
+<summary>只填表出的四支演示片（带旁白，点开看）</summary>
 
 下面四支片子的画面各由一份 `video.json` 出。配音是豆包语音，每支换一个音色、语气和语速；配乐是库乐队的乐器采样，每支一种编曲。这两样用的是技能里「借助外部工具」的做法：配音要自己的密钥，采样配乐只能在 macOS 上做。为了让播放器的封面有画面，每支开头加了一帧封面。播放器默认静音，记得点喇叭图标。
 
@@ -56,6 +59,8 @@ https://github.com/user-attachments/assets/1bec9149-21b1-4973-81be-457f3c279f72
 「one-prompt-video 是什么」：七场里有一场是自己写的画面代码（一句话变成 `video.json` 再变成 MP4 的那一场），其余是现成版式。男声，从容；钢琴、圆号、合唱、竖琴。
 
 https://github.com/user-attachments/assets/d89fea91-f7cd-4c06-b54d-4c51cbde7e3f
+
+</details>
 
 ### 风格不设上限
 
