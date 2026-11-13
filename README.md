@@ -13,11 +13,17 @@
 ![agent skills](https://img.shields.io/badge/Agent%20Skills-SKILL.md-8a5cf6)
 ![no GPU](https://img.shields.io/badge/GPU-not%20needed-lightgrey)
 
-<img src="docs/hero.jpg" width="760" alt="展示短片《沿线剪下》里的一帧：纸鲸游出幕布">
+<img src="https://github.com/user-attachments/assets/785b180e-654e-47c9-8f4d-2f6f957f4799" width="760" alt="one-prompt-video 宣传片的片段">
 
 </div>
 
-展示短片《沿线剪下》，45 秒，没有旁白。**GitHub 的播放器默认静音，播放后点右下角的喇叭图标打开声音**，本页所有视频都一样：
+带旁白和配乐的完整版，42 秒。**GitHub 的播放器默认静音，播放后点右下角的喇叭图标打开声音**，本页所有视频都一样：
+
+https://github.com/user-attachments/assets/bbe739b1-32a2-4042-b0e6-c4116cb0daa9
+
+<sub>画面由本技能的引擎逐帧渲染：自己写的三场画面加现成版式，源文件在 <a href="docs/demos/trailer">docs/demos/trailer</a>。配乐用库乐队（GarageBand）的乐器采样制作，旁白是豆包语音合成的 AI 配音，做法在技能的 <a href="one-prompt-video/references/external-tools.md">external-tools.md</a> 里。</sub>
+
+再看一支不是版式片的：展示短片《沿线剪下》，45 秒，没有旁白。
 
 https://github.com/user-attachments/assets/4a6eb480-7430-4076-b320-c1aea5d31f0c
 

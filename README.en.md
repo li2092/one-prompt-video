@@ -13,11 +13,17 @@ Say one sentence → the LLM fills in a form → one command renders an MP4 with
 ![agent skills](https://img.shields.io/badge/Agent%20Skills-SKILL.md-8a5cf6)
 ![no GPU](https://img.shields.io/badge/GPU-not%20needed-lightgrey)
 
-<img src="docs/hero.jpg" width="760" alt="A frame from the showcase short: a paper whale swims out of the screen">
+<img src="https://github.com/user-attachments/assets/aa4fee16-3d77-4bf4-a7b6-e1cefc0bdfab" width="760" alt="A clip from the one-prompt-video trailer">
 
 </div>
 
-The showcase short, 45 seconds, no narration (the on-screen line reads "a whale swims over the rooftops"). **GitHub's player starts muted: press play, then click the speaker icon at the bottom right.** The same goes for every video on this page:
+Full version with narration and score, 42 seconds. **GitHub's player starts muted: press play, then click the speaker icon at the bottom right.** The same goes for every video on this page:
+
+https://github.com/user-attachments/assets/7da9e384-5efd-4d13-9077-716861572c67
+
+<sub>Every frame is rendered by this skill's engine: three hand-written scenes plus built-in layouts, with sources in <a href="docs/demos/trailer-en">docs/demos/trailer-en</a>. The score uses GarageBand instrument samples and the narration is an AI voice from Doubao TTS; both methods are described in the skill's <a href="one-prompt-video/references/external-tools.md">external-tools.md</a>.</sub>
+
+And one that is not a layout video: the showcase short, 45 seconds, no narration (the on-screen line reads "a whale swims over the rooftops").
 
 https://github.com/user-attachments/assets/4a6eb480-7430-4076-b320-c1aea5d31f0c
 
