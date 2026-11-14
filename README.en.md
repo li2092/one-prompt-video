@@ -244,7 +244,7 @@ It makes short videos that explain one thing clearly: style packs and layouts, p
 
 ## Status
 
-- Version 0.5.0. Tested on macOS (Apple Silicon) only. The Windows and Linux code paths are written but have not been run yet; reports are welcome.
+- Version 0.6.0. Tested on macOS (Apple Silicon) only. The Windows and Linux code paths are written but have not been run yet; reports are welcome.
 - Without external tools, the default output has code-synthesized music and no voice-over, which is plainer than the demos above. Compare with [the default output of the same "One prompt in, one video out"](https://github.com/user-attachments/assets/382dc542-a11a-47e3-85dd-1de3ded48b5d).
 - Music, both built-in and sample-based, has only been measured for loudness and peaks; whether it sounds good is for you to judge.
 - The skill instructions (`SKILL.md`, `references/`) and the script messages are in Chinese for now. Video content can be in any language, and English typesetting is supported.
