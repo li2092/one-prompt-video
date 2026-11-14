@@ -25,6 +25,8 @@
 
 ## 各版式的字段
 
+下面每一行列出了这种版式能写的全部字段。`kicker`、`subtitle`、`note`、`label`、`cta` 和各场的 `title` 默认不写，只有去掉它观众就看不懂这一场时才写（`SKILL.md` 第 2 步）。
+
 ```json
 { "layout": "title", "title": "大标题", "subtitle": "副标题", "kicker": "标题上方的小字" }
 { "layout": "clip", "file": "素材/采访.mp4", "from": 12.4, "to": 18, "fit": "cover", "volume": 1, "title": "角标" }   // 素材的一段，见 editing.md
