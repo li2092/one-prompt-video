@@ -17,7 +17,6 @@ import { sizeOf } from './engine/timeline.mjs'
 import { Music, SR, chord, sfxSignal } from './engine/synth.mjs'
 import { wavBuffer } from './engine/music.mjs'
 import { findFfmpeg, FFMPEG_HELP, mixAudio, prepMusic, openEncoder, probe, loudness } from './engine/encode.mjs'
-import { KITS } from './kits/index.mjs'
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const argv = process.argv.slice(2)
@@ -113,10 +112,8 @@ const E = {
   layer(w = W, h = H) { return createCanvas(Math.max(1, Math.round(w)), Math.max(1, Math.round(h))) },
   // 只算一次的东西（纸纹、星空、静止的背景）：第一次调用时算，以后直接取
   once(name, make) { if (!store.has(name)) store.set(name, make()); return store.get(name) },
-  kit: {},
   state: null,
 }
-for (const [name, make] of Object.entries(KITS)) E.kit[name] = make(E)
 
 function resetCtx(ctx) {
   ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; ctx.shadowBlur = 0; ctx.shadowColor = 'transparent'; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0

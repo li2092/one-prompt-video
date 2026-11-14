@@ -4,7 +4,7 @@
 
 ### One prompt in, one video out
 
-Say one sentence → the LLM fills in a form → one command renders an MP4 with music and captions
+Say one sentence → the model designs the scenes and writes one video.json → one command renders an MP4 with music and captions
 
 [简体中文](README.md) · English
 
@@ -34,7 +34,7 @@ https://github.com/user-attachments/assets/4a6eb480-7430-4076-b320-c1aea5d31f0c
 An [Agent Skill](https://agentskills.io). Install it into Claude Code, Codex, or any agent that supports skills, say one sentence, and get back a 20 to 90 second video: explainers, product intros, data stories, knowledge cards, in landscape or portrait.
 
 - **No video generation model.** Every frame is drawn by code. Text is never garbled, numbers are exact, the same input always gives the same video, and a fix is a one-word edit followed by a re-render.
-- **The model only fills in a form.** It picks from nine layouts and fills in text and numbers. Timing, drawing, music, encoding and self-checks are done by scripts.
+- **The model designs first.** It picks a style and decides what each scene shows. Things you can see in the subject are drawn by the model in code; the rest uses ready-made layouts. Timing, music, captions, encoding and self-checks are done by scripts.
 - **No ceiling on style.** The built-in themes are a starting point: swap colors and fonts, or write the drawing code for any scene. Stronger models can also bring in Blender, real-instrument scores and AI narration.
 - **Small models can run it.** When the form is wrong, the script says which scene, which field, and what the correct form looks like.
 - **Lightweight.** Node.js and ffmpeg. No GPU, no browser. A 30-second 1080p video renders in about 13 seconds on an Apple Silicon laptop.
@@ -105,19 +105,19 @@ flowchart LR
 
 The timeline follows the beat of the theme: every scene lasts a whole number of beats, and cuts and sound effects land on the beat, so picture and music stay in step.
 
-This file is all the model writes:
+The model writes a file like this, plus drawing code for the scenes it draws itself (in `scenes/`):
 
 ```json
 {
   "title": "One prompt in, one video out",
-  "theme": "grid",
+  "theme": "papercraft",
   "aspect": "16:9",
-  "seconds": 32,
+  "seconds": 30,
   "scenes": [
-    { "layout": "title", "title": "One prompt in, one video out", "subtitle": "The model fills in a form. Scripts render it.", "say": "Say one sentence. Get a finished video." },
-    { "layout": "steps", "title": "How it works", "items": ["Say one sentence", "The model fills in a form", "Scripts render it", "You get an MP4"] },
-    { "layout": "number", "value": "13", "unit": "s", "label": "to render a 35-second 1080p video", "note": "Measured on an Apple Silicon laptop" },
-    { "layout": "end", "title": "One prompt in, one video out", "cta": "Try it" }
+    { "layout": "title", "title": "One prompt in, one video out", "say": "Say one sentence. Get a finished video." },
+    { "layout": "custom", "module": "scenes/pipeline.mjs", "seconds": 7, "cues": 3, "say": "You say one sentence. The model designs it, and scripts render it." },
+    { "layout": "bars", "unit": "s", "items": [{ "label": "Run 1", "value": 68 }, { "label": "Run 2", "value": 51 }, { "label": "Run 3", "value": 57 }], "say": "A small model took about a minute per run." },
+    { "layout": "end", "title": "Try it", "say": "Try it now." }
   ]
 }
 ```
@@ -187,14 +187,14 @@ node /path/to/one-prompt-video/scripts/make.mjs demo/video.json     # output in 
 
 Any scene can carry a `say` line, shown as a caption. All fields are documented in [`references/video-json.md`](references/video-json.md) (Chinese).
 
-## Built for small models
+## Test results
 
-Tested with Claude Haiku, a small model, on three prompts (explaining a concept, a portrait product video, a data story), two rounds each. The model read only `SKILL.md`. All six runs succeeded on the first attempt with no failed command, at about one minute per run. The prompts and the grading script are in [`evals/`](evals).
+- The earlier form-only version: tested with Claude Haiku, a small model, on three prompts (explaining a concept, a portrait product video, a data story), two rounds each. All six runs succeeded on the first attempt, at about one minute per run.
+- The current design-first version: tested with deepseek-v4.1-flash on five prompts. The explainer, the product intro, the data story and the portrait tip video each rendered in 3 to 8 minutes, with three or four scenes drawn by the model. The atmosphere short took the free-form film route and did not finish within an hour; that route currently needs a stronger model.
 
-Design choices that make this work:
+Design choices that help small models:
 
-- `SKILL.md` is about 120 lines. Everything else is read on demand.
-- The model writes no drawing code, computes no timings and tunes no parameters.
+- The model computes no timings and tunes no parameters; it writes drawing code only for the scenes that show the subject.
 - Validation reports every problem in one pass, each with a correct example.
 - Trailing commas and stray code fences are tolerated.
 - Text that is too long is shrunk automatically and flagged in the report.
@@ -240,7 +240,7 @@ The sources of the demo videos on this page are in [`docs/demos/`](docs/demos), 
 | Live-action look, real people, camera work | No | Yes |
 | Hardware | Any ordinary computer | A GPU or a cloud service |
 
-It makes layout-based videos that explain one thing clearly. Live-action footage, real people on camera and character-driven stories are out of scope, and so is editing existing footage.
+It makes short videos that explain one thing clearly: style packs and layouts, plus a few scenes drawn by the model. Footage and screen recordings you supply can be cut in, and the project can be exported to Final Cut Pro or CapCut for further editing. It cannot generate real people or live-action footage; stories with scenes and characters take the free-form film route and need a stronger model.
 
 ## Status
 
@@ -256,7 +256,6 @@ SKILL.md                     main instructions read by the model; the repository
 scripts/                     setup.mjs, make.mjs, browser-render.mjs, engine/
 references/                  documents read on demand
 assets/                      example video.json, theme preview, minimal projects for the reference pipelines
-evals/                       test prompts and grading script
 docs/                        images for this page; demo sources are in docs/demos/
 ```
 
