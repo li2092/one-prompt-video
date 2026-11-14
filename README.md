@@ -244,7 +244,7 @@ https://github.com/user-attachments/assets/225be1e4-821d-4b5b-9432-e9ffde8ccc12
 
 ## 现状
 
-- 版本 0.5.0。只在 macOS（Apple Silicon）上实测过；Windows 和 Linux 的代码路径按文档写了，还没有实测，欢迎反馈。
+- 版本 0.6.0。只在 macOS（Apple Silicon）上实测过；Windows 和 Linux 的代码路径按文档写了，还没有实测，欢迎反馈。
 - 不接外部工具时的默认输出是程序合成的配乐、没有人声，比上面的演示片简单。[同一支「一句话，出一支片」的默认输出](https://github.com/user-attachments/assets/80fd4bbb-2e34-457d-8688-b6d547401871)可以对比着看。
 - 配乐（自带的和采样的）只量过响度和峰值，好不好听要你自己听。
 - 技能的说明文件和脚本的提示信息目前是中文；片子的内容可以是任何语言，英文排版已支持。

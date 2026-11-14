@@ -4,7 +4,7 @@ description: 把一句话需求做成带配乐和字幕的 MP4 短视频：讲�
 license: MIT
 metadata:
   author: JiMiL, vivhuang
-  version: "0.5.0"
+  version: "0.6.0"
 compatibility: Requires Node.js 18+ and ffmpeg (scripts/setup.mjs checks and helps install). No GPU, no browser.
 ---
 
