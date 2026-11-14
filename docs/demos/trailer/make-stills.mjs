@@ -4,7 +4,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
-const here = path.dirname(fileURLToPath(import.meta.url)), eng = path.join(here, '../../../one-prompt-video/scripts/engine/')
+const here = path.dirname(fileURLToPath(import.meta.url)), eng = path.join(here, '../../../scripts/engine/')
 const { createCanvas, GlobalFonts } = createRequire(path.join(process.cwd(), 'x.js'))('@napi-rs/canvas')
 const { resolveFonts } = await import(eng + 'core.mjs'), { getTheme } = await import(eng + 'themes.mjs')
 const { buildTimeline } = await import(eng + 'timeline.mjs'), { makeRenderer } = await import(eng + 'render.mjs')

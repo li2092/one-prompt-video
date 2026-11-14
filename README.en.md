@@ -21,13 +21,13 @@ Full version with narration and score, 42 seconds. **GitHub's player starts mute
 
 https://github.com/user-attachments/assets/7da9e384-5efd-4d13-9077-716861572c67
 
-<sub>Every frame is rendered by this skill's engine: three hand-written scenes plus built-in layouts, with sources in <a href="docs/demos/trailer-en">docs/demos/trailer-en</a>. The score uses GarageBand instrument samples and the narration is an AI voice from Doubao TTS; both methods are described in the skill's <a href="one-prompt-video/references/external-tools.md">external-tools.md</a>.</sub>
+<sub>Every frame is rendered by this skill's engine: three hand-written scenes plus built-in layouts, with sources in <a href="docs/demos/trailer-en">docs/demos/trailer-en</a>. The score uses GarageBand instrument samples and the narration is an AI voice from Doubao TTS; both methods are described in the skill's <a href="references/external-tools.md">external-tools.md</a>.</sub>
 
 And one that is not a layout video: the showcase short, 45 seconds, no narration (the on-screen line reads "a whale swims over the rooftops").
 
 https://github.com/user-attachments/assets/4a6eb480-7430-4076-b320-c1aea5d31f0c
 
-<sub>Every frame is drawn by code. No video generation model and no image assets: the model follows the skill's <a href="one-prompt-video/references/film.md">free-form film route</a> and writes the drawing code, and the script handles shots, music and rendering. The score uses GarageBand instrument samples.</sub>
+<sub>Every frame is drawn by code. No video generation model and no image assets: the model follows the skill's <a href="references/film.md">free-form film route</a> and writes the drawing code, and the script handles shots, music and rendering. The score uses GarageBand instrument samples.</sub>
 
 ## What it is
 
@@ -74,13 +74,13 @@ When that is not enough, write the drawing code for a scene, use one of the thre
 
 The built-in themes, three scenes each (in Chinese):
 
-<img src="one-prompt-video/assets/themes.jpg" width="100%" alt="Preview of the built-in themes">
+<img src="assets/themes.jpg" width="100%" alt="Preview of the built-in themes">
 
 ### Style packs: a whole look of their own
 
 A theme changes colors and lines. A style pack redraws all nine layouts its own way: in the chat pack every bullet is a message bubble, in the arcade pack a bar chart is a stack of bricks, on the detective board steps are joined with red string. Usage is the same, one word in `"theme"`. Fifteen ship with the skill, and a model can write a new one by following `references/style-packs.md`.
 
-<img src="one-prompt-video/assets/styles.jpg" width="100%" alt="Preview of the fifteen style packs">
+<img src="assets/styles.jpg" width="100%" alt="Preview of the fifteen style packs">
 
 ### Cut real footage in, export a project to keep editing
 
@@ -139,25 +139,22 @@ After rendering, the script checks resolution, duration, loudness, true peak and
 ### 1. Install the skill
 
 ```bash
-git clone --depth 1 https://github.com/li2092/one-prompt-video.git
-
 # Claude Code
-mkdir -p ~/.claude/skills && cp -r one-prompt-video/one-prompt-video ~/.claude/skills/
+git clone --depth 1 https://github.com/li2092/one-prompt-video.git ~/.claude/skills/one-prompt-video
 
 # Codex
-mkdir -p ~/.codex/skills && cp -r one-prompt-video/one-prompt-video ~/.codex/skills/
+git clone --depth 1 https://github.com/li2092/one-prompt-video.git ~/.codex/skills/one-prompt-video
 ```
 
 Windows (PowerShell):
 
 ```powershell
-git clone --depth 1 https://github.com/li2092/one-prompt-video.git
-Copy-Item -Recurse one-prompt-video\one-prompt-video "$HOME\.claude\skills\one-prompt-video"
+git clone --depth 1 https://github.com/li2092/one-prompt-video.git "$HOME\.claude\skills\one-prompt-video"
 ```
 
 The videos and GIFs on this page are stored on GitHub's attachment service, not in the repository, so the download is only a megabyte or two.
 
-For other agents, put the folder wherever that agent loads skills from. For a model without skill support, paste the content of `one-prompt-video/SKILL.md` into the conversation and replace `SKILL` with the absolute path of the folder.
+For other agents, put the folder wherever that agent loads skills from. For a model without skill support, paste the content of `SKILL.md` into the conversation and replace `SKILL` with the absolute path of the folder.
 
 ### 2. Say one sentence
 
@@ -188,7 +185,7 @@ node /path/to/one-prompt-video/scripts/make.mjs demo/video.json     # output in 
 | `number` | One key figure, counting up from 0 | `end` | Closing, with an optional button |
 | `bars` | Bar chart | `custom` | Your own drawing code for one scene |
 
-Any scene can carry a `say` line, shown as a caption. All fields are documented in [`references/video-json.md`](one-prompt-video/references/video-json.md) (Chinese).
+Any scene can carry a `say` line, shown as a caption. All fields are documented in [`references/video-json.md`](references/video-json.md) (Chinese).
 
 ## Built for small models
 
@@ -209,11 +206,11 @@ From the nearest step to the furthest:
 
 | You want | How |
 |---|---|
-| Custom colors, fonts, or a fixed length for one scene | [`references/video-json.md`](one-prompt-video/references/video-json.md) |
-| Voice-over | The skill ships no voice service; bring your own. Drop in recordings or plug in your own TTS: [`references/voice.md`](one-prompt-video/references/voice.md) |
-| One scene with special visuals | Write the drawing code for that scene; the rest stay as layouts: [`references/custom-scenes.md`](one-prompt-video/references/custom-scenes.md) |
-| Cartoon shorts, 3D scenes, landscapes | Three reference pipelines: [`references/pipelines.md`](one-prompt-video/references/pipelines.md) |
-| Photoreal rendering, real instruments, AI narration | External tools: [`references/external-tools.md`](one-prompt-video/references/external-tools.md) |
+| Custom colors, fonts, or a fixed length for one scene | [`references/video-json.md`](references/video-json.md) |
+| Voice-over | The skill ships no voice service; bring your own. Drop in recordings or plug in your own TTS: [`references/voice.md`](references/voice.md) |
+| One scene with special visuals | Write the drawing code for that scene; the rest stay as layouts: [`references/custom-scenes.md`](references/custom-scenes.md) |
+| Cartoon shorts, 3D scenes, landscapes | Three reference pipelines: [`references/pipelines.md`](references/pipelines.md) |
+| Photoreal rendering, real instruments, AI narration | External tools: [`references/external-tools.md`](references/external-tools.md) |
 
 Each reference pipeline ships with a minimal runnable project, intended for stronger models:
 
@@ -221,7 +218,7 @@ Each reference pipeline ships with a minimal runnable project, intended for stro
 
 ### With external tools
 
-When the user's machine has the software or the account, a stronger model can use these three methods. Instructions and minimal projects are in [`references/external-tools.md`](one-prompt-video/references/external-tools.md) (Chinese):
+When the user's machine has the software or the account, a stronger model can use these three methods. Instructions and minimal projects are in [`references/external-tools.md`](references/external-tools.md) (Chinese):
 
 - Blender rendering: global illumination, real materials, reflections, depth of field. Needs an installed Blender.
 - Instrument-sample scores: real brass, choir, harp and timpani. Needs GarageBand or Logic on macOS.
@@ -255,15 +252,14 @@ It makes layout-based videos that explain one thing clearly. Live-action footage
 ## Repository layout
 
 ```text
-one-prompt-video/            the skill itself; this is the folder you install
-  SKILL.md                   main instructions read by the model
-  scripts/                   setup.mjs, make.mjs, browser-render.mjs, engine/
-  references/                documents read on demand
-  assets/                    example video.json, theme preview, minimal projects for the reference pipelines
+SKILL.md                     main instructions read by the model; the repository root is the skill
+scripts/                     setup.mjs, make.mjs, browser-render.mjs, engine/
+references/                  documents read on demand
+assets/                      example video.json, theme preview, minimal projects for the reference pipelines
 evals/                       test prompts and grading script
 docs/                        images for this page; demo sources are in docs/demos/
 ```
 
 ## Authors and license
 
-By JiMiL and vivhuang. Licensed under [MIT](LICENSE). Dependencies and the sources of the methods used are listed in [`references/sources.md`](one-prompt-video/references/sources.md).
+By JiMiL and vivhuang. Licensed under [MIT](LICENSE). Dependencies and the sources of the methods used are listed in [`references/sources.md`](references/sources.md).

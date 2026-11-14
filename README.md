@@ -21,13 +21,13 @@
 
 https://github.com/user-attachments/assets/bbe739b1-32a2-4042-b0e6-c4116cb0daa9
 
-<sub>画面由本技能的引擎逐帧渲染：自己写的三场画面加现成版式，源文件在 <a href="docs/demos/trailer">docs/demos/trailer</a>。配乐用库乐队（GarageBand）的乐器采样制作，旁白是豆包语音合成的 AI 配音，做法在技能的 <a href="one-prompt-video/references/external-tools.md">external-tools.md</a> 里。</sub>
+<sub>画面由本技能的引擎逐帧渲染：自己写的三场画面加现成版式，源文件在 <a href="docs/demos/trailer">docs/demos/trailer</a>。配乐用库乐队（GarageBand）的乐器采样制作，旁白是豆包语音合成的 AI 配音，做法在技能的 <a href="references/external-tools.md">external-tools.md</a> 里。</sub>
 
 再看一支不是版式片的：展示短片《沿线剪下》，45 秒，没有旁白。
 
 https://github.com/user-attachments/assets/4a6eb480-7430-4076-b320-c1aea5d31f0c
 
-<sub>整支片子的每一帧都是代码画的，没有用视频生成模型，也没有用图片素材：模型按技能里 <a href="one-prompt-video/references/film.md">自由画面的短片</a> 那条路线写画面代码，脚本管镜头、配乐和出片。配乐用库乐队（GarageBand）的乐器采样制作。</sub>
+<sub>整支片子的每一帧都是代码画的，没有用视频生成模型，也没有用图片素材：模型按技能里 <a href="references/film.md">自由画面的短片</a> 那条路线写画面代码，脚本管镜头、配乐和出片。配乐用库乐队（GarageBand）的乐器采样制作。</sub>
 
 ## 这是什么
 
@@ -74,13 +74,13 @@ https://github.com/user-attachments/assets/d89fea91-f7cd-4c06-b54d-4c51cbde7e3f
 
 内置主题各取三场：
 
-<img src="one-prompt-video/assets/themes.jpg" width="100%" alt="内置主题的预览">
+<img src="assets/themes.jpg" width="100%" alt="内置主题的预览">
 
 ### 风格包：一整套自己的画面
 
 主题换的是颜色和线条，风格包把九种版式各按自己的样子重画：聊天界面里每条要点是一个气泡，街机关卡里柱状图是一摞砖块，线索板上的步骤用红线连起来。用法一样，`"theme"` 换一个词。现成的有十五个，也可以让模型按 `references/style-packs.md` 现写一个新的。
 
-<img src="one-prompt-video/assets/styles.jpg" width="100%" alt="十五个风格包的预览">
+<img src="assets/styles.jpg" width="100%" alt="十五个风格包的预览">
 
 ### 剪进实拍素材，导出工程接着剪
 
@@ -139,25 +139,22 @@ flowchart LR
 ### 1. 装技能
 
 ```bash
-git clone --depth 1 https://github.com/li2092/one-prompt-video.git
-
 # Claude Code
-mkdir -p ~/.claude/skills && cp -r one-prompt-video/one-prompt-video ~/.claude/skills/
+git clone --depth 1 https://github.com/li2092/one-prompt-video.git ~/.claude/skills/one-prompt-video
 
 # Codex
-mkdir -p ~/.codex/skills && cp -r one-prompt-video/one-prompt-video ~/.codex/skills/
+git clone --depth 1 https://github.com/li2092/one-prompt-video.git ~/.codex/skills/one-prompt-video
 ```
 
 Windows（PowerShell）：
 
 ```powershell
-git clone --depth 1 https://github.com/li2092/one-prompt-video.git
-Copy-Item -Recurse one-prompt-video\one-prompt-video "$HOME\.claude\skills\one-prompt-video"
+git clone --depth 1 https://github.com/li2092/one-prompt-video.git "$HOME\.claude\skills\one-prompt-video"
 ```
 
 本页的视频和动图存在 GitHub 的附件服务上，不在仓库里，下载下来的仓库只有一两兆。
 
-别的 agent 按它自己的文档放技能目录。不支持技能的模型，把 `one-prompt-video/SKILL.md` 的内容贴进对话，把里面的 `SKILL` 换成这个目录的绝对路径。
+别的 agent 按它自己的文档放技能目录。不支持技能的模型，把 `SKILL.md` 的内容贴进对话，把里面的 `SKILL` 换成这个目录的绝对路径。
 
 ### 2. 说一句话
 
@@ -188,7 +185,7 @@ node /path/to/one-prompt-video/scripts/make.mjs demo/video.json     # 成片在 
 | `number` | 一个关键数字，从 0 滚到目标值 | `end` | 结尾，可带一个按钮 |
 | `bars` | 柱状图，比大小 | `custom` | 自己写这一场的画面代码 |
 
-每一场都可以加一句 `say` 作字幕。全部字段见 [`references/video-json.md`](one-prompt-video/references/video-json.md)。
+每一场都可以加一句 `say` 作字幕。全部字段见 [`references/video-json.md`](references/video-json.md)。
 
 ## 为小模型设计
 
@@ -209,11 +206,11 @@ node /path/to/one-prompt-video/scripts/make.mjs demo/video.json     # 成片在 
 
 | 想要 | 怎么做 |
 |---|---|
-| 换颜色、换字体、固定某一场的秒数 | [`references/video-json.md`](one-prompt-video/references/video-json.md) |
-| 加人声 | 技能不带配音服务，配音要自己找：放自己的录音，或接一个自己的 TTS：[`references/voice.md`](one-prompt-video/references/voice.md) |
-| 某一场要特别的画面 | 这一场自己写画面代码，其余照常用版式：[`references/custom-scenes.md`](one-prompt-video/references/custom-scenes.md) |
-| 卡通短片、3D 场景、自然风景 | 三条参考生产线：[`references/pipelines.md`](one-prompt-video/references/pipelines.md) |
-| 写实渲染、真实乐器的配乐、AI 旁白 | 借助外部工具：[`references/external-tools.md`](one-prompt-video/references/external-tools.md) |
+| 换颜色、换字体、固定某一场的秒数 | [`references/video-json.md`](references/video-json.md) |
+| 加人声 | 技能不带配音服务，配音要自己找：放自己的录音，或接一个自己的 TTS：[`references/voice.md`](references/voice.md) |
+| 某一场要特别的画面 | 这一场自己写画面代码，其余照常用版式：[`references/custom-scenes.md`](references/custom-scenes.md) |
+| 卡通短片、3D 场景、自然风景 | 三条参考生产线：[`references/pipelines.md`](references/pipelines.md) |
+| 写实渲染、真实乐器的配乐、AI 旁白 | 借助外部工具：[`references/external-tools.md`](references/external-tools.md) |
 
 三条参考生产线各带一个能跑的最小工程，给能力强的模型用：
 
@@ -221,7 +218,7 @@ node /path/to/one-prompt-video/scripts/make.mjs demo/video.json     # 成片在 
 
 ### 借助外部工具
 
-用户的机器上有相应的软件或账号时，能力强的模型可以用这三种做法，说明和最小工程在 [`references/external-tools.md`](one-prompt-video/references/external-tools.md)：
+用户的机器上有相应的软件或账号时，能力强的模型可以用这三种做法，说明和最小工程在 [`references/external-tools.md`](references/external-tools.md)：
 
 - Blender 渲染：全局光照、真实材质、反射、景深。要装好的 Blender。
 - 乐器采样配乐：铜管、合唱、竖琴、定音鼓的真实音色。要 macOS 上的库乐队或 Logic。
@@ -255,15 +252,14 @@ https://github.com/user-attachments/assets/225be1e4-821d-4b5b-9432-e9ffde8ccc12
 ## 目录
 
 ```text
-one-prompt-video/            技能本体，装的就是这个目录
-  SKILL.md                   模型读的主说明
-  scripts/                   setup.mjs、make.mjs、browser-render.mjs、engine/
-  references/                按需读的说明
-  assets/                    示例 video.json、主题预览、参考生产线的最小工程
+SKILL.md                     模型读的主说明；仓库根目录就是技能本体
+scripts/                     setup.mjs、make.mjs、browser-render.mjs、engine/
+references/                  按需读的说明
+assets/                      示例 video.json、主题预览、参考生产线的最小工程
 evals/                       测试题和打分脚本
 docs/                        本页用的图，演示片的源文件在 docs/demos/
 ```
 
 ## 作者和许可
 
-作者：JiMiL、vivhuang。[MIT](LICENSE) 许可。依赖和做法的出处见 [`references/sources.md`](one-prompt-video/references/sources.md)。
+作者：JiMiL、vivhuang。[MIT](LICENSE) 许可。依赖和做法的出处见 [`references/sources.md`](references/sources.md)。
