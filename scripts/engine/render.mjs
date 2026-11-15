@@ -1,6 +1,7 @@
 // 出帧：drawFrame(ctx, T) 把全片第 T 秒的画面画到 ctx 上。同一个 T 永远画出同一张图。
 import { clamp, lerp, ease, fitText, invLerp, k, inOut, rng, hash, noise1, rgba, mix, hexToRgb, wrapText, spacedText, roundRect, typeOn } from './core.mjs'
 import { LAYOUTS, drawCaption } from './layouts.mjs'
+import { baseKit } from './kit.mjs'
 
 // clips[i]：第 i 场是素材片段时，{ load(k) 读进第 k 帧（异步）, frame(k) 取已读进来的第 k 帧, n 帧数, w, h 图的尺寸 }
 // 有素材片段的片子，每次 drawFrame(ctx, T) 之前先 await prepare(T)
@@ -58,6 +59,7 @@ export function makeRenderer({ v, theme, TL, fonts, W, H, createCanvas, custom =
         ctx.restore()
       },
     }
+    E.kit = { ...baseKit(E), ...(theme.kit ? theme.kit(E) : {}) }
     return E
   }
 

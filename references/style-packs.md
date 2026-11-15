@@ -32,6 +32,7 @@ export default {
   },
   caption(ctx, s, E) { … },                  // 自己的字幕样式（可选）
   overlay(ctx, E, s) { … },                  // 画在最上层的东西（可选）：扫描线、外框、角标
+  kit(E) { return { rect, circle, poly, place, figure } },   // 给自己画的场用的材质画法（可选）：没写的用平涂色块，签名见 custom-scenes.md
   card(ctx, E, x, y, w, h, o) { … },         // 默认版式会调用的零件（可选）：卡片、线、柱、标记、标题下划线
   line, bar, mark, underline,
   music: { style: 'drive', prog: ['C', 'G', 'Am', 'F'], lead: 'marimba', drums: true },   // style: calm | ambient | drive | bright；lead: piano | epiano | marimba | pluck
