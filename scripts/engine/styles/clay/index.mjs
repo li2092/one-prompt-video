@@ -446,6 +446,34 @@ export default {
   },
 
   // 默认版式会调用的零件（九种版式都重画了，这些只在别处借用默认摆法时用到）：黏土卡片、黏土条、黏土柱、黏土球
+  // 给自己画的场用的画法：捏出来的黏土块（有厚度、高光、指纹，预渲染成贴图）和小机器人。
+  // 贴图按尺寸和颜色缓存：形状的宽高不要逐帧变，放大缩小用 place 的 s
+  kit(E) {
+    const K = pal(E), q = v => Math.max(4, Math.round(v))
+    const drawAt = (ctx, sp, x, y, w, h) => put(ctx, sp, x + w / 2, y + h / 2)
+    return {
+      material: 'clay',
+      colors: [...K.tones, K.green],
+      rect: (ctx, x, y, w, h, fill, o = {}) => { const W = q(w), H = q(h); drawAt(ctx, blob(E, 'kit', W, H, Math.round(o.r ?? Math.min(W, H) * 0.22), { color: fill, seed: o.seed ?? 3, shadow: (o.lift ?? 1) > 0 }), x, y, W, H) },
+      circle: (ctx, cx, cy, r, fill, o = {}) => { const D = q(r * 2); put(ctx, ball(E, 'kit', D, D, { color: fill, seed: o.seed ?? 4, shadow: (o.lift ?? 1) > 0 }), cx, cy) },
+      poly: (ctx, pts, fill, o = {}) => {
+        const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]), x0 = Math.min(...xs), y0 = Math.min(...ys), W = q(Math.max(...xs) - x0), H = q(Math.max(...ys) - y0)
+        const local = pts.map(([x, y]) => [Math.round(x - x0), Math.round(y - y0)])
+        const sp = sprite(E, `kitpoly:${local.join(';')}:${fill}`, W, H, g => { pathPts(g, local); g.fill() }, { color: fill, seed: o.seed ?? 5, shadow: (o.lift ?? 1) > 0 })
+        drawAt(ctx, sp, x0, y0, W, H)
+      },
+      place: (ctx, x, y, o = {}, fn) => {
+        const s = o.s ?? 1
+        if (s <= 0.001) return
+        const b = boil(E.T, (o.seed || 1) * 17 + 3, 0.6 * E.u)
+        ctx.save(); ctx.translate(x + b.x, y + b.y); ctx.rotate((o.rot || 0) + b.r); ctx.scale(s, s); fn(ctx); ctx.restore()
+      },
+      figure: (ctx, x, y, h, o = {}) => {
+        robot(ctx, E, x, y, h / 1.56, { t: E.T, mood: o.mood === 'happy' ? 'happy' : o.mood === 'o' ? 'o' : 'neutral', look: o.look ?? 0, seed: o.seed || 3, armL: 0.35, armR: o.wave ? 1.7 + Math.sin(E.T * 9) * 0.3 : 0.35 })
+        return true
+      },
+    }
+  },
   card(ctx, E, x, y, w, h, o = {}) { put(ctx, blob(E, 'card', Math.round(w), Math.round(h), this.radius * E.u, { color: o.tone === 'accent' ? this.c.accent : this.c.card, shadow: true, seed: o.seed ?? 5 }), x, y, { ax: 0, ay: 0 }) },
   line(ctx, E, x1, y1, x2, y2, o = {}) { noodle(ctx, g => { g.beginPath(); g.moveTo(x1, y1); g.lineTo(lerp(x1, x2, o.p ?? 1), lerp(y1, y2, o.p ?? 1)) }, o.color ?? this.c.accent, (o.width ?? 4) * 2.5 * E.u) },
   bar(ctx, E, x, y, w, h, o = {}) { if (w > 1 && h > 1) put(ctx, blob(E, 'bar', Math.round(w), Math.round(h), Math.min(w, h) * 0.3, { color: o.color ?? this.c.accent, seed: o.seed ?? 6 }), x, y, { ax: 0, ay: 0 }) },

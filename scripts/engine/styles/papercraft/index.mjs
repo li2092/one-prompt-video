@@ -489,6 +489,24 @@ export default {
   },
 
   // 默认摆法会用到的零件（九种版式都重画了，custom 场借用时才用到）：纸卡、纸块柱、纸圆点、纸条下划线
+  // 给自己画的场用的画法：剪纸色块（剪口微微不齐、带投影、定格抖动）和纸片小人
+  kit(E) {
+    useE(E)
+    const u = E.u
+    return {
+      material: 'paper',
+      colors: [P.mustard, P.coral, P.sage, P.blue, P.pink, P.kraft, P.white],
+      rect: (ctx, x, y, w, h, fill, o = {}) => card(ctx, x, y, w, h, fill, { r: o.r ?? 14 * u, seed: o.seed || 1, lift: o.lift ?? 1 }),
+      circle: (ctx, cx, cy, r, fill, o = {}) => { cutCircle(ctx, cx, cy, r, o.seed || 2); fillPaper(ctx, fill, o.lift ?? 1) },
+      poly: (ctx, pts, fill, o = {}) => { cutPoly(ctx, pts, o.seed || 3); fillPaper(ctx, fill, o.lift ?? 1) },
+      place: (ctx, x, y, o = {}, fn) => place(ctx, x, y, { s: o.s ?? 1, rot: o.rot || 0, seed: o.seed || 1 }, fn),
+      figure: (ctx, x, y, h, o = {}) => {
+        const wave = o.wave ? 1.9 + Math.sin(frameNo() * Math.PI / 2) * 0.25 : 0.2
+        doll(ctx, x, y, h / DOLL_H, { seed: o.seed || 3, face: o.mood === 'happy' ? 'happy' : o.mood === 'o' ? 'o' : 'smile', look: o.look ?? 0, armR: wave })
+        return true
+      },
+    }
+  },
   card(ctx, E, x, y, w, h, o = {}) { useE(E); card(ctx, x, y, w, h, o.tone === 'accent' ? this.c.accent : this.c.card, { r: 14 * E.u, seed: o.seed || 1 }) },
   bar(ctx, E, x, y, w, h, o = {}) { useE(E); if (Math.abs(w) > 1 && Math.abs(h) > 1) card(ctx, Math.min(x, x + w), Math.min(y, y + h), Math.abs(w), Math.abs(h), o.color ?? this.c.accent, { r: 6 * E.u, seed: o.seed || 2 }) },
   mark(ctx, E, x, y, r, i, o = {}) { useE(E); cutCircle(ctx, x, y, r, 3 + i); fillPaper(ctx, o.color ?? (i % 2 ? this.c.accent2 : this.c.accent), 0.7) },
