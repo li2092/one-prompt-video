@@ -27,6 +27,7 @@
 | 画面事件登记成表、音效从表里取时刻；页面不请求外部地址 | javascript-animation-skills（MIT） |
 | 手绘抖动每秒换 7 到 8 次 | hand-drawn-canvas-animation（MIT） |
 | three.js 里用程序生成的表面和多次采样累加出画质 | 一个公开的单文件 three.js 作品的源码 |
+| 正反例分三档（弱、做对了还是平、有效）；风格包写明不动什么、能换什么、能装多少；照参考片学做法时看连续帧、对比密度和明暗 | openmotion（Apache-2.0） |
 
 ## 工程文件的格式
 
@@ -41,6 +42,7 @@
 | hand-drawn-canvas-animation（MIT） | <https://github.com/alesha-pro/tools/tree/main/skills/hand-drawn-canvas-animation> | 手绘短片的流程：先完成一个代表镜头再铺开，快动作出连续帧条，抖动每秒换几次 |
 | animate（MIT） | <https://github.com/cth9191/animate> | 拍子网格和帧的换算、切点落在拍子上、每秒一格的总览图 |
 | javascript-animation-skills（MIT） | <https://github.com/iart-ai/javascript-animation-skills> | 画面事件登记成表、模板的值只是起点、检查没有加载外部资源 |
+| openmotion（Apache-2.0） | <https://github.com/nexu-io/openmotion> | `custom-scenes.md`、`film.md` 的三档对照写法；`style-packs.md` 里 `NOTES.md` 的分节和「照参考片做新风格包」的步骤 |
 
 对这些网站和项目只参考做法和水准，不搬它们的画面、题材、文案和代码。
 
